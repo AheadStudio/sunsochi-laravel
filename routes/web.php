@@ -18,8 +18,8 @@ Route::get("/company/about/", ["uses" => "PageController@default", "arParams" =>
 ]]);
 Route::get("/company/team/", "PageController@default");
 Route::get("/reviews/", "PageController@default");
-Route::get("/news/", "PageController@default");
-Route::get("/blog/", "PageController@default");
+Route::get("/news/", "NewsController@getNews");
+Route::get("/blog/", "BlogController@getBlog");
 Route::get("/developers/", "PageController@default");
 Route::get("/partners/", "PageController@default");
 Route::get("/contacts/", "PageController@default");
@@ -29,6 +29,13 @@ Route::get("/catalog/{section}/", "CatalogController@section");
 Route::get("/catalog/{section}/{code}/", "CatalogController@detail");
 Route::get("/investments/", "PageController@default");
 
+// route for import table
+//--- news ---//
+Route::get("/news/import/", "NewsImportController@index")->name("index");
+Route::post("/news/import/send/", "NewsImportController@import")->name("import");
+//--- blogs ---//
+Route::get("/blog/import/", "BlogImportController@index")->name("index");
+Route::post("/blog/import/send/", "BlogImportController@import")->name("import");
 
 Route::group(['prefix' => 'admin'], function () {
     Voyager::routes();
