@@ -1,4 +1,4 @@
-@extends("layouts.app")
+@extends("layouts.import-header")
 
 @section("content")
 	<h1>Import file</h1>
@@ -31,11 +31,14 @@
             </div>
         @endif
 
-        <form action="{{ route("import") }}" method="POST" enctype="multipart/form-data">
+        <form action="{{ $action }}" method="POST" enctype="multipart/form-data">
             {{ csrf_field() }}
             Choose your csv File : <input type="file" name="file" class="form-control">
-
-            <input type="submit" class="btn btn-primary btn-lg" style="margin-top: 3%">
+			<div class="form-row text-center">
+				<div class="col-12">
+					<input type="submit" class="btn btn-primary btn-lg">
+				</div>
+			</div>
         </form>
 
     </div>

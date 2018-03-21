@@ -9,14 +9,15 @@ use Session;
 use Excel;
 use File;
 
-class NewsController extends Controller
+class BuildersController extends Controller
 {
     public function list() {
-        return view("news");
+        $list = \App\Builder::all();
+        return view("builders", ["blogsInfo" => $list]);
     }
 
     public function import() {
-        return view("import", ["action" => route("NewsImportSend")]);
+        return view("import", ["action" => route("BuildersImportSend")]);
     }
 
     public function importHandler(Request $request) {
@@ -50,17 +51,15 @@ class NewsController extends Controller
             if (!empty($data)) {
                 foreach ($data as $key => $value) {
                     $insert[] = [
-                        "name"              => $value["IE_NAME"],
-                        "date"              => date_format(date_create($value["IE_ACTIVE_FROM"]), "Y-m-d H:i:s"),
-                        "url"               => $value["IE_CODE"],
-                        "preview_text"      => $value["IE_PREVIEW_TEXT"],
-                        "preview_picture"   => $value["IE_PREVIEW_PICTURE"],
-                        "detail_text"       => trim(preg_replace('/\s{2,}/', ' ', $value["IE_DETAIL_TEXT"])),
+                        "name"    => $value["IE_NAME"],
+                        "url"     => $value["IE_CODE"],
+                        "logo"    => $value["IE_DETAIL_PICTURE"],
+                        "text"    => $value["IE_DETAIL_TEXT"],
                     ];
                 }
 
                 if(!empty($insert)){
-                    $insertData = DB::table("news")->insert($insert);
+                    $insertData = DB::table("builders")->insert($insert);
                     if ($insertData) {
                         Session::flash("success", "Your Data has successfully imported");
                     } else {
@@ -68,9 +67,10 @@ class NewsController extends Controller
                         return back();
                     }
                 }
+
             }
 
-            //return back();
+            return back();
 
         } else {
             Session::flash("error", "File is a ".$expanFile. "file.!! Please upload a valid xls/csv file..!!");

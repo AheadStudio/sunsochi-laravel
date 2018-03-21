@@ -9,14 +9,15 @@ use Session;
 use Excel;
 use File;
 
-class NewsController extends Controller
+class TeamController extends Controller
 {
     public function list() {
-        return view("news");
+        $list = \App\Team::all();
+        return view("team", ["blogsInfo" => $list]);
     }
 
     public function import() {
-        return view("import", ["action" => route("NewsImportSend")]);
+        return view("import", ["action" => route("TeamImportSend")]);
     }
 
     public function importHandler(Request $request) {
@@ -50,17 +51,18 @@ class NewsController extends Controller
             if (!empty($data)) {
                 foreach ($data as $key => $value) {
                     $insert[] = [
-                        "name"              => $value["IE_NAME"],
-                        "date"              => date_format(date_create($value["IE_ACTIVE_FROM"]), "Y-m-d H:i:s"),
-                        "url"               => $value["IE_CODE"],
-                        "preview_text"      => $value["IE_PREVIEW_TEXT"],
-                        "preview_picture"   => $value["IE_PREVIEW_PICTURE"],
-                        "detail_text"       => trim(preg_replace('/\s{2,}/', ' ', $value["IE_DETAIL_TEXT"])),
+                        "name"     =>  $value["IE_NAME"],
+                        "section"  =>  $value["IC_GROUP0"],
+                        "url"      =>  $value["IE_CODE"],
+                        "post"     =>  $value["IP_PROP273"],
+                        "mobile"   =>  $value["IP_PROP274"],
+                        "email"    =>  $value["IP_PROP275"],
+                        "logo"     =>  $value["IE_PREVIEW_PICTURE"],
                     ];
                 }
 
                 if(!empty($insert)){
-                    $insertData = DB::table("news")->insert($insert);
+                    $insertData = DB::table("teams")->insert($insert);
                     if ($insertData) {
                         Session::flash("success", "Your Data has successfully imported");
                     } else {
@@ -68,9 +70,10 @@ class NewsController extends Controller
                         return back();
                     }
                 }
+
             }
 
-            //return back();
+            return back();
 
         } else {
             Session::flash("error", "File is a ".$expanFile. "file.!! Please upload a valid xls/csv file..!!");
