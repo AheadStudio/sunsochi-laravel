@@ -40,12 +40,19 @@ Route::get("/company/team/", "TeamController@list");
 Route::get("/company/team/import/", "TeamController@import")->middleware("auth")->name("TeamImportIndex");
 Route::post("/company/team/import/send/", "TeamController@importHandler")->middleware("auth")->name("TeamImportSend");
 
-Route::get("/contacts/", "PageController@default");
 
 Route::get("/catalog/", "CatalogController@index");
+Route::get("/catalog/import/", "CatalogController@import")->middleware("auth")->name("CatalogImportIndex");
+Route::post("/catalog/import/send/", "CatalogController@importHandler")->middleware("auth")->name("CatalogImportSend");
 Route::get("/catalog/{section}/", "CatalogController@section");
-Route::get("/catalog/{section}/{code}/", "CatalogController@detail");
+Route::get("/catalog/{section}/{subsection}/", "CatalogController@subsection");
+Route::get("/catalog/{section}/{subsection}/{code}/", "CatalogController@detail");
+
+
 Route::get("/investments/", "PageController@default");
+
+
+Route::get("/contacts/", "PageController@default");
 
 
 Route::group(['prefix' => 'admin'], function () {
