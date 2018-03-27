@@ -36,7 +36,7 @@
             Choose your csv File : <input type="file" name="file" class="form-control">
 			<div class="form-row text-center">
 				<div class="col-12">
-					<input type="submit" class="btn btn-primary btn-lg">
+					<input type="submit" class="btn btn-primary btn-lg" value="Импортировать">
 				</div>
 			</div>
         </form>

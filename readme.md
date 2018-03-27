@@ -56,3 +56,11 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+# Обновление / импорт таблиц со старого сайта (для таблиц: Новости, Блок, Сотрудники, Отзывы, Застройщики, Партнеры)
+
+Чтобы импортировать со старого сайта необходимую таблицу, необходимо:
+- Авторизоваться в административной панели
+- Перейти на страницу <i>Название сайта<i>/<i>Страница где располагается контент (news,blogs)<i>/import
+- Выбрать csv файл, предварительно выгрузив из Bitrix
+- Нажать кнопку Импортировать
