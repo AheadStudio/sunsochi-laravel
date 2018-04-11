@@ -1,12 +1,14 @@
-<nav>
-	@foreach($items as $item)
-		@php
-			$isItemActive = (url($item->link()) == url()->current()) ? true : false;
-		@endphp
-		@if ($isItemActive)
-			<span>{{ $item->title }}</span>
-		@else
-			<a href="{{ $item->link() }}">{{ $item->title }}</a>
-		@endif
-	@endforeach
+<nav itemscope="itemscope" itemtype="http://schema.org/SiteNavigationElement" class="footer-top">
+	<ul class="footer-top-inner">
+		@foreach($items as $item)
+			@php
+				$isItemActive = (url($item->link()) == url()->current()) ? "active" : "";
+			@endphp
+			<li class="footer-top-item-holder">
+				<a href="{{ $item->link() }}" title="" itemprop="url" class="footer-top-item link link-white link-white--bottom-reverse {{ $isItemActive }}">
+					<span itemprop="name" class="footer-top-item-name">{{ $item->title }}</span>
+				</a>
+			</li>
+		@endforeach
+	</ul>
 </nav>

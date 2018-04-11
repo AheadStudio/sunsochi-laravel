@@ -1,5 +1,7 @@
 <?
 namespace App\GoodCode;
+
+
 /**
  * class for parse csv
  */

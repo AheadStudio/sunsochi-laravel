@@ -5,15 +5,25 @@ use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\GoodCode\ParseCsv;
+
+use \App\Team;
+
 use Session;
 use Excel;
 use File;
 
 class TeamController extends Controller
 {
-    public function list() {
-        $list = \App\Team::all();
-        return view("team", ["blogsInfo" => $list]);
+    public function index() {
+        $finalArray = [];
+        $teamList = Team::orderBy("section", "asc")->get()->toArray();
+        foreach ($teamList as $keyTeamList => $valTeamList) {
+            $finalArray[$valTeamList["section"]][] = $teamList[$keyTeamList];
+        }
+        return view("team", [
+            "teamList" => $finalArray,
+            "pageTitle"    => "Сотрудники"
+        ]);
     }
 
     public function import() {

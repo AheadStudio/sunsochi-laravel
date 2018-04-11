@@ -44,9 +44,10 @@ class NewsController extends Controller
             $arrReadFile[] = $readFile;
         }
 
-        $data = ParseCsv::parsingCsv($arrReadFile);
+        echo "<pre>"; print_r($arrReadFile); echo "</pre>";
 
-        if ($expanFile == "csv") {
+        $data = ParseCsv::parsingCsv($arrReadFile);
+        /*if ($expanFile == "csv") {
             if (!empty($data)) {
                 foreach ($data as $key => $value) {
                     $insert[] = [
@@ -74,7 +75,7 @@ class NewsController extends Controller
 
         } else {
             Session::flash("error", "File is a ".$expanFile. "file.!! Please upload a valid xls/csv file..!!");
-        }
+        }*/
 
     }
 

@@ -36,7 +36,7 @@ Route::get("/partners/", "PartnersController@list");
 Route::get("/partners/import/", "PartnersController@import")->middleware("auth")->name("PartnersImportIndex");
 Route::post("/partners/import/send/", "PartnersController@importHandler")->middleware("auth")->name("PartnersImportSend");
 
-Route::get("/company/team/", "TeamController@list");
+Route::get("/company/team/", "TeamController@index");
 Route::get("/company/team/import/", "TeamController@import")->middleware("auth")->name("TeamImportIndex");
 Route::post("/company/team/import/send/", "TeamController@importHandler")->middleware("auth")->name("TeamImportSend");
 
