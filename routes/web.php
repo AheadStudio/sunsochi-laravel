@@ -20,7 +20,7 @@ Route::get("/reviews/", "ReviewsController@list");
 Route::get("/reviews/import/", "ReviewsController@import")->middleware("auth")->name("ReviewsImportIndex");
 Route::post("/reviews/import/send/", "ReviewsController@importHandler")->middleware("auth")->name("ReviewsImportSend");
 
-Route::get("/news/", "NewsController@list");
+Route::get("/news/", "NewsController@index");
 Route::get("/news/import/", "NewsController@import")->middleware("auth")->name("NewsImportIndex");
 Route::post("/news/import/send/", "NewsController@importHandler")->middleware("auth")->name("NewsImportSend");
 

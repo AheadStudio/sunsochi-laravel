@@ -5,14 +5,21 @@ use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\GoodCode\ParseCsv;
+
+use \App\News;
+
 use Session;
 use Excel;
 use File;
 
 class NewsController extends Controller
 {
-    public function list() {
-        return view("news");
+    public function index() {
+        $newsList = News::orderBy("date", "asc")->paginate(3);
+        return view("news", [
+            "newsList"  => $newsList,
+            "pageTitle" => "Новости"
+        ]);
     }
 
     public function import() {

@@ -21,8 +21,8 @@ class TeamController extends Controller
             $finalArray[$valTeamList["section"]][] = $teamList[$keyTeamList];
         }
         return view("team", [
-            "teamList" => $finalArray,
-            "pageTitle"    => "Сотрудники"
+            "teamList"  => $finalArray,
+            "pageTitle" => "Сотрудники"
         ]);
     }
 

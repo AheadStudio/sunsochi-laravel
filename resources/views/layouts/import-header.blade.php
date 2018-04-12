@@ -14,7 +14,7 @@
 			</div>
 			<div class="phone"><?php echo setting("site.phone"); ?></div>
 
-			<?php echo menu("main", "menus.main"); ?>
+			<?php echo menu("main", "menus.top"); ?>
 			<link href="{{ asset("css/bootstrap.min.css") }}" rel="stylesheet">
 		</header>
 		<main>
