@@ -5,17 +5,59 @@ use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\GoodCode\ParseCsv;
+
+use \App\Builder;
+use \App\Catalog;
+use \App\ElementDirectory;
+use \App\District;
+
 use Session;
 use Excel;
 use File;
 
 class BuildersController extends Controller
 {
-    public function list() {
-        $list = \App\Builder::all();
-        return view("builders", ["blogsInfo" => $list]);
+    // index page
+    public function index() {
+        $finalArray = [];
+        $builderList = Builder::orderBy("name", "asc")->get()->toArray();
+        foreach ($builderList as $keyBuilderList => $valBuilderList) {
+            $finalArray[mb_substr($valBuilderList["name"], 0, 1)][] = $builderList[$keyBuilderList];
+        }
+        return view("builders-list", [
+            "builderList"  => $finalArray,
+            "pageTitle" => "Застройщики",
+            "pageSubtitle" => "Мы собрали для вас информацию по всем компаниям-застройщикам, которые занимаются строительством жилых комплексов в городе-курорте Сочи."
+        ]);
     }
 
+    // detail page
+    public function show($code) {
+        $builderItem = Builder::where("code", $code)->first();
+
+        $builderOffers = Catalog::where("developer_buildings", $builderItem->id)
+                                ->orderBy("active", "1")
+                                ->orderBy("name", "asc")
+                                ->paginate(6)
+                                ->toArray();
+
+        foreach ($builderOffers["data"] as $keyOffers => $valOffers) {
+            $allPropCode = ElementDirectory::where("element_id", $valOffers["id"])->get()->toArray();
+            foreach ($allPropCode as $keyProp => $valProp) {
+                $className = "\App\\".$valProp["name_table"];
+                $allProp[$valProp["name_field"]] = $className::where("code", $valProp["code"])->get()->toArray();
+            }
+            $builderOffers["data"][$keyOffers]["property"] = $allProp;
+        }
+        return view("builder-detail", [
+            "builderItem"  => $builderItem,
+            "builderOffers" => $builderOffers["data"],
+            "pageTitle" => $builderItem->name
+        ]);
+
+    }
+
+    // import page
     public function import() {
         return view("import", ["action" => route("BuildersImportSend")]);
     }

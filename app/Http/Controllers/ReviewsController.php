@@ -5,20 +5,49 @@ use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\GoodCode\ParseCsv;
+
+use \App\Review;
+
 use Session;
 use Excel;
 use File;
 
 class ReviewsController extends Controller
 {
-    public function list() {
-        return view("reviews");
+    // index page
+    public function index() {
+        $reviewList = Review::orderBy("date", "asc")->paginate(3);
+
+        foreach ($reviewList as $keyList => $valList) {
+            $finalText = self::splitText($valList->text, 50);
+            $valList->textOther = $finalText[0];
+            $valList->text = $finalText[1];
+        }
+
+        return view("review-list", [
+            "reviewList"    => $reviewList,
+            "pageTitle"     => "Отзывы",
+        ]);
+
     }
 
-    public function import() {
-        return view("import", ["action" => route("ReviewsImportSend")]);
+    // explode string by words
+    function splitText($text, $maxWords) {
+        $phraseArray = explode(' ', $text);
+        if(count($phraseArray) > $maxWords && $maxWords > 0) {
+            $phrase = implode(' ', array_slice($phraseArray, 0, $maxWords));
+        }
+
+        foreach ($phraseArray as $keyPhrase => $valPhrase) {
+            if ($keyPhrase <= $maxWords) {
+                unset($phraseArray[$keyPhrase]);
+            }
+        }
+        $phraseArray = implode(' ', $phraseArray);
+        return $finalString = [$phraseArray, $phrase, $text];
     }
 
+    // import page
     public function importHandler(Request $request) {
         $this->validate($request, array(
             "file"  =>  "required"

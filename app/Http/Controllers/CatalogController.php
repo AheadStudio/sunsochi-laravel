@@ -17,6 +17,7 @@ use App\StatusSales;
 use App\Picture;
 use App\Layout;
 use App\PlanFloor;
+use App\Builder;
 
 use Session;
 use Excel;
@@ -162,7 +163,7 @@ class CatalogController extends Controller
             }
             $arrReadFile[] = $readFile;
         }
-        
+
         $classParseCatalog = new ParseCatalog($arrReadFile);
         $parseCatalog = $classParseCatalog->parseCatalog();
 
@@ -323,7 +324,7 @@ class CatalogController extends Controller
             foreach ($valParseCatalog as $keyPropEl => $valPropEl) {
 
                 // проверяю наличие их в массиве по ключу
-                if (array_key_exists($keyPropEl, $arrOldNameProps)) {
+                if (array_key_exists(mb_strtoupper($keyPropEl), $arrOldNameProps)) {
 
                     if (is_array($valParseCatalog[$keyPropEl])) {
                         foreach ($valParseCatalog[$keyPropEl]["ALL_VALUE"] as $keyProp => $valProp) {
@@ -509,7 +510,6 @@ class CatalogController extends Controller
                  "gsk"                  => $gsk = empty($idGsk->id) ? null : $idGsk->id
                 ]
             );
-
             // add relations directory with element
             foreach ($codeProp as $keyCodeProp => $valCodeProp) {
                 $explodeProp = explode("|", $keyCodeProp);
@@ -570,6 +570,15 @@ class CatalogController extends Controller
                             "section_lenght"    => $valParseCatalog["CHEKERB_ELEMENT"],
                         ]
                     );
+                }
+            }
+
+            $allCatalogEL = Builder::all();
+
+            foreach ($allCatalogEL as $keyEl => $valEl) {
+                $allEl = Catalog::where("developer_buildings", $valEl->name)->get();
+                foreach ($allEl as $val) {
+                    Catalog::where("id", $val->id)->update(["developer_buildings" => $valEl->id]);
                 }
             }
 

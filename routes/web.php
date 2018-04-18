@@ -16,11 +16,12 @@ Route::get("/", "PageController@home");
 Route::get("/company/about/", ["uses" => "PageController@default", "arParams" => [
 	"view" => "test"
 ]]);
-Route::get("/reviews/", "ReviewsController@list");
+Route::get("/reviews/", "ReviewsController@index");
 Route::get("/reviews/import/", "ReviewsController@import")->middleware("auth")->name("ReviewsImportIndex");
 Route::post("/reviews/import/send/", "ReviewsController@importHandler")->middleware("auth")->name("ReviewsImportSend");
 
 Route::get("/news/", "NewsController@index");
+Route::get("/news/{code}", "NewsController@show");
 Route::get("/news/import/", "NewsController@import")->middleware("auth")->name("NewsImportIndex");
 Route::post("/news/import/send/", "NewsController@importHandler")->middleware("auth")->name("NewsImportSend");
 
@@ -28,7 +29,8 @@ Route::get("/blog/", "BlogController@list");
 Route::get("/blog/import/", "BlogController@import")->middleware("auth")->name("BlogImportIndex");
 Route::post("/blog/import/send/", "BlogController@importHandler")->middleware("auth")->name("BlogImportSend");
 
-Route::get("/builders/", "BuildersController@list");
+Route::get("/builders/", "BuildersController@index");
+Route::get("/builders/{code}", "BuildersController@show");
 Route::get("/builders/import/", "BuildersController@import")->middleware("auth")->name("BuildersImportIndex");
 Route::post("/builders/import/send/", "BuildersController@importHandler")->middleware("auth")->name("BuildersImportSend");
 

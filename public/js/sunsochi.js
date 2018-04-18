@@ -157,69 +157,122 @@
 				}
 			},
 
-			fixedBlock: function() {
-				var self = this,
-					$stickyBlocks = $("[data-sticky]"),
-					$fixedBlock = $(".fixed-block");
+			fixedBlock:  {
+				init: function() {
+					var self = this;
+					self.calcFixed();
+					$sel.window.resize(function(){
+						self.calcFixed();
+					});
+				},
 
-				if ($sel.window.width() > "820") {
-					$fixedBlock.each(function() {
-						(function(el) {
-							var elWidth = el.innerWidth()+100,
-								elLeft = el.offset().left;
+				calcFixed: function() {
+					var self = this,
+						$stickyBlocks = $("[data-sticky]"),
+						$fixedBlock = $(".fixed-block");
 
-							$sel.window.on("scroll", function() {
-								var hh = el.outerHeight(),
-									dataBlockLimit = $("[data-fixed-limit='" + el.data("fixedBlock") + "']"),
-									sTop = $sel.window.scrollTop();
+					if ($sel.window.width() > "820") {
+						$fixedBlock.each(function() {
+							(function(el) {
+								var elWidth = el.innerWidth()+100,
+									windowWidth = $sel.window.width();
 
-								if(sTop > hh + 50) {
-									el.addClass("fixed-element");
-									el.css({
-										"left" : elLeft,
-										"min-width" : elWidth,
-									});
+								$sel.window.on("scroll", function() {
+									var elHeight = el.outerHeight(),
+										container = el.parent(),
+										elLeft = container.offset().left,
+										elParentHeight = container.outerHeight(),
+										dataBlockLimit = $("[data-fixed-limit='" + el.data("fixedBlock") + "']"),
+										dataBlockLimitTop = dataBlockLimit.position().top,
+										sTop = $sel.window.scrollTop();
 
-									setTimeout(function() {
-										el.addClass("fixed-element--show");
-									}, 300);
 
-								} else {
-									el.css({
-										"left": "",
-										"min-width": "",
-									});
-									el.removeClass("fixed-element--show");
-									el.removeClass("fixed-element");
-								}
+									if(sTop > elHeight + 300) {
+										container.css({
+											"position" : "absolute",
+											"top" : 0,
+											"width" : windowWidth - container.offset().left,
+											"left" : container.offset().left - container.parent().offset().left + 20,
+											"height" : dataBlockLimitTop,
+										})
 
-								var distanceBlock = dataBlockLimit.offset().top - el.offset().top - el.outerHeight();
+										el.css({
+											"width" : "100%",
+											"left"  : elLeft,
+										})
+										if (dataBlockLimitTop <= el.offset().top + elHeight) {
+											el.css({
+												"position" : "absolute",
+												"top" : "auto",
+												"left" : 0,
+												"right" : 0,
+												"bottom" : elHeight,
+											});
+										}
+										if (sTop < el.offset().top) {
 
-								if (distanceBlock < 10) {
-									el.addClass("fixed-element--hide");
-								} else {
-									el.removeClass("fixed-element--hide");
-								}
+											el.css({
+												"position" : "",
+												"top" : "",
+												"right" : "",
+												"bottom" : "",
+												"width" : "100%",
+												"left"  : elLeft,
+											});
+										}
 
-							});
+										if (!el.hasClass("fixed-element")) {
+											el.addClass("fixed-element");
+										}
 
-						})($(this))
+										setTimeout(function() {
+											el.addClass("fixed-element--show");
+										}, 300);
+
+									} else {
+
+										container.css({
+											"position" : "",
+											"top" : "",
+											"width" :"",
+											"left" : "",
+											"height" : "",
+										})
+
+										el.css({
+											"position" : "",
+											"width" : "",
+											"top" : "",
+											"right" : "",
+											"bottom" : "",
+											"left" : "",
+										})
+										el.removeClass("fixed-element--show");
+										el.removeClass("fixed-element");
+
+									}
+
+								});
+
+							})($(this))
+
+						});
+					}
+
+					$stickyBlocks.each(function() {
+						var el = $(this),
+							offsetTOp = el.data("stickyOffsetTop"),
+							$container = el.parent();
+
+						el.stick_in_parent({
+							container: $container,
+							offset_top: offsetTOp
+						});
 
 					});
-				}
 
-				$stickyBlocks.each(function() {
-					var el = $(this),
-						offsetTOp = el.data("stickyOffsetTop"),
-						$container = el.parent();
 
-					el.stick_in_parent({
-						container: $container,
-						offset_top: offsetTOp
-					});
-
-				});
-
+				},
 
 			},
 
@@ -228,24 +281,44 @@
 					var self = this;
 
 					self.scroll.init();
+					self.fixedApartment();
 				},
 				scroll: {
 					init: function() {
-						$sel.window.on("scroll", function() {
-							var hh = $(".page-header").outerHeight(),
-								sTop = $sel.window.scrollTop();
-							if(sTop > hh+50) {
-								$sel.body.addClass("fixed-header");
-								setTimeout(function() {
-									$sel.body.addClass("fixed-header--show");
-								}, 100);
-							} else {
-								$sel.body.removeClass("fixed-header--show");
-								$sel.body.removeClass("fixed-header");
-							}
-						});
+						if ($sel.window.width() > "820") {
+							$sel.window.on("scroll", function() {
+								var hh = $(".page-header").outerHeight(),
+									sTop = $sel.window.scrollTop();
+								if(sTop > hh+50) {
+									$sel.body.addClass("fixed-header");
+									setTimeout(function() {
+										$sel.body.addClass("fixed-header--show");
+									}, 100);
+								} else {
+									$sel.body.removeClass("fixed-header--show");
+									$sel.body.removeClass("fixed-header");
+								}
+							});
+						}
 					}
 				},
+
+				fixedApartment: function() {
+					$sel.window.on("scroll", function() {
+						var $apartmentHeader = $("[data-fixed-apartment]"),
+							hh = $apartmentHeader.outerHeight(),
+							sTop = $sel.window.scrollTop();
+						if(sTop > hh + 250) {
+							$sel.body.addClass("fixed-apartment");
+							setTimeout(function() {
+								$sel.body.addClass("fixed-apartment--show");
+							}, 300);
+						} else {
+							$sel.body.removeClass("fixed-apartment--show");
+							$sel.body.removeClass("fixed-apartment");
+						}
+					});
+				}
 			},
 
 			filter: {
@@ -374,8 +447,11 @@
 								valueArray = $inputEl[0].defaultValue.split(",");
 
 								// text in container
-								$jcfFromField.text(valueArray[0]).append(tplText);
-								$jcfToField.text(valueArray[1]).append(tplText);
+								var startFrom = valueArray[0].replace(/(\d)(?=(\d\d\d)+([^\d]|$))/g, "$1 ");
+								var finishTo = valueArray[1].replace(/(\d)(?=(\d\d\d)+([^\d]|$))/g, "$1 ");
+
+								$jcfFromField.html(startFrom).append(tplText);
+								$jcfToField.html(finishTo).append(tplText);
 
 								$inputEl.attr("data-valfrom", valueArray[0]);
 								$inputEl.attr("data-valto", valueArray[1]);
@@ -385,8 +461,11 @@
 									fromVal = $element[0].valueLow;
 									toVal = $element[0].valueHigh;
 
-									$jcfFromField.text(fromVal).append(tplText);
-									$jcfToField.text(toVal).append(tplText);
+									fromVal = fromVal.replace(/(\d)(?=(\d\d\d)+([^\d]|$))/g, "$1 ");
+									toVal = toVal.replace(/(\d)(?=(\d\d\d)+([^\d]|$))/g, "$1 ");
+
+									$jcfFromField.html(fromVal).append(tplText);
+									$jcfToField.html(toVal).append(tplText);
 
 									$element.attr("data-valfrom", fromVal);
 									$element.attr("data-valto", toVal);
@@ -433,7 +512,7 @@
 
 							$el.on("change input", function(e) {
 								var $btnClear = self.filter.find(".filter-clear");
-								$btnClear.addClass("active");
+								$btnClear.addClass("reset");
 							});
 						})
 
@@ -530,11 +609,14 @@
 							$regionsLi.removeClass("select");
 							$regionsCheckbox.remove();
 
+							$(this).removeClass("reset");
+
 							self.forms.each(function() {
 								var $form = $(this),
 									$itemForm = $form.find(".form-item");
 
 								$form[0].reset();
+
 								setTimeout(function() {
 									$itemForm.each(function() {
 										(function(el) {
@@ -549,10 +631,10 @@
 										})($(this));
 									})
 								}, 100);
+
 							});
+
 						});
-
-
 
 					}
 				},
@@ -775,20 +857,13 @@
 								elType = el.data("mfpType"),
 								elAjaxContent = el.data("mfpAjaxcontent"),
 								elClose = el.data("mfpCloseinside"),
+								elCloseBcg = el.data("mfpCloseonbcg"),
 								elbcg = el.data("mfpBcg");
 
 							if (!elbcg) {
 								classBcg = "";
 							} else {
 								classBcg = "mfp-blue";
-							}
-
-							if (!elType) {
-								elType = "inline";
-							}
-
-							if (!elType) {
-								elClose = "true";
 							}
 
 							if (elAjaxContent) {
@@ -800,14 +875,16 @@
 							}
 
 							el.magnificPopup({
-								type: elType,
+								type: elType ? elType : "inline",
 								closeMarkup: '<button title="%title%" type="button" class="mfp-close btn-container-close"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44.8 44.8"><g data-name="Слой 2"><path d="M19.6 22.4L0 42l2.8 2.8 19.6-19.6L42 44.8l2.8-2.8-19.6-19.6L44.8 2.8 42 0 22.4 19.6 2.8 0 0 2.8z" fill="#d0d0d0" data-name="Слой 1"/></g></svg></button>',
 								mainClass: "mfp-fade" + " " + classBcg,
 								removalDelay: 300,
-								closeOnBgClick: false,
-								closeBtnInside: elClose,
+								closeOnBgClick: elCloseBcg ? elCloseBcg : false,
+								closeBtnInside: elClose ? elClose : false,
 								callbacks: {
 									open: function(el) {
+										$(".mfp-bg.mfp-blue").css("background", elbcg);
+
 										$(".btn-container-close").on("click", function() {
 											$.magnificPopup.close();
 										});
@@ -1004,7 +1081,11 @@
 								}
 							},
 							onSliderLoad: function(el) {
-								var parentSlider = el.closest(".for-preloader");
+								var parentSlider = el.closest(".for-preloader"),
+									$lastTumb = $(el.miniGalary).last();
+
+								$lastTumb.append("<a href='#tour' class='link link-white tour'><span class='tour-text'>3D-тур</span></a>");
+
 								if (parentSlider.length !== 0) {
 									$sel.window.on("load", function() {
 										setTimeout(function() {
@@ -1018,6 +1099,8 @@
 
 									})
 								}
+
+
 							},
 							responsive : [
 								{
@@ -1105,7 +1188,8 @@
 								widgets: ["stickyHeaders"],
 								widgetOptions: {
 									 stickyHeaders_attachTo: self.table
-								}
+								},
+								sortList: [[1], [1,0]],
 							}
 						}
 						$(".sort-table").tablesorter(params);
@@ -1179,6 +1263,7 @@
 
 									var $content = instance.content(),
 										$contentTitle = $content.find("[data-tooltip-apartment-title]"),
+										$contentLinkTitle = $content.find("[data-tooltip-apartment-link-title]"),
 										$contentId = $content.find("[data-tooltip-apartment-id]"),
 										$contentImg = $content.find("[data-tooltip-apartment-img]"),
 										$contentImgSheme = $content.find("[data-tooltip-apartment-imgsheme]"),
@@ -1199,12 +1284,21 @@
 										$contentId.text("Нет информации");
 									}
 
-									$contentTitle.text("");
+									if (apartmentData.linkobject) {
+										$contentLinkTitle.text("");
 
-									if (apartmentData.apartment) {
-										$contentTitle.text(apartmentData.apartment);
+										if (apartmentData.apartment) {
+											$contentLinkTitle.attr("href", apartmentData.linkobject);
+											$contentLinkTitle.text(apartmentData.apartment);
+										}
+
 									} else {
-										$contentTitle.text(apartmentData.apartment);
+										$contentTitle.text("");
+
+										if (apartmentData.apartment) {
+											$contentTitle.text(apartmentData.apartment);
+										}
+
 									}
 
 									$contentImg.attr("src", "");
@@ -1225,11 +1319,11 @@
 									$contentPrice.empty();
 
 									if (apartmentData.oldprice) {
-										$contentPrice.append("<div class='tooltip-apartment-price-old'>"+apartmentData.oldprice+" &#8381;</div>");
+										$contentPrice.append("<div class='tooltip-apartment-price-old'>"+apartmentData.oldprice+"<span class='rub'>i</span></div>");
 									}
 
 									if (apartmentData.price) {
-										$contentPrice.append("<div class='tooltip-apartment-price-new'>"+apartmentData.price+" &#8381;</div>");
+										$contentPrice.append("<div class='tooltip-apartment-price-new'>"+apartmentData.price+"<span class='rub'>i</span></div>");
 									} else {
 										$contentPrice.append("<div class='tooltip-apartment-price-new'>Нет информации</div>");
 									}
@@ -1695,7 +1789,7 @@
 
 							});
 
-							$.cookie("sunsochi-preloader", true, { path: '/' });
+							$.cookie("sunsochi-preloader", true);
 						}
 
 					},
@@ -1848,7 +1942,7 @@
 	SUNSOCHI.mobileMenu.init();
 
 	SUNSOCHI.goEl();
-	SUNSOCHI.fixedBlock();
+	SUNSOCHI.fixedBlock.init();
 
 	SUNSOCHI.forms.init();
 	SUNSOCHI.filter.init();

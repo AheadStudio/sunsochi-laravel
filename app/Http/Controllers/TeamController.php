@@ -20,7 +20,7 @@ class TeamController extends Controller
         foreach ($teamList as $keyTeamList => $valTeamList) {
             $finalArray[$valTeamList["section"]][] = $teamList[$keyTeamList];
         }
-        return view("team", [
+        return view("team-list", [
             "teamList"  => $finalArray,
             "pageTitle" => "Сотрудники"
         ]);

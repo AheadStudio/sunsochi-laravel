@@ -18,9 +18,6 @@
 			<link href="{{ asset("css/bootstrap.min.css") }}" rel="stylesheet">
 		</header>
 		<main>
-			@component("components.heading", ["title" => "TEST"])
-			@endcomponent
-
 			@yield("content")
 		</main>
 		<footer>

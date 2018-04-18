@@ -14,14 +14,25 @@ use File;
 
 class NewsController extends Controller
 {
+    // index page
     public function index() {
         $newsList = News::orderBy("date", "asc")->paginate(3);
-        return view("news", [
+        return view("news-list", [
             "newsList"  => $newsList,
             "pageTitle" => "Новости"
         ]);
     }
 
+    // detail page
+    public function show($code) {
+        $newsItem = News::where("code", $code)->first();
+        return view("news-detail", [
+            "newsItem"  => $newsItem,
+            "pageTitle" => $newsItem->name
+        ]);
+    }
+
+    // import page
     public function import() {
         return view("import", ["action" => route("NewsImportSend")]);
     }
@@ -51,10 +62,7 @@ class NewsController extends Controller
             $arrReadFile[] = $readFile;
         }
 
-        echo "<pre>"; print_r($arrReadFile); echo "</pre>";
-
-        $data = ParseCsv::parsingCsv($arrReadFile);
-        /*if ($expanFile == "csv") {
+        if ($expanFile == "csv") {
             if (!empty($data)) {
                 foreach ($data as $key => $value) {
                     $insert[] = [
@@ -82,7 +90,7 @@ class NewsController extends Controller
 
         } else {
             Session::flash("error", "File is a ".$expanFile. "file.!! Please upload a valid xls/csv file..!!");
-        }*/
+        }
 
     }
 

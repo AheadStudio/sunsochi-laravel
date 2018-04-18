@@ -86,7 +86,7 @@
 					<div class="page-inner page-inner--w1">
 						<div class="header-row-items">
 							<div class="header-logo header-logo--mini">
-								<a href="home.html" class="link header-logo-img">
+								<a href="/" class="link header-logo-img">
 									<?php include("svg/logo-mini.svg"); ?>
 								</a>
 							</div>
@@ -109,9 +109,6 @@
 
 			<!--main-->
 			<main class="page-content">
-				<!--@component("components.heading", ["title" => "TEST"])
-				@endcomponent -->
-
 				@yield("content")
 			</main>
 			<!--//main-->
