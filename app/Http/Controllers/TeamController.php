@@ -38,7 +38,7 @@ class TeamController extends Controller
         $file = $request->file;
 
         // folder download
-        $destinationPath = "uploads";
+        $destinationPath = "upload";
 
         // push file in folder
         $filePath = $file->move($destinationPath, $file->getClientOriginalName());

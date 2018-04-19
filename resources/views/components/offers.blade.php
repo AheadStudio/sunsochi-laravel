@@ -9,42 +9,36 @@
                     <button type="button" class="link link-orange link-orange--bottom offers-container-favorites-text">Добавить в избранное</button>
                 </div>
                 <div class="offers-container">
-                    @if ($valOffers["text_action"])
+                    @if ($valOffers->text_action)
                         <div class="offers-container-mark">
-                            @php echo $valOffers["text_action"]; die;@endphp
+                            {{ $valOffers->text_action }}
                         </div>
                     @endif
-                    <img src="../dummy/home_1.jpg" alt class="offers-container-img">
-                    <div class="offers-container-price">{{ number_format($valOffers["price_from"], 0, " ", " ") }}<span class="rub">i</span></div>
+                    <img src="{{ $valOffers->photo }}" alt class="offers-container-img">
+                    <div class="offers-container-price">{{ number_format($valOffers->price_from, 0, " ", " ") }} <span class="rub">i</span></div>
                 </div>
                 <div class="offers-information">
                     <div class="page-text">
-                        <div class="offers-name">{{ $valOffers["name"] }}</div>
-                        <div class="offers-district">{{ $valOffers["property"]["district"] }}</div>
-                        <span class="offers-time"></span>
-                        <dl>
-                            <dt>
-                                <span>Студия</span>
-                            </dt>
-                            <dd>
-                                <span>от 1 167 920<span class="rub">i</span></span>
-                            </dd>
-                            <dt>
-                                <span>1 комн.</span>
-                            </dt>
-                            <dd>
-                                <span>от 1 910 920<span class="rub">i</span></span>
-                            </dd>
-                            <dt>
-                                <span>2 комн.</span>
-                            </dt>
-                            <dd>
-                                <span>от 1 910 920<span class="rub">i</span></span>
-                            </dd>
-                        </dl>
+                        <div class="offers-name">{{ $valOffers->name }}</div>
+                        <div class="offers-district">{{ $valOffers->district }}</div>
+                        @if (isset($valOffers->deadline))
+                            <span class="offers-time">{{ $valOffers->deadline }}</span>
+                        @endif
+                        @if (isset($valOffers->apartments))
+                            <dl>
+                                @foreach ($valOffers->apartments as $keyApartment => $valApartment)
+                                    <dt>
+                                        <span>{{ $keyApartment }}</span>
+                                    </dt>
+                                    <dd>
+                                        <span>от {{ number_format($valApartment->price, 0, " ", " ") }}<span class="rub">i</span></span>
+                                    </dd>
+                                @endforeach
+                            </dl>
+                        @endif
                     </div>
                 </div>
-                <a href="#" class="link button button--orange offers-container-more">Подробнее</a>
+                <a href="/{{ $valOffers->path }}/" class="link button button--orange offers-container-more">Подробнее</a>
             </div>
         @endforeach
     </div>

@@ -8,8 +8,13 @@ use App\GoodCode\ParseCsv;
 
 use \App\Builder;
 use \App\Catalog;
+use \App\CatalogsSection;
+use \App\CatalogsElement;
 use \App\ElementDirectory;
 use \App\District;
+use \App\Picture;
+use \App\NumberRoom;
+use \App\Deadline;
 
 use Session;
 use Excel;
@@ -38,20 +43,82 @@ class BuildersController extends Controller
         $builderOffers = Catalog::where("developer_buildings", $builderItem->id)
                                 ->orderBy("active", "1")
                                 ->orderBy("name", "asc")
-                                ->paginate(6)
-                                ->toArray();
+                                ->paginate(6);
 
-        foreach ($builderOffers["data"] as $keyOffers => $valOffers) {
-            $allPropCode = ElementDirectory::where("element_id", $valOffers["id"])->get()->toArray();
-            foreach ($allPropCode as $keyProp => $valProp) {
-                $className = "\App\\".$valProp["name_table"];
-                $allProp[$valProp["name_field"]] = $className::where("code", $valProp["code"])->get()->toArray();
+        foreach ($builderOffers as $keyOffers => $valOffers) {
+
+            if (!empty($valOffers) || isset($valOffers)) {
+                // get section offers
+                $subSection = CatalogsSection::where("id", $valOffers->basic_section)->first();
+                $catalogSection = CatalogsSection::where("id", $subSection->parent_id)->first();
+
+                // get photo offers
+                $photo = Picture::where("element_id", $valOffers->id)->first();
+
+                // get district(region) offers
+                $districtProp = ElementDirectory::where("element_id", $valOffers->id)->where("name_field", "district")->get();
+                if (!$districtProp->isEmpty()) {
+                    $district = District::where("code", $districtProp[0]->code)->get();
+                } else {
+                    $district[0]->{"name"} = "";
+                }
+
+                // get end of construction
+                $deadlineProp = ElementDirectory::where("element_id", $valOffers->id)->where("name_field", "deadline")->get();
+                if (!$deadlineProp->isEmpty()) {
+                    $deadline = Deadline::where("code", $deadlineProp[0]->code)->get();
+                }else {
+                    $deadline[0]->{"name"} = "";
+                }
+
+                // get connected apartments
+                $apartments = Catalog::where("cottage_village", $valOffers->id)
+                                     ->where("price", ">", "0")
+                                     ->orderBy("price", "asc")
+                                     ->get();
+
+                $apartmnetItems = [];
+
+                foreach ($apartments as $keyApartment => $valApartment) {
+                    $apartmentsProp = ElementDirectory::where("element_id", $valApartment->id)->where("name_field", "number_rooms")->first();
+                    if (!empty($apartmentsProp->code) || isset($apartmentsProp->code)) {
+                        $apartmentRooms = NumberRoom::where("code", $apartmentsProp->code)->first();
+
+                        // verification of existence apartments
+                        if(!isset($apartmnetItems[$apartmentRooms->name])) {
+                            $apartmnetItems[$apartmentRooms->name] = Array(
+                                "price" => $valApartment->price
+                            );
+                        } else {
+                            if($apartmnetItems[$apartmentRooms->name]->price > $valApartment->price) {
+                                $apartmnetItems[$apartmentRooms->name]->price = $valApartment->price;
+                            }
+                        }
+
+                        $apartmnetItems = array_map(function($array){
+                            return (object)$array;
+                        }, $apartmnetItems);
+                    } else {
+                        $apartmnetItems = [];
+                    }
+                }
+
+                ksort($apartmnetItems);
+
+                // create final obj
+                $builderOffers[$keyOffers]->{"photo"}       = $photo->path;
+                $builderOffers[$keyOffers]->{"district"}    = $district[0]->name;
+                $builderOffers[$keyOffers]->{"deadline"}    = $deadline[0]->name;
+                $builderOffers[$keyOffers]->{"apartments"}  = (object)$apartmnetItems;
+                $builderOffers[$keyOffers]->{"path"}        = $catalogSection->code."/".$subSection->code."/".$valOffers->code;
+
             }
-            $builderOffers["data"][$keyOffers]["property"] = $allProp;
+
         }
+
         return view("builder-detail", [
             "builderItem"  => $builderItem,
-            "builderOffers" => $builderOffers["data"],
+            "builderOffers" => $builderOffers,
             "pageTitle" => $builderItem->name
         ]);
 
@@ -70,7 +137,7 @@ class BuildersController extends Controller
         $file = $request->file;
 
         // folder download
-        $destinationPath = "uploads";
+        $destinationPath = "upload";
 
         // push file in folder
         $filePath = $file->move($destinationPath, $file->getClientOriginalName());
