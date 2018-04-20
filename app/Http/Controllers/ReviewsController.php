@@ -24,7 +24,7 @@ class ReviewsController extends Controller
             $valList->text = $finalText[1];
         }
 
-        return view("review-list", [
+        return view("reviews-list", [
             "reviewList"    => $reviewList,
             "pageTitle"     => "Отзывы",
         ]);
@@ -44,7 +44,9 @@ class ReviewsController extends Controller
             }
         }
         $phraseArray = implode(' ', $phraseArray);
+
         return $finalString = [$phraseArray, $phrase, $text];
+
     }
 
     // import page

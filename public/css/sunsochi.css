@@ -873,6 +873,32 @@ em {
   font-family: "Rubl";
   src: url("../fonts/rouble.woff") format("woff");
 }
+/*** animations ***/
+@-ms-keyframes spin {
+  from {
+    -ms-transform: rotate(0deg);
+  }
+  to {
+    -ms-transform: rotate(360deg);
+  }
+}
+@-moz-keyframes spin {
+  from {
+    -moz-transform: rotate(0deg);
+  }
+  to {
+    -moz-transform: rotate(360deg);
+  }
+}
+@-webkit-keyframes spin {
+  from {
+    -webkit-transform: rotate(0deg);
+  }
+  to {
+    -webkit-transform: rotate(360deg);
+  }
+}
+/*** //animations ***/
 /* //fonts */
 html {
   height: 100%;
@@ -3241,6 +3267,48 @@ body.open-menu .page-header .mobile-favorites {
   margin: 0 auto;
   text-align: center;
   font-family: "ProximaNovaSemibold";
+}
+.load-more.loading {
+    max-width: 44px !important;
+    height: 44px !important;
+    font-size: 0 !important;
+    -webkit-transition: -webkit-transform 1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    -moz-transition: -moz-transform 1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    -o-transition: -o-transform 1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    -ms-transition: -ms-transform 1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    transition: transform 1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    -webkit-animation-name: spin;
+    -moz-animation-name: spin;
+    -o-animation-name: spin;
+    -ms-animation-name: spin;
+    animation-name: spin;
+    -webkit-animation-duration: 1000ms;
+    -moz-animation-duration: 1000ms;
+    -o-animation-duration: 1000ms;
+    -ms-animation-duration: 1000ms;
+    animation-duration: 1000ms;
+    -webkit-animation-iteration-count: infinite;
+    -moz-animation-iteration-count: infinite;
+    -o-animation-iteration-count: infinite;
+    -ms-animation-iteration-count: infinite;
+    animation-iteration-count: infinite;
+    -webkit-animation-timing-function: linear;
+    -moz-animation-timing-function: linear;
+    -o-animation-timing-function: linear;
+    -ms-animation-timing-function: linear;
+    animation-timing-function: linear;
+    background: transparent;
+}
+.load-more.loading:before {
+    content: "";
+    position: absolute;
+    top: -5px;
+    left: 50%;
+    width: 10px;
+    height: 10px;
+    margin-left: -2.5px;
+    border-radius: 50%;
+    background: #009ecc;
 }
 /*** //block offers ***/
 /*** section block ***/
@@ -5740,8 +5808,14 @@ body.open-menu .page-header .mobile-favorites {
   color: #4a494a;
 }
 .about-info {
-  margin: 65px 0 35px 0;
-  padding: 50px 0 95px 0;
+    margin: 65px 0 35px 0;
+    padding: 50px 0 95px 0;
+    background-image: url(../svg/about_icon_all.svg);
+    background-repeat: no-repeat;
+    -webkit-background-size: 1120px;
+    -moz-background-size: 1120px;
+    background-size: 1120px;
+    background-position: center 8px;
 }
 .about-info h2 {
   margin-bottom: 20px;
@@ -6099,11 +6173,6 @@ body.open-menu .page-header .mobile-favorites {
   text-align: center;
   margin-bottom: 100px;
 }
-.reviews-more .load-more {
-  max-width: 215px;
-  margin: 0 auto;
-  text-align: center;
-}
 .toggle-container {
   display: none;
   opacity: 0;
@@ -6273,6 +6342,7 @@ body.open-menu .page-header .mobile-favorites {
 .partners .partners-img {
   display: block;
   max-height: 150px;
+  max-width: 100%;
 }
 .partners .partners-title {
   margin-bottom: 15px;
@@ -6949,6 +7019,10 @@ body.open-menu .page-header .mobile-favorites {
 }
 .fake-preview .fake-preview-icon svg path[stroke-width] {
   stroke-width: 8px;
+}
+.fake-preview .fake-preview-icon--image svg path {
+  fill: #fff;
+  stroke: #fff;
 }
 .fake-preview:hover .fake-preview-icon {
   opacity: 0.5;

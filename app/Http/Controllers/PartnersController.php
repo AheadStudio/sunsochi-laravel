@@ -5,15 +5,21 @@ use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\GoodCode\ParseCsv;
+
+use \App\Partner;
+
 use Session;
 use Excel;
 use File;
 
 class PartnersController extends Controller
 {
-    public function list() {
-        $list = \App\Partner::all();
-        return view("partners", ["blogsInfo" => $list]);
+    public function index() {
+        $partnersList = Partner::orderBy("name", "asc")->get();
+        return view("partners", [
+            "partnersList"  => $partnersList,
+            "pageTitle" => "Партнеры"
+        ]);
     }
 
     public function import() {

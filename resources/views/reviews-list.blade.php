@@ -14,10 +14,17 @@
 				<div class="reviews-item">
 					<div class="reviews-video">
 						<div style="background-image: url({{ $valReview->preview_video }})" class="fake-preview">
-							<a href="{{ $valReview->video }}" data-mfp-type="{{ stristr($valReview->video, 'http') === FALSE ? 'image' : 'iframe' }}" data-mfp-bcg="rgba(0, 158, 204, 0.9)" data-mfp-closeinside="false" data-mfp-closeonbcg="true" class="link fake-preview-link mfp-modal"></a>
-							<span class="fake-preview-icon">
-								<?php include("svg/play_youtube.svg"); ?>
-							</span>
+							@if (stristr($valReview->video, 'youtube') === FALSE)
+								<a href="{{ $valReview->video }}" data-mfp-type="image" data-mfp-bcg="rgba(0, 158, 204, 0.9)" data-mfp-closeinside="false" data-mfp-closeonbcg="true" class="link fake-preview-link mfp-modal"></a>
+								<span class="fake-preview-icon fake-preview-icon--image">
+									<?php include("svg/loupe.svg"); ?>
+								</span>
+							@else
+								<a href="{{ $valReview->video }}" data-mfp-type="iframe" data-mfp-bcg="rgba(0, 158, 204, 0.9)" data-mfp-closeinside="false" data-mfp-closeonbcg="true" class="link fake-preview-link mfp-modal"></a>
+								<span class="fake-preview-icon">
+									<?php include("svg/play_youtube.svg"); ?>
+								</span>
+							@endif
 						</div>
 						<!--iframe(frameborder="0", height="100%", width="100%", src="https://www.youtube.com/embed/WiJGohGIs14?rel=0&amp;controls=0&amp;showinfo=0", allow="autoplay; encrypted-media", allowfullscreen)-->
 					</div>

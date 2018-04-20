@@ -1,8 +1,21 @@
 @extends("layouts.app")
 
 @section("content")
-	<h1>Партнеры</h1>
-	<?php foreach ($blogsInfo as $blog): ?>
-		<p style="font-size:16px;display: block; border-bottom: 1px solid #000;"><? echo $blog->name; ?></p>
-	<?php endforeach; ?>
+	<div class="page-inner page-inner--w1">
+		<div class="partners">
+			<div class="page-text">
+				<h1>{{ $pageTitle }}</h1>
+			</div>
+				<div class="partners-list">
+					@foreach ($partnersList as $valPartnersList)
+						<div class="partners-item">
+							<div class="partners-holder"><img src="{{ $valPartnersList->logo }}" class="partners-img"></div>
+							<div class="partners-title">{{ $valPartnersList->name }}</div>
+							<div class="partners-text">{{ $valPartnersList->text }}</div>
+						</div>
+					@endforeach
+				</div>
+			</div>
+		</div>
+	</div>
 @endsection

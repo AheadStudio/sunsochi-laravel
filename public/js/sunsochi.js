@@ -280,10 +280,10 @@
 				init: function() {
 					var self = this;
 
-					self.scroll.init();
+					self.fixedHeader.init();
 					self.fixedApartment();
 				},
-				scroll: {
+				fixedHeader: {
 					init: function() {
 						if ($sel.window.width() > "820") {
 							$sel.window.on("scroll", function() {
@@ -1653,46 +1653,54 @@
 
 				$toggle.each(function() {
 					(function(el) {
-						el.on("click", function(e) {
-							var toggleEl = $(this),
-								toggleId = toggleEl.data("toggleLink"),
-								toggleLinkTextNew = toggleEl.attr("data-toggle-text"),
-								toggleLinkTextOld = toggleEl.text();
-								$container = toggleEl.parent().find("[data-toggle='"+toggleId+"']");
+						var active = el.data("toogleActive");
 
-							if (toggleEl.hasClass("active")) {
-								toggleEl.removeClass("active-animation");
+						if (active !== true) {
+							el.on("click", function(e) {
+								var $toggleEl = $(this),
+									toggleId = $toggleEl.data("toggleLink"),
+									toggleLinkTextNew = $toggleEl.attr("data-toggle-text"),
+									toggleLinkTextOld = $toggleEl.text();
+									$container = $toggleEl.parent().find("[data-toggle='"+toggleId+"']");
 
-								toggleEl.attr("data-toggle-text", toggleLinkTextOld);
-								toggleEl.text(toggleLinkTextNew);
+								if ($toggleEl.hasClass("active")) {
+									$toggleEl.removeClass("active-animation");
 
-								$container.removeClass("active-animation");
+									$toggleEl.attr("data-toggle-text", toggleLinkTextOld);
+									$toggleEl.text(toggleLinkTextNew);
 
-								setTimeout(function() {
-									toggleEl.removeClass("active");
-									$container.removeClass("active");
-								}, 300);
+									$container.removeClass("active-animation");
 
-							} else {
-								toggleEl.addClass("active");
-								$container.addClass("active");
+									setTimeout(function() {
+										$toggleEl.removeClass("active");
+										$container.removeClass("active");
+									}, 300);
 
-								toggleEl.attr("data-toggle-text", toggleLinkTextOld);
-								toggleEl.text(toggleLinkTextNew);
+								} else {
+									$toggleEl.addClass("active");
+									$container.addClass("active");
 
-								setTimeout(function() {
-									toggleEl.addClass("active-animation");
-									$container.addClass("active-animation");
-								}, 300);
+									$toggleEl.attr("data-toggle-text", toggleLinkTextOld);
+									$toggleEl.text(toggleLinkTextNew);
 
-							}
+									setTimeout(function() {
+										$toggleEl.addClass("active-animation");
+										$container.addClass("active-animation");
+									}, 300);
 
-							if (toggleEl.closest("reviews-container")) {
-								SUNSOCHI.animations.animateHeightReviews($(".reviews-container"), "height", "auto");
-							}
+								}
 
-							e.preventDefault();
-						})
+								if ($toggleEl.closest("reviews-container")) {
+									SUNSOCHI.animations.animateHeightReviews($(".reviews-container"), "height", "auto");
+								}
+
+								e.preventDefault();
+							})
+
+							el.data("toogleActive", true);
+
+						}
+
 					})($(this));
 				})
 			},
@@ -1946,10 +1954,8 @@
 
 	SUNSOCHI.forms.init();
 	SUNSOCHI.filter.init();
+	SUNSOCHI.autocomplete.init();
 
-	ymaps.ready(function() {
-		SUNSOCHI.maps.yandexMap.init();
-	});
 	SUNSOCHI.sliders.init();
 	SUNSOCHI.apartments.init();
 	SUNSOCHI.modalWindow.init();
@@ -1959,16 +1965,17 @@
 
 	SUNSOCHI.printpage();
 
-	SUNSOCHI.autocomplete.init();
 	SUNSOCHI.animations.init();
 
-
+	ymaps.ready(function() {
+		SUNSOCHI.maps.yandexMap.init();
+	});
 
 	SUNSOCHI.reload = function() {
 		SUNSOCHI.forms.init();
 		SUNSOCHI.printpage();
-		SUNSOCHI.modalWindow.init();
 		SUNSOCHI.toggleElements();
+		SUNSOCHI.modalWindow.init();
 	};
 
 })(jQuery);

@@ -26,91 +26,120 @@ class BuildersController extends Controller
     public function index() {
         $finalArray = [];
         $builderList = Builder::orderBy("name", "asc")->get()->toArray();
+
         foreach ($builderList as $keyBuilderList => $valBuilderList) {
             $finalArray[mb_substr($valBuilderList["name"], 0, 1)][] = $builderList[$keyBuilderList];
         }
+
         return view("builders-list", [
             "builderList"  => $finalArray,
             "pageTitle" => "Застройщики",
             "pageSubtitle" => "Мы собрали для вас информацию по всем компаниям-застройщикам, которые занимаются строительством жилых комплексов в городе-курорте Сочи."
         ]);
+
     }
 
     // detail page
     public function show($code) {
         $builderItem = Builder::where("code", $code)->first();
 
-        $builderOffers = Catalog::where("developer_buildings", $builderItem->id)
+        $builderOffers = Catalog::select("id", "basic_section", "name", "code", "text_action", "price_from")
+                                ->where("developer_buildings", $builderItem->id)
                                 ->orderBy("active", "1")
                                 ->orderBy("name", "asc")
                                 ->paginate(6);
 
-        foreach ($builderOffers as $keyOffers => $valOffers) {
+        if (!$builderOffers->isEmpty()) {
+            foreach ($builderOffers as $keyOffers => $valOffers) {
 
-            if (!empty($valOffers) || isset($valOffers)) {
-                // get section offers
-                $subSection = CatalogsSection::where("id", $valOffers->basic_section)->first();
-                $catalogSection = CatalogsSection::where("id", $subSection->parent_id)->first();
+                if (!empty($valOffers) || isset($valOffers)) {
 
-                // get photo offers
-                $photo = Picture::where("element_id", $valOffers->id)->first();
+                    // get section offers
+                    $subSection = CatalogsSection::select("parent_id", "code")
+                                                 ->where("id", $valOffers->basic_section)
+                                                 ->first();
 
-                // get district(region) offers
-                $districtProp = ElementDirectory::where("element_id", $valOffers->id)->where("name_field", "district")->get();
-                if (!$districtProp->isEmpty()) {
-                    $district = District::where("code", $districtProp[0]->code)->get();
-                } else {
-                    $district[0]->{"name"} = "";
-                }
+                    $catalogSection = CatalogsSection::select("code")
+                                                     ->where("id", $subSection->parent_id)
+                                                     ->first();
 
-                // get end of construction
-                $deadlineProp = ElementDirectory::where("element_id", $valOffers->id)->where("name_field", "deadline")->get();
-                if (!$deadlineProp->isEmpty()) {
-                    $deadline = Deadline::where("code", $deadlineProp[0]->code)->get();
-                }else {
-                    $deadline[0]->{"name"} = "";
-                }
+                    // get photo offers
+                    $photo = Picture::select("path")
+                                    ->where("element_id", $valOffers->id)
+                                    ->first();
 
-                // get connected apartments
-                $apartments = Catalog::where("cottage_village", $valOffers->id)
-                                     ->where("price", ">", "0")
-                                     ->orderBy("price", "asc")
-                                     ->get();
-
-                $apartmnetItems = [];
-
-                foreach ($apartments as $keyApartment => $valApartment) {
-                    $apartmentsProp = ElementDirectory::where("element_id", $valApartment->id)->where("name_field", "number_rooms")->first();
-                    if (!empty($apartmentsProp->code) || isset($apartmentsProp->code)) {
-                        $apartmentRooms = NumberRoom::where("code", $apartmentsProp->code)->first();
-
-                        // verification of existence apartments
-                        if(!isset($apartmnetItems[$apartmentRooms->name])) {
-                            $apartmnetItems[$apartmentRooms->name] = Array(
-                                "price" => $valApartment->price
-                            );
-                        } else {
-                            if($apartmnetItems[$apartmentRooms->name]->price > $valApartment->price) {
-                                $apartmnetItems[$apartmentRooms->name]->price = $valApartment->price;
-                            }
-                        }
-
-                        $apartmnetItems = array_map(function($array){
-                            return (object)$array;
-                        }, $apartmnetItems);
+                    // get district(region) offers
+                    $districtProp = ElementDirectory::where("element_id", $valOffers->id)->where("name_field", "district")->first();
+                    if (isset($districtProp)) {
+                        $district = District::select("name")
+                                            ->where("code", $districtProp->code)
+                                            ->first();
                     } else {
-                        $apartmnetItems = [];
+                        $district->{"name"} = "";
                     }
+
+                    // get end of construction
+                    $deadlineProp = ElementDirectory::where("element_id", $valOffers->id)->where("name_field", "deadline")->first();
+                    if (isset($deadlineProp->code)) {
+                        $deadline = Deadline::select("name")
+                                            ->where("code", $deadlineProp->code)
+                                            ->first();
+                    } else {
+                        $deadline->{"name"} = "";
+                    }
+
+                    // get connected apartments
+                    $apartments = Catalog::select("id", "price")
+                                         ->where([
+                                            ["cottage_village", $valOffers->id],
+                                            ["price", ">", "0"],
+                                         ])
+                                         ->orderBy("price", "asc")
+                                         ->distinct()
+                                         ->get();
+
+                    $apartmnetItems = [];
+
+                    foreach ($apartments as $keyApartment => $valApartment) {
+                        $apartmentsProp = ElementDirectory::where([
+                                                             ["element_id", $valApartment->id],
+                                                             ["name_field", "number_rooms"],
+                                                          ])
+                                                          ->first();
+                                                          
+                        if (!empty($apartmentsProp->code) || isset($apartmentsProp->code)) {
+                            $apartmentRooms = NumberRoom::where("code", $apartmentsProp->code)->first();
+
+                            // verification of existence apartments
+                            if(!isset($apartmnetItems[$apartmentRooms->name])) {
+                                $apartmnetItems[$apartmentRooms->name] = Array(
+                                    "price" => $valApartment->price
+                                );
+                            } else {
+                                if($apartmnetItems[$apartmentRooms->name]->price > $valApartment->price) {
+                                    $apartmnetItems[$apartmentRooms->name]->price = $valApartment->price;
+                                }
+                            }
+
+                            $apartmnetItems = array_map(function($array){
+                                return (object)$array;
+                            }, $apartmnetItems);
+
+                        } else {
+                            $apartmnetItems = [];
+                        }
+                    }
+
+                    ksort($apartmnetItems);
+
+                    // create final obj
+                    $builderOffers[$keyOffers]->{"photo"}       = $photo->path;
+                    $builderOffers[$keyOffers]->{"district"}    = $district->name;
+                    $builderOffers[$keyOffers]->{"deadline"}    = $deadline->name;
+                    $builderOffers[$keyOffers]->{"apartments"}  = (object)$apartmnetItems;
+                    $builderOffers[$keyOffers]->{"path"}        = $catalogSection->code."/".$subSection->code."/".$valOffers->code;
+
                 }
-
-                ksort($apartmnetItems);
-
-                // create final obj
-                $builderOffers[$keyOffers]->{"photo"}       = $photo->path;
-                $builderOffers[$keyOffers]->{"district"}    = $district[0]->name;
-                $builderOffers[$keyOffers]->{"deadline"}    = $deadline[0]->name;
-                $builderOffers[$keyOffers]->{"apartments"}  = (object)$apartmnetItems;
-                $builderOffers[$keyOffers]->{"path"}        = $catalogSection->code."/".$subSection->code."/".$valOffers->code;
 
             }
 

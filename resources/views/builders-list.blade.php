@@ -13,7 +13,7 @@
 					<div class="developers-letter">{{ $keyBuilderList }}</div>
 					<div class="developers-company">
 						@foreach ($valBuilderList as $valBuilder)
-							<a href="{{ $valBuilder["code"] }}" class="link link--showdow-black-blue developers-link">{{$valBuilder["name"]}}</a>
+							<a href="{{ route("BuildersShow", $valBuilder["code"]) }}" class="link link--showdow-black-blue developers-link">{{$valBuilder["name"]}}</a>
 						@endforeach
 					</div>
 				</div>

@@ -21,9 +21,7 @@
                     <div class="page-text">
                         <div class="offers-name">{{ $valOffers->name }}</div>
                         <div class="offers-district">{{ $valOffers->district }}</div>
-                        @if (isset($valOffers->deadline))
-                            <span class="offers-time">{{ $valOffers->deadline }}</span>
-                        @endif
+                        <span class="offers-time">{{ $valOffers->deadline }}</span>
                         @if (isset($valOffers->apartments))
                             <dl>
                                 @foreach ($valOffers->apartments as $keyApartment => $valApartment)
@@ -38,7 +36,7 @@
                         @endif
                     </div>
                 </div>
-                <a href="/{{ $valOffers->path }}/" class="link button button--orange offers-container-more">Подробнее</a>
+                <a href="{{ url($valOffers->path) }}" class="link button button--orange offers-container-more">Подробнее</a>
             </div>
         @endforeach
     </div>
