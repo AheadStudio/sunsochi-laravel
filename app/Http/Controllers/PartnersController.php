@@ -1,25 +1,40 @@
 <?php
+
 namespace App\Http\Controllers;
 
-use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use App\GoodCode\ParseCsv;
 
-use \App\Partner;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Request;
+
+use App\GoodCode\ParseCsv;
+use App\GoodCode\Helper;
+
+use App\Partner;
 
 use Session;
 use Excel;
 use File;
 
+use SEO;
+
 class PartnersController extends Controller
 {
     public function index() {
+        // SEO information
+        Helper::setSEO(
+            "Наши партнеры",
+            "Компания “Солнечный Сочи” занимается экспертным подбором недвижимости любых типов в городе-курорте Сочи, организовывая не только полное сопровождение сделки, но и предлагая инвестиционные проекты “под ключ”.",
+            "http://sunsochi.goodcode.ru"
+        );
+
         $partnersList = Partner::orderBy("name", "asc")->get();
+
         return view("partners", [
             "partnersList"  => $partnersList,
             "pageTitle" => "Партнеры"
         ]);
+
     }
 
     public function import() {

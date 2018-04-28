@@ -161,6 +161,7 @@
 				init: function() {
 					var self = this;
 					self.calcFixed();
+					self.sticky();
 					$sel.window.resize(function(){
 						self.calcFixed();
 					});
@@ -168,7 +169,6 @@
 
 				calcFixed: function() {
 					var self = this,
-						$stickyBlocks = $("[data-sticky]"),
 						$fixedBlock = $(".fixed-block");
 
 					if ($sel.window.width() > "820") {
@@ -259,20 +259,24 @@
 						});
 					}
 
+				},
+				sticky: function() {
+					var $stickyBlocks = $("[data-sticky]");
+
 					$stickyBlocks.each(function() {
 						var el = $(this),
 							offsetTOp = el.data("stickyOffsetTop"),
 							$container = el.parent();
 
-						el.stick_in_parent({
-							container: $container,
-							offset_top: offsetTOp
-						});
-
+						el.on("sticky_kit:detach");
+						setTimeout(function() {
+							el.stick_in_parent({
+								container: $container,
+								offset_top: offsetTOp
+							});
+						},300);
 					});
-
-
-				},
+				}
 
 			},
 
@@ -437,6 +441,7 @@
 							(function(el) {
 								var $inputEl = $(el),
 									$jcfContainer = $inputEl.closest(".jcf-range"),
+									realInputName = $jcfContainer.find("input").data("nameInput"),
 									jcfFrom = $jcfContainer.find(".jcf-index-1"),
 									$jcfFromField = $(".jcf-range-count-number", jcfFrom),
 									$jcfTo = $jcfContainer.find(".jcf-index-2"),
@@ -444,7 +449,9 @@
 									tplText = $inputEl.data("valtext"),
 									fromVal,toVal,valueArray;
 
+
 								valueArray = $inputEl[0].defaultValue.split(",");
+
 
 								// text in container
 								var startFrom = valueArray[0].replace(/(\d)(?=(\d\d\d)+([^\d]|$))/g, "$1 ");
@@ -455,6 +462,16 @@
 
 								$inputEl.attr("data-valfrom", valueArray[0]);
 								$inputEl.attr("data-valto", valueArray[1]);
+
+								//add hidden field
+								$jcfContainer.prepend("<input type='hidden' name='"+realInputName+"_min' data-fake-min>");
+								$jcfContainer.prepend("<input type='hidden' name='"+realInputName+"_max' data-fake-max>");
+
+								var $fakeInputMin = $jcfContainer.find("[data-fake-min]");
+								var $fakeInputMax = $jcfContainer.find("[data-fake-max]");
+								
+								$fakeInputMin.val(startFrom);
+								$fakeInputMax.val(finishTo);
 
 								$inputEl.on("change input", function(e) {
 									var $element = $(this);
@@ -469,6 +486,9 @@
 
 									$element.attr("data-valfrom", fromVal);
 									$element.attr("data-valto", toVal);
+
+									$fakeInputMin.val(fromVal);
+									$fakeInputMax.val(toVal);
 
 									var currentStateRange = jcf.getInstance($inputEl);
 									currentStateRange.refresh();
@@ -571,8 +591,8 @@
 								checkboxContainer = filterContainer.find(".filter-selected-regions-list");
 
 							checkboxContainer.append(
-								'<div class="filter-selected-regions-item" data-regname="'+nameCheckbox+'">'+
-                      				'<input type="checkbox" name="'+nameCheckbox+'" data-jcfapply="off" disabled="" checked="checked" class="form-item form-item--checkbox"><span class="selected-regions-item-text">'+textCheckbox+'</span>'+
+								'<div class="filter-selected-regions-item" data-regname="district|'+nameCheckbox+'">'+
+                      				'<input type="checkbox" name="district|'+nameCheckbox+'" data-jcfapply="off" checked="checked" class="form-item form-item--checkbox"><span class="selected-regions-item-text">'+textCheckbox+'</span>'+
                   					'<div class="selected-regions-item-close">'+
 										'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44.8 44.8"><g id="Слой_2" data-name="Слой 2"><g id="Слой_1-2" data-name="Слой 1"><path d="M19.6,22.4,0,42l2.8,2.8L22.4,25.2,42,44.8,44.8,42,25.2,22.4,44.8,2.8,42,0,22.4,19.6,2.8,0,0,2.8Z" fill="#d0d0d0"></path></g></g></svg>'+
 									'</div>'+
@@ -723,13 +743,12 @@
 				rating: {
 					init: function() {
 						var $rating = $("[data-rating]");
-
 						$rating.each(function() {
 							(function(el) {
 								var elScore = el.data("ratingValue"),
 									elRead = el.data("ratingRead");
 
-								if (!elRead) {
+								if (!elRead || elRead == "") {
 									elRead = false;
 								}
 
@@ -740,10 +759,19 @@
 									scoreName: "result-blog-rating",
 									starOff: "../svg/star.svg",
 									starOn: "../svg/star_orage_fill.svg",
+									starHalf: "../svg/star_orage_half.svg",
 								});
 							})($(this))
 						})
 					},
+					destroy: function() {
+						var $rating = $("[data-rating]");
+						$rating.each(function() {
+							(function(el) {
+								el.raty("destroy");
+							})($(this))
+						})
+					}
 				},
 
 				validate: {
@@ -1123,7 +1151,11 @@
 						selector = $linkAddress.data("itemsselector"),
 						$container = $($linkAddress.data("container"));
 
-					$linkAddress.addClass("loading");
+					if ($linkAddress.hasClass("loading")) {
+						return false;
+					} else {
+						$linkAddress.addClass("loading");
+					}
 
 					(function(href, $container, $link, selector) {
 						$.ajax({
@@ -1146,6 +1178,7 @@
 								setTimeout(function() {
 									$container.find(".load-events-item").removeClass("load-events-item");
 									$linkAddress.removeClass("loading");
+									//$linkAddress.prop("disabled", false);
 								}, 100);
 
 								SUNSOCHI.reload();
@@ -1661,13 +1694,16 @@
 									toggleId = $toggleEl.data("toggleLink"),
 									toggleLinkTextNew = $toggleEl.attr("data-toggle-text"),
 									toggleLinkTextOld = $toggleEl.text();
-									$container = $toggleEl.parent().find("[data-toggle='"+toggleId+"']");
+									$container = $toggleEl.parent().find("[data-toggle='"+toggleId+"']")
+									textpoint = $toggleEl.parent().find(".text-points");
 
 								if ($toggleEl.hasClass("active")) {
 									$toggleEl.removeClass("active-animation");
 
 									$toggleEl.attr("data-toggle-text", toggleLinkTextOld);
 									$toggleEl.text(toggleLinkTextNew);
+
+									textpoint.css("display", "inline");
 
 									$container.removeClass("active-animation");
 
@@ -1679,6 +1715,8 @@
 								} else {
 									$toggleEl.addClass("active");
 									$container.addClass("active");
+
+									textpoint.css("display", "none");
 
 									$toggleEl.attr("data-toggle-text", toggleLinkTextOld);
 									$toggleEl.text(toggleLinkTextNew);
@@ -1808,6 +1846,8 @@
 
 					$numberItem: null,
 
+					startAnimation: false,
+
 					init: function() {
 						var self = this;
 
@@ -1818,9 +1858,24 @@
 
 					start: function() {
 						var self = this,
-							timeStep = 500;
+							timeStep = 500,
+ 							el =  $(".about-info-container");
 
 						$sel.window.on("load", function() {
+							$sel.window.on("scroll", function() {
+								var elHeight = el.outerHeight(),
+									sTop = $sel.window.scrollTop();
+
+								if (!self.startAnimation && (sTop < elHeight + 500)) {
+									self.startAnimation = true;
+									self.start();
+									console.log(123);
+								}
+
+							});
+						});
+
+						if (self.startAnimation == true) {
 							self.$numberItem.each(function() {
 								var element = $(this);
 								setTimeout(function() {
@@ -1852,7 +1907,7 @@
 
 								timeStep +=250;
 							});
-						});
+						}
 
 					}
 
@@ -1874,60 +1929,36 @@
 				start: function() {
 					var self = this;
 
-					self.$elements.autocomplete({
-						minChars: 3,
-						maxHeight: 400,
-						source: false,
-						lookup: [
-							{
-								value: "Центральная",
-								data: "Центральная улица",
-							}, {
-								value: "Южная",
-								data: "Южная",
-							}, {
-								value: "Северная",
-								data: "Северная",
-							}, {
-								value: "Красноармейская",
-								data: "Красноармейская",
-							}, {
-								value: "Красноармейская 1",
-								data: "Красноармейская 1",
-							}, {
-								value: "Красноармейская 2",
-								data: "Красноармейская 2",
-							}, {
-								value: "Красноармейская 3",
-								data: "Красноармейская 3",
-							}, {
-								value: "Красноармейская 4",
-								data: "Красноармейская 4",
-							}, {
-								value: "Красноармейская 5",
-								data: "Красноармейская 5",
-							}
-						],
-						formatResult: function(suggestion, currentValue) {
-							var strItem = "",
-								reg = new RegExp(currentValue, "gi");
+					self.$elements.each(function() {
+						var el = $(this);
 
-							itemName = suggestion.data.replace(reg, function(str) {
-								return "<b>" + str + "</b>";
-							});
+						el.autocomplete({
+							minChars: 2,
+							maxHeight: 400,
+							serviceUrl: el.data("autocompleteUrl"),
+							ajaxSettings: {
+			                    type: "GET",
+			                    dataType: "json"
+							},
+							noSuggestionNotice: "Ничего не найдено",
+							showNoSuggestionNotice: true,
+							formatResult: function(suggestion, currentValue) {
+								var strItem = "",
+									reg = new RegExp(currentValue, "gi");
 
-							strItem += '<div class="autocomplate-item">'
-											+ '<div class="autocomplate-item-name">' + itemName +
-											 '</div>'
-										+ '</div>';
-							return strItem;
+								itemName = suggestion.value.replace(reg, function(str) {
+									return "<b>" + str + "</b>";
+								});
 
-						},
-						onSelect: function(suggestion, element) {
+								strItem += '<div class="autocomplate-item">'
+												+ '<div class="autocomplate-item-name">' + itemName +
+												 '</div>'
+											+ '</div>';
+								return strItem;
+							},
+						});
 
-						}
-
-					});
+					})
 
 				},
 
@@ -1977,5 +2008,7 @@
 		SUNSOCHI.toggleElements();
 		SUNSOCHI.modalWindow.init();
 	};
+
+	window.SUNSOCHI = SUNSOCHI;
 
 })(jQuery);

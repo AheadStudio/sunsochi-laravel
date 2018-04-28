@@ -1,21 +1,15 @@
 <!DOCTYPE html>
-<html>
+<html lang="{{ app()->getLocale() }}">
 	<head>
 		<!--Meta-->
 		<meta charset="utf-8"/>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-		<meta name="description" content="Солнечный Сочи"/>
 		<meta name="robots" content="index, follow"/>
 		<!--//Meta-->
 
-		<!--Open graph-->
-		<meta property="og:type" content="website"/>
-		<meta property="og:title" content="Солнечный Сочи"/>
-		<meta property="og:site_name" content="Sun Sochi"/>
-		<meta property="og:description" content="Вся жилая и коммерческая недвижимость в Сочи с помощью в выборе и оформлении"/>
-		<meta property="og:url" content=""/>
-		<meta property="og:image" content=""/>
-		<!--//Open graph-->
+		<!-- SEO -->
+		{!! SEO::generate() !!}
+		<!-- //SEO -->
 
 		<!--Icons-->
 		<link href="{{ asset("i/favicon.ico") }}" rel="shortcut icon" type="image/x-icon"/>
@@ -26,10 +20,9 @@
 		<link href="../i/icons/apple-touch-icon-152.jpg" rel="apple-touch-icon" sizes="152x152"/>
 		<!--//Icons-->
 
-		<title></title>
-
 		<!-- CSRF Token -->
 		<meta name="csrf-token" content="{{ csrf_token() }}">
+		<!-- //CSRF Token -->
 
 		<!--CSS-->
 		<link rel="stylesheet" type="text/css" media="screen" href="{{ asset("css/plugins/magnific-popup.css") }}"/>
@@ -184,6 +177,7 @@
 		<script type="text/javascript" src="{{ asset("js/plugins/jquery.number.js") }}"></script>
 		<script type="text/javascript" src="{{ asset("js/plugins/ssm.min.js") }}"></script>
 		<script type="text/javascript" src="{{ asset("js/sunsochi.js") }}"></script>
+		<script type="text/javascript" src="{{ asset("js/app.js") }}"></script>
 		<!--//Sripts-->
 
 	</body>

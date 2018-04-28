@@ -2,21 +2,71 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
+
+use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Response;
 use Illuminate\Http\Request;
+
 use App\GoodCode\ParseCsv;
+use App\GoodCode\Helper;
+
+use App\Blog;
+
 use Session;
 use Excel;
 use File;
 
 class BlogController extends Controller
 {
-    public function list() {
-        $blogsInfo = \App\Blog::all();
-        return view("blog", ["blogsInfo" => $blogsInfo]);
+    // index page
+    public function index() {
+
+        // SEO information
+        Helper::setSEO("Блог", "Блог компании “Солнечный Сочи”", "http://sunsochi.goodcode.ru");
+
+        $blogsList = Blog::orderBy("date", "asc")->paginate(4);
+        $blogsPopular = Blog::orderBy("date", "asc")->where("popular", 1)->get();
+        $blogMaxViews = Blog::orderBy("views", "desc")->first();
+
+        foreach ($blogsList as $key => $val) {
+            $blogsList[$key]->date = Helper::convertDate($val->date);
+        }
+
+        $blogMaxViews->date = Helper::convertDate($blogMaxViews->date);
+
+        return view("blog-list", [
+            "blogList"      => $blogsList,
+            "blogPopular"   => $blogsPopular,
+            "blogMaxViews"  => $blogMaxViews,
+            "pageTitle"     => "Блог",
+        ]);
     }
 
+    // detail page
+    public function show($code) {
+        $blogItem = Blog::where("code", $code)->first();
+        if (!isset($blogItem)) {
+            return redirect(404);
+        }
+
+        // SEO information
+        Helper::setSEO($blogItem->name, "Блог компании “Солнечный Сочи”", "http://sunsochi.goodcode.ru");
+
+        $blogItem->date = Helper::convertDate($blogItem->date);
+
+        // views + 1
+        $countViews = Blog::where("code", $code)->increment("views", 1);
+
+        return view("blog-detail", [
+            "blogItem"          => $blogItem,
+            "blogItemSimilar"   => $blogItem,
+            "pageTitle"         => $blogItem->name
+        ]);
+
+    }
+
+    // import
     public function import() {
         return view("import", ["action" => route("BlogImportSend")]);
     }

@@ -6,7 +6,9 @@
             <div class="page-text">
                 <h1>{{ $pageTitle }}</h1>
                 <div class="developer-info">
-                    <img src="{{ $builderItem->logo }}" class="img img--left">
+                    @if (isset($builderItem->logo) && $builderItem->logo != "")
+                        <img src="{{ $builderItem->logo }}" class="img img--left">
+                    @endif
                     <div class="developer-info-text">
                         @php
                             echo html_entity_decode($builderItem->text);

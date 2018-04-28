@@ -1,20 +1,26 @@
 <?php
+
 namespace App\Http\Controllers;
 
-use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use App\GoodCode\ParseCsv;
 
-use \App\Builder;
-use \App\Catalog;
-use \App\CatalogsSection;
-use \App\CatalogsElement;
-use \App\ElementDirectory;
-use \App\District;
-use \App\Picture;
-use \App\NumberRoom;
-use \App\Deadline;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Redis;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Http\Request;
+
+use App\GoodCode\ParseCsv;
+use App\GoodCode\Helper;
+
+use App\Builder;
+use App\Catalog;
+use App\CatalogsSection;
+use App\CatalogsElement;
+use App\ElementDirectory;
+use App\District;
+use App\Picture;
+use App\NumberRoom;
+use App\Deadline;
 
 use Session;
 use Excel;
@@ -24,6 +30,14 @@ class BuildersController extends Controller
 {
     // index page
     public function index() {
+
+        // SEO information
+        Helper::setSEO(
+            "Застройщики Сочи, официальная информация о застройщиках в Сочи",
+            "Белый список застройщиков Сочи. Объекты и актуальная информация о скидках и акциях.",
+            "http://sunsochi.goodcode.ru"
+        );
+
         $finalArray = [];
         $builderList = Builder::orderBy("name", "asc")->get()->toArray();
 
@@ -43,13 +57,25 @@ class BuildersController extends Controller
     public function show($code) {
         $builderItem = Builder::where("code", $code)->first();
 
+        if (!isset($builderItem)) {
+            return redirect(404);
+        }
+
         $builderOffers = Catalog::select("id", "basic_section", "name", "code", "text_action", "price_from")
                                 ->where("developer_buildings", $builderItem->id)
                                 ->orderBy("active", "1")
                                 ->orderBy("name", "asc")
                                 ->paginate(6);
 
+        // SEO information
+        Helper::setSEO(
+            "Застройщик ".$builderItem->name." и информация о нем",
+            "Все новостройки от застройщика ".$builderItem->name." в Сочи - информация о ценах, планировках и документах на строительство.",
+            "http://sunsochi.goodcode.ru"
+        );
+
         if (!$builderOffers->isEmpty()) {
+
             foreach ($builderOffers as $keyOffers => $valOffers) {
 
                 if (!empty($valOffers) || isset($valOffers)) {
@@ -69,7 +95,10 @@ class BuildersController extends Controller
                                     ->first();
 
                     // get district(region) offers
-                    $districtProp = ElementDirectory::where("element_id", $valOffers->id)->where("name_field", "district")->first();
+                    $districtProp = ElementDirectory::where("element_id", $valOffers->id)
+                                                    ->where("name_field", "district")
+                                                    ->first();
+
                     if (isset($districtProp)) {
                         $district = District::select("name")
                                             ->where("code", $districtProp->code)
@@ -79,7 +108,9 @@ class BuildersController extends Controller
                     }
 
                     // get end of construction
-                    $deadlineProp = ElementDirectory::where("element_id", $valOffers->id)->where("name_field", "deadline")->first();
+                    $deadlineProp = ElementDirectory::where("element_id", $valOffers->id)
+                                                    ->where("name_field", "deadline")
+                                                    ->first();
                     if (isset($deadlineProp->code)) {
                         $deadline = Deadline::select("name")
                                             ->where("code", $deadlineProp->code)
@@ -88,15 +119,17 @@ class BuildersController extends Controller
                         $deadline->{"name"} = "";
                     }
 
-                    // get connected apartments
-                    $apartments = Catalog::select("id", "price")
-                                         ->where([
-                                            ["cottage_village", $valOffers->id],
-                                            ["price", ">", "0"],
-                                         ])
-                                         ->orderBy("price", "asc")
-                                         ->distinct()
-                                         ->get();
+                    //using Cache
+                    $apartments = Cache::remember("catalogApartments", 24*60, function() use(&$valOffers){
+                        return Catalog::select("id", "price")
+                                             ->where([
+                                                ["cottage_village", $valOffers->id],
+                                                ["price", ">", "0"],
+                                             ])
+                                             ->orderBy("price", "asc")
+                                             ->distinct()
+                                             ->get();
+                    });
 
                     $apartmnetItems = [];
 
@@ -106,7 +139,7 @@ class BuildersController extends Controller
                                                              ["name_field", "number_rooms"],
                                                           ])
                                                           ->first();
-                                                          
+
                         if (!empty($apartmentsProp->code) || isset($apartmentsProp->code)) {
                             $apartmentRooms = NumberRoom::where("code", $apartmentsProp->code)->first();
 
@@ -121,6 +154,7 @@ class BuildersController extends Controller
                                 }
                             }
 
+                            // convert array to object (for unification component)
                             $apartmnetItems = array_map(function($array){
                                 return (object)$array;
                             }, $apartmnetItems);
@@ -132,12 +166,12 @@ class BuildersController extends Controller
 
                     ksort($apartmnetItems);
 
-                    // create final obj
+                    // create final object
                     $builderOffers[$keyOffers]->{"photo"}       = $photo->path;
                     $builderOffers[$keyOffers]->{"district"}    = $district->name;
                     $builderOffers[$keyOffers]->{"deadline"}    = $deadline->name;
                     $builderOffers[$keyOffers]->{"apartments"}  = (object)$apartmnetItems;
-                    $builderOffers[$keyOffers]->{"path"}        = $catalogSection->code."/".$subSection->code."/".$valOffers->code;
+                    $builderOffers[$keyOffers]->{"path"}        = route("CatalogShow", [$catalogSection->code, $subSection->code, $valOffers->code]);
 
                 }
 

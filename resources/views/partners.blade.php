@@ -9,7 +9,9 @@
 				<div class="partners-list">
 					@foreach ($partnersList as $valPartnersList)
 						<div class="partners-item">
-							<div class="partners-holder"><img src="{{ $valPartnersList->logo }}" class="partners-img"></div>
+							@if (isset($valPartnersList->logo) && $valPartnersList->logo !="")
+								<div class="partners-holder"><img src="{{ $valPartnersList->logo }}" class="partners-img"></div>
+							@endif
 							<div class="partners-title">{{ $valPartnersList->name }}</div>
 							<div class="partners-text">{{ $valPartnersList->text }}</div>
 						</div>

@@ -753,7 +753,7 @@
             if (!value) {
                 return;
             }
-
+            
             $.each(that.suggestions, function (i, suggestion) {
                 var foundMatch = suggestion.value.toLowerCase().indexOf(value) === 0;
                 if (foundMatch) {
@@ -780,6 +780,7 @@
 
         verifySuggestionsFormat: function (suggestions) {
             // If suggestions is string array, convert them to supported format:
+
             if (suggestions.length && typeof suggestions[0] === 'string') {
                 return $.map(suggestions, function (value) {
                     return { value: value, data: null };

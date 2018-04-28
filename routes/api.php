@@ -13,6 +13,9 @@ use Illuminate\Http\Request;
 |
 */
 
-Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();
-});
+// blog API
+Route::get("/blog/", "ApiController@getBlog");
+Route::post("/blog/add-rating/", "ApiController@updateRating");
+
+// catalog API
+Route::get("/catalog/", "ApiController@getCatalog");

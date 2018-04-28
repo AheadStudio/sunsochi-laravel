@@ -22,7 +22,8 @@ Route::get("/news/{code}", "NewsController@show")->name("NewsShow");
 Route::get("/news/import/", "NewsController@import")->middleware("auth")->name("NewsImportIndex");
 Route::post("/news/import/send/", "NewsController@importHandler")->middleware("auth")->name("NewsImportSend");
 
-Route::get("/blog/", "BlogController@list")->name("BlogIndex");
+Route::get("/blog/", "BlogController@index")->name("BlogIndex");
+Route::get("/blog/{code}", "BlogController@show")->name("BlogShow");
 Route::get("/blog/import/", "BlogController@import")->middleware("auth")->name("BlogImportIndex");
 Route::post("/blog/import/send/", "BlogController@importHandler")->middleware("auth")->name("BlogImportSend");
 
@@ -51,6 +52,14 @@ Route::get("/contacts/", "ContactsController@index")->name("ContactsIndex");
 Route::get("/vacancies/", "VacanciesController@index")->name("VacanciesIndex");
 
 Route::get("/company/about/", "AboutController@index")->name("AboutIndex");
+
+Route::get("/company/", function () {
+    return redirect("/company/about/");
+})->name("CompanyIndex");
+
+Route::get("/about/", function () {
+    return redirect("/company/about/");
+})->name("CompanyIndex");
 
 //Route::get("/company/about/", ["uses" => "PageController@default", "arParams" => [
 //	"view" => "test"

@@ -12,9 +12,11 @@
 				<div class="employees-list">
 					<?php foreach ($valSection as $valTeam): ?>
 							<div class="employees-item">
-								<div class="employees-container">
-									<img src="{{ $valTeam["logo"]}}" class="employees-img">
-								</div>
+								@if (isset($valTeam["logo"]) && $valTeam["logo"] !== "")
+									<div class="employees-container">
+										<img src="{{ $valTeam["logo"]}}" class="employees-img">
+									</div>
+								@endif
 								<div class="employees-info">
 									<div class="employees-name">{{  $valTeam["name"] }}</div>
 									<div class="employees-position">{{  $valTeam["post"] }}</div>

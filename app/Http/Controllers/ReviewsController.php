@@ -1,25 +1,37 @@
 <?php
+
 namespace App\Http\Controllers;
 
-use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use App\GoodCode\ParseCsv;
 
-use \App\Review;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Request;
+
+use App\GoodCode\ParseCsv;
+use App\GoodCode\Helper;
+
+use App\Review;
 
 use Session;
 use Excel;
 use File;
 
+
 class ReviewsController extends Controller
 {
     // index page
     public function index() {
+        // SEO information
+        Helper::setSEO(
+            "Отзывы клиентов",
+            "Компания “Солнечный Сочи” занимается экспертным подбором недвижимости любых типов в городе-курорте Сочи, организовывая не только полное сопровождение сделки, но и предлагая инвестиционные проекты “под ключ”.",
+            "http://sunsochi.goodcode.ru"
+        );
+
         $reviewList = Review::orderBy("date", "asc")->paginate(3);
 
         foreach ($reviewList as $keyList => $valList) {
-            $finalText = self::splitText($valList->text, 50);
+            $finalText = Helper::splitText($valList->text, 50);
             $valList->textOther = $finalText[0];
             $valList->text = $finalText[1];
         }
@@ -31,23 +43,6 @@ class ReviewsController extends Controller
 
     }
 
-    // explode string by words
-    function splitText($text, $maxWords) {
-        $phraseArray = explode(' ', $text);
-        if(count($phraseArray) > $maxWords && $maxWords > 0) {
-            $phrase = implode(' ', array_slice($phraseArray, 0, $maxWords));
-        }
-
-        foreach ($phraseArray as $keyPhrase => $valPhrase) {
-            if ($keyPhrase <= $maxWords) {
-                unset($phraseArray[$keyPhrase]);
-            }
-        }
-        $phraseArray = implode(' ', $phraseArray);
-
-        return $finalString = [$phraseArray, $phrase, $text];
-
-    }
 
     // import page
     public function importHandler(Request $request) {

@@ -1,12 +1,16 @@
 <?php
+
 namespace App\Http\Controllers;
 
-use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use App\GoodCode\ParseCsv;
 
-use \App\News;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Request;
+
+use App\GoodCode\ParseCsv;
+use App\GoodCode\Helper;
+
+use App\News;
 
 use Session;
 use Excel;
@@ -16,7 +20,19 @@ class NewsController extends Controller
 {
     // index page
     public function index() {
+        // SEO information
+        Helper::setSEO(
+            "Новости",
+            "Компания “Солнечный Сочи” занимается экспертным подбором недвижимости любых типов в городе-курорте Сочи, организовывая не только полное сопровождение сделки, но и предлагая инвестиционные проекты “под ключ”.",
+            "http://sunsochi.goodcode.ru"
+        );
+
         $newsList = News::orderBy("date", "asc")->paginate(3);
+
+        foreach ($newsList as $key => $val) {
+            $newsList[$key]->date = Helper::convertDate($val->date);
+        }
+
         return view("news-list", [
             "newsList"  => $newsList,
             "pageTitle" => "Новости"
@@ -26,6 +42,20 @@ class NewsController extends Controller
     // detail page
     public function show($code) {
         $newsItem = News::where("code", $code)->first();
+        if (!isset($newsItem)) {
+            return redirect(404);
+        }
+
+        // SEO information
+        Helper::setSEO(
+            $newsItem->name,
+            "Новости компании “Солнечный Сочи”",
+            "http://sunsochi.goodcode.ru"
+        );
+
+
+        $newsItem->date = Helper::convertDate($newsItem->date);
+
         return view("news-detail", [
             "newsItem"  => $newsItem,
             "pageTitle" => $newsItem->name

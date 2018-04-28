@@ -1,12 +1,16 @@
 <?php
+
 namespace App\Http\Controllers;
 
-use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use App\GoodCode\ParseCsv;
 
-use \App\Team;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Request;
+
+use App\GoodCode\ParseCsv;
+use App\GoodCode\Helper;
+
+use App\Team;
 
 use Session;
 use Excel;
@@ -15,15 +19,29 @@ use File;
 class TeamController extends Controller
 {
     public function index() {
+        // SEO information
+        Helper::setSEO(
+            "Команда",
+            "Компания “Солнечный Сочи” занимается экспертным подбором недвижимости любых типов в городе-курорте Сочи, организовывая не только полное сопровождение сделки, но и предлагая инвестиционные проекты “под ключ”.",
+            "http://sunsochi.goodcode.ru"
+        );
+
         $finalArray = [];
-        $teamList = Team::orderBy("section", "asc")->get()->toArray();
+
+        $teamList = Team::where("active", "1")
+                        ->orderBy("section", "asc")
+                        ->get()
+                        ->toArray();
+
         foreach ($teamList as $keyTeamList => $valTeamList) {
             $finalArray[$valTeamList["section"]][] = $teamList[$keyTeamList];
         }
+
         return view("team-list", [
             "teamList"  => $finalArray,
             "pageTitle" => "Сотрудники"
         ]);
+
     }
 
     public function import() {
