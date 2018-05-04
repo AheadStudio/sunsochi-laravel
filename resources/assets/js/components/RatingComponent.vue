@@ -9,32 +9,47 @@
         data: function() {
     		return {
                 params: {
-                    read: this.rating.read,
-                    value: Number(this.rating.value),
-                    voted: Number(this.rating.voted),
-                    summ: Number(this.rating.summ),
-                    code: this.rating.code,
+                    read: "",
+                    value: "",
+                    voted: "",
+                    summ: "",
+                    code: "",
                 },
                 ratingValue: null,
                 checkCookie: null,
     		}
     	},
         props: ["rating"],
+        created: function () {
+            var self = this;
+            self.params.read = self.rating.read;
+            self.params.value = Number(self.rating.value);
+            self.params.voted = Number(self.rating.voted);
+            self.params.summ = Number(self.rating.summ);
+            self.params.code = self.rating.code;
+
+            self.checkCookie = this.$cookie.get("sunsochi-rating");
+
+            if (self.checkCookie) {
+                self.params.read = true;
+            }
+        },
         methods: {
             setEvent: function(componentTpl) {
                 var self = this,
                     $ratingInput = componentTpl.find("img");
 
+                if (self.params.read) {
+                    return;
+                }
+
                 $ratingInput.on("click", function() {
                     var $el = $(this);
 
-                    if (self.params.read == false && !self.checkCookie) {
-                        self.ratingValue = Number(componentTpl.find('[name=result-blog-rating]').val());
+                    self.ratingValue = Number(componentTpl.find('[name=result-blog-rating]').val());
+                    self.changeRating();
 
-                        self.changeRating();
-                    } else {
-                        console.log("Вы уже проголосовали!");
-                    }
+                    self.$cookie.set("sunsochi-rating", true, {expires: 24*30*365, domain: "localhost"});
                 });
 
             },
@@ -55,9 +70,8 @@
                         self.params.summ = data.summ;
                         self.params.voted = data.voted;
                         self.params.value = data.rating;
+                        self.params.read = true;
                     }
-                    console.log("Ваш голос учтен");
-                    self.$cookie.set("sunsochi-rating", true, {expires: 365, domain: "/"});
                 });
 
             }
@@ -65,8 +79,6 @@
         mounted: function() {
             var self = this,
                 componentTpl = $(this.$el);
-
-            self.checkCookie = self.$cookie.get("sunsochi-rating");
 
             SUNSOCHI.forms.rating.init();
 
@@ -78,11 +90,13 @@
         updated: function() {
             var self = this,
                 componentTpl = $(this.$el);
-
+                
             SUNSOCHI.forms.rating.destroy();
-            SUNSOCHI.forms.rating.init();
 
             self.$nextTick(function () {
+                setTimeout(function() {
+                    SUNSOCHI.forms.rating.init();
+                }, 400);
                 self.setEvent(componentTpl);
             });
         }

@@ -41,53 +41,124 @@ class CatalogController extends Controller
 
     // section page
     public function section(Request $request, $section) {
+        // main array, which contain all params
         $pageParams = [];
+
+        // array sections which belong to elements
+        $arSections = [];
+
+        // check catalog page
 	    switch ($section) {
             case "novostrojki":
+                $mainSectionId = 51;
                 $pageParams["pageTitle"] = "Новостройки Сочи и Адлера";
                 $pageParams["pageTabs"] = ["Вcе объекты проверены", "Квартиры<br>от 900 тысяч<br>рублей", "Гарантия цены<br>застройщика"];
                 $pageParams["pageImage"] = "/dummy/new-bildings.jpg";
                 break;
         }
 
-        $pageParams["district"] = Cache::remember("catalogDistrict", 24*60, function() {
-            return District::select("code", "name")->get();
+        // get district
+        $pageParams["district"] = Cache::remember("catalogDistrict", 60, function() {
+            return District::select("id", "code", "name")->get();
+        });
+        // get deadline
+        $pageParams["deadline"] = Cache::remember("catalogDeadline", 60, function() {
+            return Deadline::select("id", "code", "name")->get();
+        });
+        // all section
+        $allSection = Cache::remember("catalogAllSection", 60*3, function() {
+            return CatalogsSection::all();
         });
 
+        // fields
         $inputs = $request->all();
 
         if (!empty($inputs)) {
-            // get sections which belong to elements
-            $arSections = [];
+            // array fields
+            $arFields = [];
 
-            if (isset($inputs["novostroyki_v_sochi_po_fz_214"]) && $inputs["novostroyki_v_sochi_po_fz_214"] == "on") {
-                $result = CatalogsSection::where("code", "novostroyki_v_sochi_po_fz_214")->first();
-                $dataRequest[] = ["parent_id", $result->id];
-            }
-            if (isset($inputs["sdannye_novostroyki_v_sochi"]) && $inputs["sdannye_novostroyki_v_sochi"] == "on") {
-                $result = CatalogsSection::where("code", "sdannye_novostroyki_v_sochi")->first();
-                $dataRequest[] = ["parent_id", $result->id];
-            }
-            if (isset($inputs["novostroyki_pod_ipoteku"]) && $inputs["novostroyki_pod_ipoteku"] == "on") {
-                $result = CatalogsSection::where("code", "novostroyki_pod_ipoteku")->first();
-                $dataRequest[] = ["parent_id", $result->id];
-            }
-            if (isset($inputs["novostroyki_u_morya"]) && $inputs["novostroyki_u_morya"] == "on") {
-                $result = CatalogsSection::where("code", "novostroyki_u_morya")->first();
-                $dataRequest[] = ["parent_id", $result->id];
+            // select district
+            $selDistrict = [];
+
+            foreach ($inputs as $keyInput => $valInput) {
+                $nameSection = explode("|", $keyInput);
+
+                if ($nameSection[0] == "section") {
+                    $result = CatalogsSection::where("code", $nameSection[1])->first();
+                    $arSections[] = $result->id;
+                    continue;
+                }
+
+                if(strripos($keyInput, "min") != false) {
+                    $arFields[] = [$keyInput, ">", (int)str_replace(" ", "", $valInput)];
+                    continue;
+                }
+                if(strripos($keyInput, "max") != false) {
+                    $arFields[] = [$keyInput, "<", (int)str_replace(" ", "", $valInput)];
+                    continue;
+                }
+                if ($nameSection[0] == "district") {
+                    $selDistrict[] = $nameSection[1];
+                    continue;
+                }
+                if ($keyInput == "page") {
+                    continue;
+                }
+                $arFields[] = [$keyInput, $value = $valInput == "on" ? "1" : $valInput];
+
             }
 
-            if (!empty($dataRequest)) {
-                $idElements = CatalogsElement::where("parent_id", $dataRequest[0][1])
-                                             ->take(5)
-                                             ->get();
+            // create query
+            $QUERY = "(SELECT element_id FROM (
+                               SELECT element_id, count(element_id) as sections
+                               FROM catalogs_elements
+                               WHERE parent_id in ({section})
+                               GROUP BY element_id
+                           ) as s1
+                           WHERE (s1.sections {countSection})
+                           AND
+                           s1.element_id in (
+                               SELECT element_id FROM element_directories WHERE code in ('{district}')
+                           )
+                       )";
+
+            // get section
+            if (empty($arSections)) {
+                $arSections = CatalogsSection::where("parent_id", $mainSectionId)->get();
+
+                foreach ($arSections as $valSection) {
+                    $arrSectionsId[] =  $valSection->id;
+                }
+                // convert section array in string
+                $strSections = implode(", ", $arrSectionsId);
+                $arSectionsCount = "LIKE '%'";
+            } else {
+                $strSections = implode(", ", $arSections);
+                $arSectionsCount = " = ". count($arSections);
             }
 
-            $elements = Catalog::select("id", "basic_section", "name", "code", "text_action", "price_from")
-                                  ->where("basic_section", $dataRequest[0][1])
-                                  ->orderBy("active", "1")
-                                  ->orderBy("name", "asc")
-                                  ->paginate(6);
+            $QUERY = str_replace("{section}", $strSections, $QUERY);
+            $QUERY = str_replace("{countSection}", $arSectionsCount, $QUERY);
+
+            //get district
+            if (empty($selDistrict)) {
+                foreach ($pageParams["district"] as $valDistrict) {
+                    $selDistrict[] = $valDistrict->code;
+                }
+                $strDistrict = implode("', '", $selDistrict);
+            } else {
+                $strDistrict = implode("', '", $selDistrict);
+            }
+
+            $QUERY = str_replace("{district}", $strDistrict, $QUERY);
+
+            $elements = Catalog::select("id", "basic_section", "name", "code", "text_action", "price_min")
+                               ->whereRaw("id in ". $QUERY. "")
+                               ->where($arFields)
+                               ->orderBy("active", "1")
+                               ->orderBy("name", "asc")
+                               ->paginate(9)
+                               ->appends(request()->query());
 
             if ($elements) {
 
@@ -95,50 +166,53 @@ class CatalogController extends Controller
 
                     if (!empty($valOffers) || isset($valOffers)) {
 
-                        // get section offers
-                        $subSection = CatalogsSection::select("parent_id", "code")
-                                                     ->where("id", $valOffers->basic_section)
-                                                     ->first();
-
-                        $catalogSection = CatalogsSection::select("code")
-                                                         ->where("id", $subSection->parent_id)
-                                                         ->first();
+                        foreach ($allSection as $keyAllSection => $valAllSection) {
+                            if ($valAllSection->id == $valOffers->basic_section) {
+                                $subSection = $valAllSection;
+                            }
+                        }
+                        foreach ($allSection as $keyAllSection => $valAllSection) {
+                            if ($valAllSection->id == $subSection->parent_id) {
+                                $catalogSection = $valAllSection;
+                            }
+                        }
 
                         // get photo offers
                         $photo = Picture::select("path")
                                         ->where("element_id", $valOffers->id)
                                         ->first();
 
-                        // get district(region) offers
-                        $districtProp = ElementDirectory::where("element_id", $valOffers->id)
-                                                        ->where("name_field", "district")
-                                                        ->first();
+                        $props = ElementDirectory::where("element_id", $valOffers->id)->get();
+
                         $district = new \stdClass();
-
-                        if (isset($districtProp)) {
-                            $district = District::select("name")
-                                                ->where("code", $districtProp->code)
-                                                ->first();
-                        } else {
-                            $district->{"name"} = "";
-                        }
-
                         $deadline = new \stdClass();
 
-                        // get end of construction
-                        $deadlineProp = ElementDirectory::where("element_id", $valOffers->id)
-                                                        ->where("name_field", "deadline")
-                                                        ->first();
-                        if (isset($deadlineProp->code)) {
-                            $deadline = Deadline::select("name")
-                                                ->where("code", $deadlineProp->code)
-                                                ->first();
-                        } else {
-                            $deadline->{"name"} = "";
+                        // dedline and district
+                        foreach ($props as $keyProps => $valProps) {
+                            if ($valProps->name_field == "district") {
+                                foreach ($pageParams["district"] as $valParams) {
+                                    if ($valParams->code == $valProps->code) {
+                                        $district->{"name"} = $valParams->name;
+                                        break;
+                                    } else {
+                                        $district->{"name"} = "";
+                                    }
+                                }
+                            }
+                            if ($valProps->name_field == "deadline") {
+                                foreach ($pageParams["deadline"] as $valParams) {
+                                    if ($valParams->code == $valProps->code) {
+                                        $deadline->{"name"} = $valParams->name;
+                                        break;
+                                    } else {
+                                        $deadline->{"name"} = "";
+                                    }
+                                }
+                            }
                         }
 
                         //using Cache
-                        $apartments = Cache::remember("catalogApartments", 24*60, function() use(&$valOffers){
+                        $apartments = Cache::remember("catalogApartments", 24*60, function() use(&$valOffers) {
                             return Catalog::select("id", "price")
                                                  ->where([
                                                     ["cottage_village", $valOffers->id],
@@ -148,7 +222,6 @@ class CatalogController extends Controller
                                                  ->distinct()
                                                  ->get();
                         });
-
                         $apartmnetItems = [];
 
                         foreach ($apartments as $keyApartment => $valApartment) {
@@ -191,6 +264,7 @@ class CatalogController extends Controller
                         } else {
                             $valOffers->{"photo"} = "";
                         }
+
                         $elements[$keyOffers]->{"district"}    = $district->name;
                         $elements[$keyOffers]->{"deadline"}    = $deadline->name;
                         $elements[$keyOffers]->{"apartments"}  = (object)$apartmnetItems;
@@ -203,7 +277,143 @@ class CatalogController extends Controller
             }
 
             $pageParams["offers"] = $elements;
+            $pageParams["countOffers"] = $elements->total();
 
+        } else {
+            $arSections = CatalogsSection::where("parent_id", $mainSectionId)->get();
+
+            foreach ($arSections as $valSection) {
+                $arrSectionsId[] =  $valSection->id;
+            }
+            $arElements = CatalogsElement::select("element_id")
+                                           ->whereIn("parent_id", $arrSectionsId)
+                                           ->take(45)
+                                           ->distinct()
+                                           ->get();
+
+            foreach ($arElements as $valElements) {
+                $arElementsId[] = $valElements->element_id;
+            }
+            $elements = Catalog::select("id", "basic_section", "name", "code", "text_action", "price_min")
+                               ->whereIn("id", $arElementsId)
+                               ->paginate(9);
+
+            if ($elements) {
+
+                foreach ($elements as $keyOffers => $valOffers) {
+                    if (!empty($valOffers) || isset($valOffers)) {
+
+                        foreach ($allSection as $keyAllSection => $valAllSection) {
+                            if ($valAllSection->id == $valOffers->basic_section) {
+                                $subSection = $valAllSection;
+                            }
+                        }
+                        foreach ($allSection as $keyAllSection => $valAllSection) {
+                            if ($valAllSection->id == $subSection->parent_id) {
+                                $catalogSection = $valAllSection;
+                            }
+                        }
+
+                        // get photo offers
+                        $photo = Picture::select("path")
+                                        ->where("element_id", $valOffers->id)
+                                        ->first();
+
+                        $props = ElementDirectory::where("element_id", $valOffers->id)->get();
+
+                        $district = new \stdClass();
+                        $deadline = new \stdClass();
+                        // dedline and district
+                        foreach ($props as $keyProps => $valProps) {
+                            if ($valProps->name_field == "district") {
+                                foreach ($pageParams["district"] as $valParams) {
+                                    if ($valParams->code == $valProps->code) {
+                                        $district->{"name"} = $valParams->name;
+                                        break;
+                                    } else {
+                                        $district->{"name"} = "";
+                                    }
+                                }
+                            }
+                            if ($valProps->name_field == "deadline") {
+                                foreach ($pageParams["deadline"] as $valParams) {
+                                    if ($valParams->code == $valProps->code) {
+                                        $deadline->{"name"} = $valParams->name;
+                                        break;
+                                    } else {
+                                        $deadline->{"name"} = "";
+                                    }
+                                }
+                            }
+                        }
+
+                        //using Cache
+                        $apartments = Cache::remember("catalogApartments", 24*60, function() use(&$valOffers) {
+                            return Catalog::select("id", "price")
+                                                 ->where([
+                                                    ["cottage_village", $valOffers->id],
+                                                    ["price", ">", "0"],
+                                                 ])
+                                                 ->orderBy("price", "asc")
+                                                 ->distinct()
+                                                 ->get();
+                        });
+                        $apartmnetItems = [];
+
+                        foreach ($apartments as $keyApartment => $valApartment) {
+                            $apartmentsProp = ElementDirectory::where([
+                                                                 ["element_id", $valApartment->id],
+                                                                 ["name_field", "number_rooms"],
+                                                              ])
+                                                              ->first();
+
+                            if (!empty($apartmentsProp->code) || isset($apartmentsProp->code)) {
+                                $apartmentRooms = NumberRoom::where("code", $apartmentsProp->code)->first();
+
+                                // verification of existence apartments
+                                if(!isset($apartmnetItems[$apartmentRooms->name])) {
+                                    $apartmnetItems[$apartmentRooms->name] = Array(
+                                        "price" => $valApartment->price
+                                    );
+                                } else {
+                                    if($apartmnetItems[$apartmentRooms->name]->price > $valApartment->price) {
+                                        $apartmnetItems[$apartmentRooms->name]->price = $valApartment->price;
+                                    }
+                                }
+
+                                // convert array to object (for unification component)
+                                $apartmnetItems = array_map(function($array){
+                                    return (object)$array;
+                                }, $apartmnetItems);
+
+                            } else {
+                                $apartmnetItems = [];
+                            }
+                        }
+
+                        ksort($apartmnetItems);
+
+
+                        // create final object
+                        if (isset($photo->path)) {
+                            $valOffers->{"photo"} = $photo->path;
+                        } else {
+                            $valOffers->{"photo"} = "";
+                        }
+
+                        $elements[$keyOffers]->{"district"}    = $district->name;
+                        $elements[$keyOffers]->{"deadline"}    = $deadline->name;
+                        $elements[$keyOffers]->{"apartments"}  = (object)$apartmnetItems;
+                        $elements[$keyOffers]->{"path"}        = route("CatalogShow", [$catalogSection->code, $subSection->code, $valOffers->code]);
+
+                    }
+
+                }
+
+            }
+
+            $pageParams["offers"] = $elements;
+            $pageParams["countOffers"] = $elements->total();
         }
 
 	    return view("catalog/section", $pageParams);
@@ -559,8 +769,8 @@ class CatalogController extends Controller
                  "text_action"          => $textAction = empty($valParseCatalog["PROMO_TEXT"]) ? null : $valParseCatalog["PROMO_TEXT"],
                  "street"               => $street = empty($addStreet->id) ? null : $addStreet->id,
                  "status_sale"          => $status = empty($addStatus->id) ? null : $addStatus->id,
-                 "price_from"           => $price_from = empty($valParseCatalog["PRICE_FULL"]) ? null : $valParseCatalog["PRICE_FULL"],
-                 "price_to"             => $price_to = empty($valParseCatalog["PRICE2"]) ? null : $valParseCatalog["PRICE2"],
+                 "price_min"           => $price_from = empty($valParseCatalog["PRICE_FULL"]) ? null : $valParseCatalog["PRICE_FULL"],
+                 "price_max"             => $price_to = empty($valParseCatalog["PRICE2"]) ? null : $valParseCatalog["PRICE2"],
                  "number_houses"        => $number_houses = empty($valParseCatalog["VSEGO_DOMOV"]) ? null : $valParseCatalog["VSEGO_DOMOV"],
                  "number_apartments"    => $number_houses = empty($valParseCatalog["VSEGO_KVARTIR"]) ? null : $valParseCatalog["VSEGO_KVARTIR"],
                  "cost_service"         => $cost_service = empty($valParseCatalog["STOIMOST_OBSLUZHIVANIYA"]) ? null : $valParseCatalog["STOIMOST_OBSLUZHIVANIYA"],

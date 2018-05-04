@@ -35,8 +35,18 @@ class BlogController extends Controller
 
         $blogMaxViews->date = Helper::convertDate($blogMaxViews->date);
 
+        $pagination = [
+            'total' => $blogsList->total(),
+            'per_page' => $blogsList->perPage(),
+            'current_page' => $blogsList->currentPage(),
+            'last_page' => $blogsList->lastPage(),
+            'from' => $blogsList->firstItem(),
+            'to' => $blogsList->lastItem()
+        ];
+
         return view("blog-list", [
             "blogList"      => $blogsList,
+            "blogPagination"=> json_encode($pagination),
             "blogPopular"   => $blogsPopular,
             "blogMaxViews"  => $blogMaxViews,
             "pageTitle"     => "Блог",

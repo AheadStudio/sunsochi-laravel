@@ -2703,7 +2703,8 @@ body.open-menu .page-header .mobile-favorites {
   transform: translateX(0);
 }
 .form .jcf-range-track .jcf-range-handle.jcf-active-handle .jcf-range-count .jcf-range-count-number{
-    background: #e3e3e3;
+    background: #b4eeff;
+    border-radius: 5px;
 }
 .form .jcf-range-track .jcf-range-handle .jcf-range-count .jcf-range-count-number svg {
   position: absolute;
@@ -3173,6 +3174,9 @@ body.open-menu .page-header .mobile-favorites {
 }
 .offers-item .offers-information .offers-name {
   display: block;
+  padding-right: 75px;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
   margin-bottom: 10px;
   font-size: 20px;
   line-height: 20px;

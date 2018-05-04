@@ -469,7 +469,7 @@
 
 								var $fakeInputMin = $jcfContainer.find("[data-fake-min]");
 								var $fakeInputMax = $jcfContainer.find("[data-fake-max]");
-								
+
 								$fakeInputMin.val(startFrom);
 								$fakeInputMax.val(finishTo);
 
@@ -574,7 +574,7 @@
 										$checkboxRemove;
 
 									if ($el.hasClass("select")) {
-										$checkboxRemove = $container.find(".filter-selected-regions-item[data-regname='"+name+"']");
+										$checkboxRemove = $container.find(".filter-selected-regions-item[data-regname*='"+name+"']");
 
 										$el.removeClass("select");
 										$checkboxRemove.remove();
@@ -751,7 +751,6 @@
 								if (!elRead || elRead == "") {
 									elRead = false;
 								}
-
 								el.raty({
 									score: elScore,
 									number: 5,
@@ -771,7 +770,15 @@
 								el.raty("destroy");
 							})($(this))
 						})
-					}
+					},
+					reload:  function() {
+						var $rating = $("[data-rating]");
+						$rating.each(function() {
+							(function(el) {
+								el.raty("reload");
+							})($(this))
+						})
+					},
 				},
 
 				validate: {
@@ -1149,7 +1156,12 @@
 					var $linkAddress = $(this),
 						href = $linkAddress.attr("href"),
 						selector = $linkAddress.data("itemsselector"),
+						ajaxOn = $linkAddress.data("ajax"),
 						$container = $($linkAddress.data("container"));
+
+					if (ajaxOn == false) {
+						return;
+					}
 
 					if ($linkAddress.hasClass("loading")) {
 						return false;
@@ -1923,6 +1935,7 @@
 					var self = this;
 
 					self.$elements = $("[data-autocomplete='true']");
+
 					self.start();
 				},
 

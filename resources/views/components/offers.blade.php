@@ -15,7 +15,7 @@
                         </div>
                     @endif
                     <img src="{{ $valOffers->photo }}" alt class="offers-container-img">
-                    <div class="offers-container-price">{{ number_format($valOffers->price_from, 0, " ", " ") }} <span class="rub">i</span></div>
+                    <div class="offers-container-price">{{ number_format($valOffers->price_min, 0, " ", " ") }} <span class="rub">i</span></div>
                 </div>
                 <div class="offers-information">
                     <div class="page-text">

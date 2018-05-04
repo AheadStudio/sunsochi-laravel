@@ -34,7 +34,7 @@
                 <div data-filter-item="filter_reset" class="filter-item">
                     <form action="#" class="form form-filter">
                       <div class="filter-selected-regions-list"></div>
-                      <button type="submit" data-filter-button-tpl="Показать {0} обектов" class="button button--orange-flood filter-submit">Показать 11 356 объектов</button>
+                      <button type="submit" data-filter-button-tpl="Показать {0} обектов" class="button button--orange-flood filter-submit">Показать объекты</button>
                     </form>
                 </div>
                 <div data-filter-item="filter_1" class="filter-item">
@@ -43,19 +43,19 @@
                             <div class="form-row-100">
                                 <div class="form-holder">
                                     <label class="form-label">
-                                        <input type="checkbox" name="novostroyki_v_sochi_po_fz_214" class="form-item form-item--checkbox"><span class="form-item-checkbox-title">ФЗ-214</span>
+                                        <input type="checkbox" name="section|novostroyki_v_sochi_po_fz_214" class="form-item form-item--checkbox"><span class="form-item-checkbox-title">ФЗ-214</span>
                                     </label>
                                     <label class="form-label">
-                                        <input type="checkbox" name="sdannye_novostroyki_v_sochi" class="form-item form-item--checkbox"><span class="form-item-checkbox-title">Сданные</span>
+                                        <input type="checkbox" name="section|sdannye_novostroyki_v_sochi" class="form-item form-item--checkbox"><span class="form-item-checkbox-title">Сданные</span>
                                     </label>
                                     <label class="form-label">
-                                        <input type="checkbox" name="novostroyki_pod_ipoteku" class="form-item form-item--checkbox"><span class="form-item-checkbox-title">Ипотека</span>
+                                        <input type="checkbox" name="section|novostroyki_pod_ipoteku" class="form-item form-item--checkbox"><span class="form-item-checkbox-title">Ипотека</span>
                                     </label>
                                     <label class="form-label">
                                         <input type="checkbox" name="military_mortgage" class="form-item form-item--checkbox"><span class="form-item-checkbox-title">Военная ипотека</span>
                                     </label>
                                     <label class="form-label">
-                                        <input type="checkbox" name="novostroyki_u_morya" class="form-item form-item--checkbox"><span class="form-item-checkbox-title">Близость к морю</span>
+                                        <input type="checkbox" name="section|novostroyki_u_morya" class="form-item form-item--checkbox"><span class="form-item-checkbox-title">Близость к морю</span>
                                     </label>
                                 </div>
                             </div>
@@ -64,13 +64,13 @@
                             <div class="form-row-50">
                                 <div class="form-item-title">Площадь</div>
                                 <div class="form-holder">
-                                    <input type="range" multiple="" data-name-input="area" value="20,100" min="10" max="150" step="10" data-valfrom="" data-valto="" data-valtext="&amp;thinsp;м&lt;sup&gt;2&lt;/sup&gt;" class="form-item form-item--range">
+                                    <input type="range" multiple="" data-name-input="area_ap" value="20,650" min="20" max="650" step="10" data-valfrom="" data-valto="" data-valtext="&amp;thinsp;м&lt;sup&gt;2&lt;/sup&gt;" class="form-item form-item--range">
                                 </div>
                             </div>
                             <div class="form-row-50">
                                 <div class="form-item-title">Цена</div>
                                 <div class="form-holder">
-                                    <input type="range" multiple="" data-name-input="price" value="10000000,50000000" min="700000" max="100000000" step="1000" data-valfrom="" data-valto="" data-valtext="&amp;thinsp; м&lt;sup&gt;2&lt;/sup&gt;" class="form-item form-item--range">
+                                    <input type="range" multiple="" data-name-input="price" value="800000,180000000" min="800000" max="180000000" step="1000" data-valfrom="" data-valto="" data-valtext="&amp;thinsp; м&lt;sup&gt;2&lt;/sup&gt;" class="form-item form-item--range">
                                 </div>
                             </div>
                         </div>
@@ -732,11 +732,12 @@
                                 <a href="#" class="link link-blue link-blue--bottom popular-item-link">Ценр Сочи</a>
                                 <a href="#" class="link link-blue link-blue--bottom popular-item-link">Красная поляна</a>
                                 <a href="#" class="link link-blue link-blue--bottom popular-item-link">Мамайка</a>
-                                <a href="#" class="link link-blue link-blue--bottom popular-item-link">Хоста</a></div>
+                                <a href="#" class="link link-blue link-blue--bottom popular-item-link">Хоста</a>
+                            </div>
                         </div>
                     </div>
                     <div class="find-result">
-                        <div class="find-result-text">По вашим параметрам найдено обектов: 43</div>
+                        <div class="find-result-text">По вашим параметрам найдено обектов: {{$countOffers}}</div>
                         <form action="#" class="find-result-form">
                             <select placeholder="Сортировка" class="find-result-select">
                                 <option value="" selected class="disabled">Сортировка</option>
