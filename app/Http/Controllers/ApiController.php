@@ -29,7 +29,6 @@ class ApiController extends Controller
         // method for get matches (autocomplate)
         public function getBlog(Request $request) {
             $resultRestonse = [];
-
             $requestFormat = trim(strip_tags($request["query"]));
 
             $blogItems = Blog::where([

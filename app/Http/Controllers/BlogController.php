@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
+
 use Illuminate\Http\Response;
 use Illuminate\Http\Request;
 
@@ -25,9 +27,24 @@ class BlogController extends Controller
         // SEO information
         Helper::setSEO("Блог", "Блог компании “Солнечный Сочи”", "http://sunsochi.goodcode.ru");
 
-        $blogsList = Blog::orderBy("date", "asc")->paginate(4);
-        $blogsPopular = Blog::orderBy("date", "asc")->where("popular", 1)->get();
-        $blogMaxViews = Blog::orderBy("views", "desc")->first();
+        // main query
+        $blogsQuery = Blog::orderBy("views", "desc")
+                          ->orderBy("date", "asc");
+
+        // get popular blog item and add cache
+        $blogsPopular = Cache::remember("blogsPopular", 24*60, function() use(&$blogsQuery) {
+            return $blogsQuery->where("popular", 1)->get();
+        });
+
+        // get max views blog item and add cache
+        $blogMaxViews = Cache::remember("blogsMaxView", 24*60, function() use(&$blogsQuery) {
+            return $blogsQuery->first();
+        });
+
+        // get all glog item and add cashe
+        $blogsList = Cache::remember("blogsList", 24*60, function() use(&$blogsQuery) {
+            return $blogsQuery->paginate(4);
+        });
 
         foreach ($blogsList as $key => $val) {
             $blogsList[$key]->date = Helper::convertDate($val->date);
@@ -35,14 +52,12 @@ class BlogController extends Controller
 
         $blogMaxViews->date = Helper::convertDate($blogMaxViews->date);
 
+        /* for vue pagination
         $pagination = [
             'total' => $blogsList->total(),
-            'per_page' => $blogsList->perPage(),
             'current_page' => $blogsList->currentPage(),
             'last_page' => $blogsList->lastPage(),
-            'from' => $blogsList->firstItem(),
-            'to' => $blogsList->lastItem()
-        ];
+        ];*/
 
         return view("blog-list", [
             "blogList"      => $blogsList,
@@ -56,9 +71,18 @@ class BlogController extends Controller
     // detail page
     public function show($code) {
         $blogItem = Blog::where("code", $code)->first();
+
         if (!isset($blogItem)) {
             return redirect(404);
         }
+
+        $blogItemSimularId = $blogItem->similar()
+                                        ->get()
+                                        ->pluck("element_id");
+
+        $blogItemSimular = Blog::whereIn("id", $blogItemSimularId)
+                                ->orderBy("views", "desc")
+                                ->get();
 
         // SEO information
         Helper::setSEO($blogItem->name, "Блог компании “Солнечный Сочи”", "http://sunsochi.goodcode.ru");
@@ -70,7 +94,7 @@ class BlogController extends Controller
 
         return view("blog-detail", [
             "blogItem"          => $blogItem,
-            "blogItemSimilar"   => $blogItem,
+            "blogItemSimilar"   => $blogItemSimular,
             "pageTitle"         => $blogItem->name
         ]);
 

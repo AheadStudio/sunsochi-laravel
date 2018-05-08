@@ -39,6 +39,7 @@
                 </div>
                 <div data-filter-item="filter_1" class="filter-item">
                     <form action="" method="get" class="form form-filter">
+                        <input type="hidden" name="token" value="{{ Session::token() }}" />
                         <div class="form-row">
                             <div class="form-row-100">
                                 <div class="form-holder">

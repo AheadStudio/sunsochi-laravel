@@ -42,7 +42,7 @@
 						<!-- #component vue path:resources/assets/js/components/RatingComponent >
 						<rating-component :rating='{"read" : false, "value" : "{{$blogMaxViews->rating}}", "voted" : "{{ $blogMaxViews->voted }}", "summ" : "{{ $blogMaxViews->summ_rating }}", "code": "{{ $blogMaxViews->code }}"}'></rating-component>
 						< component vue# -->
-						<div data-rating data-rating-value="{{$blogMaxViews->rating}}" data-rating-read="false" class="blog-rating"></div>
+						<div data-rating data-rating-value="{{$blogMaxViews->rating}}" data-rating-read="false" data-rating-params='{"voted" : "{{ $blogMaxViews->voted }}", "summ" : "{{ $blogMaxViews->summ_rating }}", "code": "{{ $blogMaxViews->code }}"}' class="blog-rating"></div>
 
 					</div>
 					<div class="blog-text">{!! $blogMaxViews->detail_text !!}</div>

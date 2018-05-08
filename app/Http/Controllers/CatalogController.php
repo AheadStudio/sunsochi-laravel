@@ -61,10 +61,12 @@ class CatalogController extends Controller
         $pageParams["district"] = Cache::remember("catalogDistrict", 60, function() {
             return District::select("id", "code", "name")->get();
         });
+
         // get deadline
         $pageParams["deadline"] = Cache::remember("catalogDeadline", 60, function() {
             return Deadline::select("id", "code", "name")->get();
         });
+
         // all section
         $allSection = Cache::remember("catalogAllSection", 60*3, function() {
             return CatalogsSection::all();
@@ -73,7 +75,9 @@ class CatalogController extends Controller
         // fields
         $inputs = $request->all();
 
-        if (!empty($inputs)) {
+        if (!empty($inputs) && isset($inputs["token"])) {
+            unset($inputs["token"]);
+            
             // array fields
             $arFields = [];
 
@@ -160,258 +164,21 @@ class CatalogController extends Controller
                                ->paginate(9)
                                ->appends(request()->query());
 
-            if ($elements) {
 
-                foreach ($elements as $keyOffers => $valOffers) {
-
-                    if (!empty($valOffers) || isset($valOffers)) {
-
-                        foreach ($allSection as $keyAllSection => $valAllSection) {
-                            if ($valAllSection->id == $valOffers->basic_section) {
-                                $subSection = $valAllSection;
-                            }
-                        }
-                        foreach ($allSection as $keyAllSection => $valAllSection) {
-                            if ($valAllSection->id == $subSection->parent_id) {
-                                $catalogSection = $valAllSection;
-                            }
-                        }
-
-                        // get photo offers
-                        $photo = Picture::select("path")
-                                        ->where("element_id", $valOffers->id)
-                                        ->first();
-
-                        $props = ElementDirectory::where("element_id", $valOffers->id)->get();
-
-                        $district = new \stdClass();
-                        $deadline = new \stdClass();
-
-                        // dedline and district
-                        foreach ($props as $keyProps => $valProps) {
-                            if ($valProps->name_field == "district") {
-                                foreach ($pageParams["district"] as $valParams) {
-                                    if ($valParams->code == $valProps->code) {
-                                        $district->{"name"} = $valParams->name;
-                                        break;
-                                    } else {
-                                        $district->{"name"} = "";
-                                    }
-                                }
-                            }
-                            if ($valProps->name_field == "deadline") {
-                                foreach ($pageParams["deadline"] as $valParams) {
-                                    if ($valParams->code == $valProps->code) {
-                                        $deadline->{"name"} = $valParams->name;
-                                        break;
-                                    } else {
-                                        $deadline->{"name"} = "";
-                                    }
-                                }
-                            }
-                        }
-
-                        //using Cache
-                        $apartments = Cache::remember("catalogApartments", 24*60, function() use(&$valOffers) {
-                            return Catalog::select("id", "price")
-                                                 ->where([
-                                                    ["cottage_village", $valOffers->id],
-                                                    ["price", ">", "0"],
-                                                 ])
-                                                 ->orderBy("price", "asc")
-                                                 ->distinct()
-                                                 ->get();
-                        });
-                        $apartmnetItems = [];
-
-                        foreach ($apartments as $keyApartment => $valApartment) {
-                            $apartmentsProp = ElementDirectory::where([
-                                                                 ["element_id", $valApartment->id],
-                                                                 ["name_field", "number_rooms"],
-                                                              ])
-                                                              ->first();
-
-                            if (!empty($apartmentsProp->code) || isset($apartmentsProp->code)) {
-                                $apartmentRooms = NumberRoom::where("code", $apartmentsProp->code)->first();
-
-                                // verification of existence apartments
-                                if(!isset($apartmnetItems[$apartmentRooms->name])) {
-                                    $apartmnetItems[$apartmentRooms->name] = Array(
-                                        "price" => $valApartment->price
-                                    );
-                                } else {
-                                    if($apartmnetItems[$apartmentRooms->name]->price > $valApartment->price) {
-                                        $apartmnetItems[$apartmentRooms->name]->price = $valApartment->price;
-                                    }
-                                }
-
-                                // convert array to object (for unification component)
-                                $apartmnetItems = array_map(function($array){
-                                    return (object)$array;
-                                }, $apartmnetItems);
-
-                            } else {
-                                $apartmnetItems = [];
-                            }
-                        }
-
-                        ksort($apartmnetItems);
-
-
-                        // create final object
-                        if (isset($photo->path)) {
-                            $valOffers->{"photo"} = $photo->path;
-                        } else {
-                            $valOffers->{"photo"} = "";
-                        }
-
-                        $elements[$keyOffers]->{"district"}    = $district->name;
-                        $elements[$keyOffers]->{"deadline"}    = $deadline->name;
-                        $elements[$keyOffers]->{"apartments"}  = (object)$apartmnetItems;
-                        $elements[$keyOffers]->{"path"}        = route("CatalogShow", [$catalogSection->code, $subSection->code, $valOffers->code]);
-
-                    }
-
-                }
-
-            }
+            $elements = Helper::getGsk($elements, $allSection, $pageParams["district"], $pageParams["deadline"]);
 
             $pageParams["offers"] = $elements;
             $pageParams["countOffers"] = $elements->total();
 
         } else {
-            $arSections = CatalogsSection::where("parent_id", $mainSectionId)->get();
+            $elements = CatalogsSection::where("parent_id", $mainSectionId)
+                                        ->first()
+                                        ->catalog()
+                                        ->distinct()
+                                        ->take(45)
+                                        ->paginate(9);
 
-            foreach ($arSections as $valSection) {
-                $arrSectionsId[] =  $valSection->id;
-            }
-            $arElements = CatalogsElement::select("element_id")
-                                           ->whereIn("parent_id", $arrSectionsId)
-                                           ->take(45)
-                                           ->distinct()
-                                           ->get();
-
-            foreach ($arElements as $valElements) {
-                $arElementsId[] = $valElements->element_id;
-            }
-            $elements = Catalog::select("id", "basic_section", "name", "code", "text_action", "price_min")
-                               ->whereIn("id", $arElementsId)
-                               ->paginate(9);
-
-            if ($elements) {
-
-                foreach ($elements as $keyOffers => $valOffers) {
-                    if (!empty($valOffers) || isset($valOffers)) {
-
-                        foreach ($allSection as $keyAllSection => $valAllSection) {
-                            if ($valAllSection->id == $valOffers->basic_section) {
-                                $subSection = $valAllSection;
-                            }
-                        }
-                        foreach ($allSection as $keyAllSection => $valAllSection) {
-                            if ($valAllSection->id == $subSection->parent_id) {
-                                $catalogSection = $valAllSection;
-                            }
-                        }
-
-                        // get photo offers
-                        $photo = Picture::select("path")
-                                        ->where("element_id", $valOffers->id)
-                                        ->first();
-
-                        $props = ElementDirectory::where("element_id", $valOffers->id)->get();
-
-                        $district = new \stdClass();
-                        $deadline = new \stdClass();
-                        // dedline and district
-                        foreach ($props as $keyProps => $valProps) {
-                            if ($valProps->name_field == "district") {
-                                foreach ($pageParams["district"] as $valParams) {
-                                    if ($valParams->code == $valProps->code) {
-                                        $district->{"name"} = $valParams->name;
-                                        break;
-                                    } else {
-                                        $district->{"name"} = "";
-                                    }
-                                }
-                            }
-                            if ($valProps->name_field == "deadline") {
-                                foreach ($pageParams["deadline"] as $valParams) {
-                                    if ($valParams->code == $valProps->code) {
-                                        $deadline->{"name"} = $valParams->name;
-                                        break;
-                                    } else {
-                                        $deadline->{"name"} = "";
-                                    }
-                                }
-                            }
-                        }
-
-                        //using Cache
-                        $apartments = Cache::remember("catalogApartments", 24*60, function() use(&$valOffers) {
-                            return Catalog::select("id", "price")
-                                                 ->where([
-                                                    ["cottage_village", $valOffers->id],
-                                                    ["price", ">", "0"],
-                                                 ])
-                                                 ->orderBy("price", "asc")
-                                                 ->distinct()
-                                                 ->get();
-                        });
-                        $apartmnetItems = [];
-
-                        foreach ($apartments as $keyApartment => $valApartment) {
-                            $apartmentsProp = ElementDirectory::where([
-                                                                 ["element_id", $valApartment->id],
-                                                                 ["name_field", "number_rooms"],
-                                                              ])
-                                                              ->first();
-
-                            if (!empty($apartmentsProp->code) || isset($apartmentsProp->code)) {
-                                $apartmentRooms = NumberRoom::where("code", $apartmentsProp->code)->first();
-
-                                // verification of existence apartments
-                                if(!isset($apartmnetItems[$apartmentRooms->name])) {
-                                    $apartmnetItems[$apartmentRooms->name] = Array(
-                                        "price" => $valApartment->price
-                                    );
-                                } else {
-                                    if($apartmnetItems[$apartmentRooms->name]->price > $valApartment->price) {
-                                        $apartmnetItems[$apartmentRooms->name]->price = $valApartment->price;
-                                    }
-                                }
-
-                                // convert array to object (for unification component)
-                                $apartmnetItems = array_map(function($array){
-                                    return (object)$array;
-                                }, $apartmnetItems);
-
-                            } else {
-                                $apartmnetItems = [];
-                            }
-                        }
-
-                        ksort($apartmnetItems);
-
-
-                        // create final object
-                        if (isset($photo->path)) {
-                            $valOffers->{"photo"} = $photo->path;
-                        } else {
-                            $valOffers->{"photo"} = "";
-                        }
-
-                        $elements[$keyOffers]->{"district"}    = $district->name;
-                        $elements[$keyOffers]->{"deadline"}    = $deadline->name;
-                        $elements[$keyOffers]->{"apartments"}  = (object)$apartmnetItems;
-                        $elements[$keyOffers]->{"path"}        = route("CatalogShow", [$catalogSection->code, $subSection->code, $valOffers->code]);
-
-                    }
-
-                }
-
-            }
-
+            $elements = Helper::getGsk($elements, $allSection, $pageParams["district"], $pageParams["deadline"]);
             $pageParams["offers"] = $elements;
             $pageParams["countOffers"] = $elements->total();
         }

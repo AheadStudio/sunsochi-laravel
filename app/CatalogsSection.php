@@ -20,4 +20,8 @@ class CatalogsSection extends Model
     	"picture",
     ];
 
+    public function catalog() {
+        return $this->belongsToMany("App\Catalog", "catalogs_elements", "parent_id", "element_id");
+    }
+
 }

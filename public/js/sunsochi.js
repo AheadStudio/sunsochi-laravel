@@ -464,8 +464,8 @@
 								$inputEl.attr("data-valto", valueArray[1]);
 
 								//add hidden field
-								$jcfContainer.prepend("<input type='hidden' name='"+realInputName+"_min' data-fake-min>");
-								$jcfContainer.prepend("<input type='hidden' name='"+realInputName+"_max' data-fake-max>");
+								$jcfContainer.prepend("<input type='hidden' name='"+realInputName+"_min' class='form-item' data-fake-min>");
+								$jcfContainer.prepend("<input type='hidden' name='"+realInputName+"_max' class='form-item' data-fake-max>");
 
 								var $fakeInputMin = $jcfContainer.find("[data-fake-min]");
 								var $fakeInputMax = $jcfContainer.find("[data-fake-max]");
@@ -741,16 +741,35 @@
 				},
 
 				rating: {
+
+					$checkCookie: null,
+
 					init: function() {
 						var $rating = $("[data-rating]");
 						$rating.each(function() {
 							(function(el) {
-								var elScore = el.data("ratingValue"),
-									elRead = el.data("ratingRead");
+								var elScore = el.attr("data-rating-value"),
+									elParams = el.data("ratingParams"),
+									elRead = el.attr("data-rating-read"),
+									token = document.head.querySelector('meta[name="csrf-token"]');
 
-								if (!elRead || elRead == "") {
+								if (!elRead || elRead == "" || elRead === "false") {
 									elRead = false;
 								}
+
+								$.ajaxSetup({
+									headers: {
+										'X-CSRF-TOKEN': token.content
+									}
+								});
+
+								self.$checkCookie = $.cookie("sunsochi-rating");
+
+								if (self.$checkCookie && typeof elParams !== 'undefined' && self.$checkCookie.indexOf(elParams.code) !== -1) {
+									elRead = true;
+									el.attr("data-rating-read", true);
+								}
+
 								el.raty({
 									score: elScore,
 									number: 5,
@@ -759,6 +778,53 @@
 									starOff: "../svg/star.svg",
 									starOn: "../svg/star_orage_fill.svg",
 									starHalf: "../svg/star_orage_half.svg",
+									click: function(ratingValue) {
+										var $container = $(this),
+											params = $container.data("ratingParams"),
+											newRating;
+
+										newRating = (Number(params.summ) + Number(ratingValue)) / (Number(params.voted) + 1);
+
+										if (elRead) {
+											return;
+										}
+
+										$.ajax({
+											url: "/api/blog/add-rating/",
+											type: 'POST',
+											dataType: "json",
+											data: {
+												rating  : newRating.toFixed(2),
+												summ    : Number(params.summ) + Number(ratingValue),
+												voted   : Number(params.voted) + 1,
+												code    : params.code,
+											},
+											success: function(data) {
+												var params = {
+													summ  : data.summ,
+													voted : data.voted,
+													code  : data.code,
+												};
+
+												$container.attr("data-rating-params", JSON.stringify(params));
+												$container.attr("data-rating-value", data.rating);
+
+												setTimeout(function() {
+													SUNSOCHI.forms.rating.destroy();
+													setTimeout(function() {
+														SUNSOCHI.forms.rating.init();
+													}, 100);
+												}, 300);
+
+												if (typeof self.$checkCookie === 'undefined') {
+													self.$checkCookie = "";
+												}
+
+												var cookieString = self.$checkCookie + ", " + params.code;
+												$.cookie("sunsochi-rating",cookieString);
+											}
+										})
+									}
 								});
 							})($(this))
 						})
@@ -1989,7 +2055,6 @@
 		};
 
 	})();
-
 	SUNSOCHI.header.init();
 	SUNSOCHI.mobileMenu.init();
 
