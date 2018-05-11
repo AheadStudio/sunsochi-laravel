@@ -19,3 +19,4 @@ Route::post("/blog/add-rating/", "ApiController@updateRating");
 
 // catalog API
 Route::get("/catalog/", "ApiController@getCatalog");
+Route::get("/catalog/district/", "ApiController@getDistrict");

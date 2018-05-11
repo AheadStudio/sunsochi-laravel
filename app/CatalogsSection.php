@@ -20,7 +20,7 @@ class CatalogsSection extends Model
     	"picture",
     ];
 
-    public function catalog() {
+    public function getCatalogElements() {
         return $this->belongsToMany("App\Catalog", "catalogs_elements", "parent_id", "element_id");
     }
 

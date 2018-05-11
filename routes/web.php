@@ -42,6 +42,9 @@ Route::post("/company/team/import/send/", "TeamController@importHandler")->middl
 
 Route::get("/catalog/", "CatalogController@index")->name("CatalogIndex");
 Route::get("/catalog/{section}/", "CatalogController@section")->name("CatalogSection");
+
+Route::get("/catalog/{section}/filter/{params}/", "CatalogController@section")->name("CatalogSectionFilter")->where(["params" => "([/A-Za-z0-9_-]+)"]);
+
 Route::get("/catalog/{section}/{subsection}/", "CatalogController@subsection")->name("CatalogSubSection");
 Route::get("/catalog/{section}/{subsection}/{code}/", "CatalogController@show")->name("CatalogShow");
 Route::get("/catalog/import/", "CatalogController@import")->middleware("auth")->name("CatalogImportIndex");

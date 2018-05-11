@@ -38,10 +38,11 @@
 							</span>
 							<span class="blog-views-count">{{ $blogMaxViews->views }}</span>
 						</div>
-
-						<!-- #component vue path:resources/assets/js/components/RatingComponent >
-						<rating-component :rating='{"read" : false, "value" : "{{$blogMaxViews->rating}}", "voted" : "{{ $blogMaxViews->voted }}", "summ" : "{{ $blogMaxViews->summ_rating }}", "code": "{{ $blogMaxViews->code }}"}'></rating-component>
-						< component vue# -->
+						@php
+							/*#component vue path:resources/assets/js/components/RatingComponent >
+							<rating-component :rating='{"read" : false, "value" : "{{$blogMaxViews->rating}}", "voted" : "{{ $blogMaxViews->voted }}", "summ" : "{{ $blogMaxViews->summ_rating }}", "code": "{{ $blogMaxViews->code }}"}'></rating-component>
+							< component vue#*/
+						@endphp
 						<div data-rating data-rating-value="{{$blogMaxViews->rating}}" data-rating-read="false" data-rating-params='{"voted" : "{{ $blogMaxViews->voted }}", "summ" : "{{ $blogMaxViews->summ_rating }}", "code": "{{ $blogMaxViews->code }}"}' class="blog-rating"></div>
 
 					</div>
@@ -77,11 +78,14 @@
 								</span>
 								<span class="blog-views-count">{{ $valBlogList->views }}</span>
 							</div>
-							<!-- #component vue path:resources/assets/js/components/RatingComponent
-							<keep-alive>
-								<rating-component :rating='{"read" : "true", "value" : "{{$valBlogList->rating}}"}'></rating-component>
-							</keep-alive>
-							 component vue# -->
+
+							@php
+								/*#component vue path:resources/assets/js/components/RatingComponent
+									<keep-alive>
+										<rating-component :rating='{"read" : "true", "value" : "{{$valBlogList->rating}}"}'></rating-component>
+									</keep-alive>
+								 component vue#*/
+							@endphp
 							<div data-rating data-rating-value="{{$valBlogList->rating}}" data-rating-read="true" class="blog-rating"></div>
 
 						</div>
@@ -94,9 +98,12 @@
 				@endforeach
 			</div>
 
-			<!-- #component vue path:resources/assets/js/components/PaginationComponent
+			@php
+			/*#component vue path:resources/assets/js/components/PaginationComponent
 			<pagination-component :pagination='{"setting" : {{$blogPagination}}, "paginationClass" : "blog-more", "paginationContainer" : "#blog-list-load", paginationItem : ".blog-item" }'></pagination-component>
-			 component vue#  -->
+			 component vue#*/
+			@endphp
+
 			@include("pagination.default", [
 				"paginator" => $blogList,
 				"class" 	=> "blog-more",

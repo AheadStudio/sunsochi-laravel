@@ -591,8 +591,8 @@
 								checkboxContainer = filterContainer.find(".filter-selected-regions-list");
 
 							checkboxContainer.append(
-								'<div class="filter-selected-regions-item" data-regname="district|'+nameCheckbox+'">'+
-                      				'<input type="checkbox" name="district|'+nameCheckbox+'" data-jcfapply="off" checked="checked" class="form-item form-item--checkbox"><span class="selected-regions-item-text">'+textCheckbox+'</span>'+
+								'<div class="filter-selected-regions-item" data-regname="'+nameCheckbox+'">'+
+                      				'<input type="checkbox" name="'+nameCheckbox+'" data-jcfapply="off" checked="checked" class="form-item form-item--checkbox"><span class="selected-regions-item-text">'+textCheckbox+'</span>'+
                   					'<div class="selected-regions-item-close">'+
 										'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44.8 44.8"><g id="Слой_2" data-name="Слой 2"><g id="Слой_1-2" data-name="Слой 1"><path d="M19.6,22.4,0,42l2.8,2.8L22.4,25.2,42,44.8,44.8,42,25.2,22.4,44.8,2.8,42,0,22.4,19.6,2.8,0,0,2.8Z" fill="#d0d0d0"></path></g></g></svg>'+
 									'</div>'+

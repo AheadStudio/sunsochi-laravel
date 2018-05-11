@@ -77,7 +77,7 @@ class Catalog extends Model
 		"gsk",
 	];
 
-	static function getList() {
-		return DB::table('blogs')->get();
+	static function getCatalogDeadline() {
+		return $this->belongsToMany("App\Deadline", "element_directories", "element_id", "code");
 	}
 }

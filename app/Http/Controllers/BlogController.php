@@ -61,7 +61,7 @@ class BlogController extends Controller
 
         return view("blog-list", [
             "blogList"      => $blogsList,
-            "blogPagination"=> json_encode($pagination),
+            //"blogPagination"=> json_encode($pagination),
             "blogPopular"   => $blogsPopular,
             "blogMaxViews"  => $blogMaxViews,
             "pageTitle"     => "Блог",

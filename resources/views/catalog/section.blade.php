@@ -38,25 +38,24 @@
                     </form>
                 </div>
                 <div data-filter-item="filter_1" class="filter-item">
-                    <form action="" method="get" class="form form-filter">
-                        <input type="hidden" name="token" value="{{ Session::token() }}" />
+                    <form action="/api/catalog/" method="get" class="form form-filter">
                         <div class="form-row">
                             <div class="form-row-100">
                                 <div class="form-holder">
                                     <label class="form-label">
-                                        <input type="checkbox" name="section|novostroyki_v_sochi_po_fz_214" class="form-item form-item--checkbox"><span class="form-item-checkbox-title">ФЗ-214</span>
+                                        <input type="checkbox" name="section__novostroyki_v_sochi_po_fz_214" class="form-item form-item--checkbox"><span class="form-item-checkbox-title">ФЗ-214</span>
                                     </label>
                                     <label class="form-label">
-                                        <input type="checkbox" name="section|sdannye_novostroyki_v_sochi" class="form-item form-item--checkbox"><span class="form-item-checkbox-title">Сданные</span>
+                                        <input type="checkbox" name="section__sdannye_novostroyki_v_sochi" class="form-item form-item--checkbox"><span class="form-item-checkbox-title">Сданные</span>
                                     </label>
                                     <label class="form-label">
-                                        <input type="checkbox" name="section|novostroyki_pod_ipoteku" class="form-item form-item--checkbox"><span class="form-item-checkbox-title">Ипотека</span>
+                                        <input type="checkbox" name="section__novostroyki_pod_ipoteku" class="form-item form-item--checkbox"><span class="form-item-checkbox-title">Ипотека</span>
                                     </label>
                                     <label class="form-label">
                                         <input type="checkbox" name="military_mortgage" class="form-item form-item--checkbox"><span class="form-item-checkbox-title">Военная ипотека</span>
                                     </label>
                                     <label class="form-label">
-                                        <input type="checkbox" name="section|novostroyki_u_morya" class="form-item form-item--checkbox"><span class="form-item-checkbox-title">Близость к морю</span>
+                                        <input type="checkbox" name="section__novostroyki_u_morya" class="form-item form-item--checkbox"><span class="form-item-checkbox-title">Близость к морю</span>
                                     </label>
                                 </div>
                             </div>
@@ -65,13 +64,13 @@
                             <div class="form-row-50">
                                 <div class="form-item-title">Площадь</div>
                                 <div class="form-holder">
-                                    <input type="range" multiple="" data-name-input="area_ap" value="20,650" min="20" max="650" step="10" data-valfrom="" data-valto="" data-valtext="&amp;thinsp;м&lt;sup&gt;2&lt;/sup&gt;" class="form-item form-item--range">
+                                    <input type="range" multiple="" name="area" data-name-input="area_ap" value="20,650" min="20" max="650" step="10" data-valfrom="" data-valto="" data-valtext="&amp;thinsp;м&lt;sup&gt;2&lt;/sup&gt;" class="form-item form-item--range">
                                 </div>
                             </div>
                             <div class="form-row-50">
                                 <div class="form-item-title">Цена</div>
                                 <div class="form-holder">
-                                    <input type="range" multiple="" data-name-input="price" value="800000,180000000" min="800000" max="180000000" step="1000" data-valfrom="" data-valto="" data-valtext="&amp;thinsp; м&lt;sup&gt;2&lt;/sup&gt;" class="form-item form-item--range">
+                                    <input type="range" multiple="" name="price" data-name-input="price" value="800000,180000000" min="800000" max="180000000" step="1000" data-valfrom="" data-valto="" data-valtext="&amp;thinsp; м&lt;sup&gt;2&lt;/sup&gt;" class="form-item form-item--range">
                                 </div>
                             </div>
                         </div>
@@ -83,7 +82,7 @@
                                             <div class="regions-title">Выберите район</div>
                                             <ul>
                                                 @foreach ($district as $keyDistrict => $valDistrict)
-                                                    <li name="{{ $valDistrict->code }}">
+                                                    <li name="district__{{ $valDistrict->code }}">
                                                         <span class="regions-text">{{ $valDistrict->name }}</span>
                                                         <div class="regions-close"></div>
                                                     </li>
@@ -97,7 +96,7 @@
                             </div>
                             <div class="form-row-50">
                                 <div class="form-holder">
-                                    <input type="text" placeholder="Поиск по названию или улице" data-autocomplete="true" class="form-item form-item--text">
+                                    <input type="text" name="search" placeholder="Поиск по названию или улице" data-autocomplete-url="/api/catalog/district/" data-autocomplete="true" class="form-item form-item--text">
                                     <button type="button" class="form-filter-search">
                                         <span class="form-filter-search-icon">
                                             <?php include("svg/loupe.svg") ?>
@@ -107,18 +106,19 @@
                             </div>
                         </div>
                         <div class="filter-selected-regions-list"></div>
-                        <button type="submit" data-filter-button-tpl="Показать {0} обектов" class="button button--orange-flood filter-submit">Показать 11 356 объектов</button>
+                        <button type="submit" data-filter-button-tpl="Показать {number} обектов" class="button button--orange-flood filter-submit">Показать</button>
                     </form>
                 </div>
                 <div data-filter-item="filter_2" class="filter-item">
-                    <form action="#" class="form form-filter">
+                    <form action="/api/catalog/" method="get" class="form form-filter">
+                        <input type="hidden" name="token" value="{{ Session::token() }}" />
                         <div class="form-row">
                             <div class="form-row-100">
                                 <div class="form-holder">
                                     <div class="checkbox-list-container">
                                         <div class="checkbox-list-container-title">Планировка</div>
                                         <label class="form-label">
-                                            <input type="checkbox" class="form-item form-item--checkbox"><span class="form-item-checkbox-title">1</span>
+                                            <input type="checkbox" name="number_rooms|one"  class="form-item form-item--checkbox"><span class="form-item-checkbox-title">1</span>
                                         </label>
                                         <label class="form-label">
                                             <input type="checkbox" class="form-item form-item--checkbox"><span class="form-item-checkbox-title">2</span>

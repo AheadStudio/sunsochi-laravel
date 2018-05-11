@@ -40,7 +40,9 @@ class CatalogController extends Controller
     }
 
     // section page
-    public function section(Request $request, $section) {
+    public function section(Request $request, $section, $params = false) {
+        //dd(explode("/", $params));
+
         // main array, which contain all params
         $pageParams = [];
 
@@ -75,9 +77,7 @@ class CatalogController extends Controller
         // fields
         $inputs = $request->all();
 
-        if (!empty($inputs) && isset($inputs["token"])) {
-            unset($inputs["token"]);
-            
+        if (!empty($inputs)) {
             // array fields
             $arFields = [];
 
@@ -165,20 +165,19 @@ class CatalogController extends Controller
                                ->appends(request()->query());
 
 
-            $elements = Helper::getGsk($elements, $allSection, $pageParams["district"], $pageParams["deadline"]);
-
+           $elements = Helper::getGsk($elements, $mainSectionId, $section);
             $pageParams["offers"] = $elements;
             $pageParams["countOffers"] = $elements->total();
 
         } else {
             $elements = CatalogsSection::where("parent_id", $mainSectionId)
                                         ->first()
-                                        ->catalog()
+                                        ->getCatalogElements()
                                         ->distinct()
                                         ->take(45)
                                         ->paginate(9);
 
-            $elements = Helper::getGsk($elements, $allSection, $pageParams["district"], $pageParams["deadline"]);
+            $elements = Helper::getGsk($elements, $mainSectionId, $section);
             $pageParams["offers"] = $elements;
             $pageParams["countOffers"] = $elements->total();
         }
@@ -548,8 +547,8 @@ class CatalogController extends Controller
                  "federal_law_214"      => $low_214 = empty($valParseCatalog["FEDERALNYJ_ZAKON_214"]) ? null : $valParseCatalog["FEDERALNYJ_ZAKON_214"],
                  "federal_law_215"      => $low_215 = empty($valParseCatalog["FEDERALNYJ_ZAKON_215"]) ? null : $valParseCatalog["FEDERALNYJ_ZAKON_215"],
                  "m_capital"            => $m_capital = empty($valParseCatalog["MATKAP"]) ? null : $valParseCatalog["MATKAP"],
-                 "area_ap_min"          => $area_ap_min = empty($valParseCatalog["PLOSHCHAD_KVARTIR_MIN"]) ? null : $valParseCatalog["PLOSHCHAD_KVARTIR_MIN"],
-                 "area_ap_max"          => $area_ap_max = empty($valParseCatalog["PLOSHCHAD_KVARTIR_MAX"]) ? null : $valParseCatalog["PLOSHCHAD_KVARTIR_MAX"],
+                 "area_min"             => $area_ap_min = empty($valParseCatalog["PLOSHCHAD_KVARTIR_MIN"]) ? null : $valParseCatalog["PLOSHCHAD_KVARTIR_MIN"],
+                 "area_max"             => $area_ap_max = empty($valParseCatalog["PLOSHCHAD_KVARTIR_MAX"]) ? null : $valParseCatalog["PLOSHCHAD_KVARTIR_MAX"],
                  "infrastructure"       => $infrastructure = empty($valParseCatalog["INFRASTRUCTURA"]) ? null : $valParseCatalog["INFRASTRUCTURA"],
                  "for_dacha"            => $for_dacha = empty($valParseCatalog["FOR_DACH"]) ? null : $valParseCatalog["FOR_DACH"],
                  "for_build"            => $for_build = empty($valParseCatalog["FOR_STRO"]) ? null : $valParseCatalog["FOR_STRO"],
