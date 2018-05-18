@@ -1231,6 +1231,14 @@ body {
   -ms-flex-align: center;
   -webkit-align-items: center;
   align-items: center;
+  min-width: 60px;
+  -webkit-box-pack: end;
+  -moz-box-pack: end;
+  -o-box-pack: end;
+  -ms-flex-pack: end;
+  -webkit-justify-content: flex-end;
+  justify-content: flex-end;
+
 }
 .header-favorites .header-favorites-holder {
   display: block;
@@ -2386,6 +2394,15 @@ body.open-menu .page-header .mobile-favorites {
 }
 .filter .filter-clear.reset {
   color: #f99d22;
+  border-bottom: 1px solid transparent;
+  -webkit-transition: border-color 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  -moz-transition: border-color 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  -o-transition: border-color 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  -ms-transition: border-color 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transition: border-color 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+.filter .filter-clear.reset:hover {
+    border-bottom-color: #f99d22;
 }
 .filter-tabs {
   margin-bottom: 30px;
@@ -6970,6 +6987,9 @@ display: none;
 .blog .blog-item .blog-holder {
   margin-bottom: 30px;
 }
+.blog.blog-detail {
+    position: relative;
+}
 .blog.blog-detail h1 {
   text-align: left;
   margin-bottom: 45px;
@@ -6978,6 +6998,10 @@ display: none;
   margin-bottom: 20px;
   font-size: 20px;
   color: #333;
+}
+.blog.blog-detail .back {
+    position: absolute;
+    top: -40px;
 }
 .blog.blog-detail p {
   font-size: 16px;

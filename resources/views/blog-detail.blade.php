@@ -3,6 +3,7 @@
 @section("content")
     <div class="page-inner page-inner--w4">
         <div class="blog blog-detail">
+            <a href="{{ url()->previous() }}" class="link link-black link-black--bottom back">Назад</a>
             <div class="page-text">
                 <h1>{{ $pageTitle }}</h1>
                 <div class="blog-group">

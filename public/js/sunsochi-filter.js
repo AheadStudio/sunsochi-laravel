@@ -123,7 +123,7 @@
 
 					$.ajax({
                         url: url,
-                        type: "GET",
+                        method: "GET",
                         data: {
                             "url"       	: location.href,
                             "params"    	: params,
@@ -188,7 +188,7 @@
 
 							$.ajax({
 		                        url: "/catalog/favorites/add/",
-		                        type: "GET",
+		                        method: "GET",
 		                        data: {
 		                            "element_id" : datEl,
 		                        },

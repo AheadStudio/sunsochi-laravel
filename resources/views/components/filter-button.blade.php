@@ -1,19 +1,19 @@
 @php
-    switch ($countElements) {
-        case 1:
-            $strElementsCount = $countElements." элемент";
+    switch (substr((string)$countElements, -1)) {
+        case "1":
+            $strElementsCount = $countElements." объект недвижимости";
             break;
-        case 2:
-            $strElementsCount = $countElements." элемента";
+        case "2":
+            $strElementsCount = $countElements." объекта недвижимости";
             break;
-        case 3:
-            $strElementsCount = $countElements." элемента";
+        case "3":
+            $strElementsCount = $countElements." объекта недвижимости";
             break;
-        case 4:
-            $strElementsCount = $countElements." элемента";
+        case "4":
+            $strElementsCount = $countElements." объекта недвижимости";
             break;
         default:
-            $strElementsCount = $countElements." элементов";
+            $strElementsCount = $countElements." объектов недвижимости";
             break;
     }
 

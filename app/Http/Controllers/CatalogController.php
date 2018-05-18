@@ -83,11 +83,19 @@ class CatalogController extends Controller
                 break;
             case "kommercheskaya_nedvizhimost":
                 $mainSectionId = 2;
-                $pageParams["pageTitle"] = "Участки в Сочи под любую <br>недвижимость";
+                $pageParams["pageTitle"] = "Коммерческая недвижимость";
                 $pageParams["pageTabs"] = ["Площади <br>4 — 200 соток", "Участки <br>от 600 тысяч рублей", "Гарантия актуальной <br>цены"];
                 $pageParams["pageImage"] = "/dummy/areas.jpg";
                 break;
         }
+
+        
+        Helper::setSEO(
+            $pageParams["pageTitle"],
+            "Каталог компании “Солнечный Сочи”",
+            "http://sunsochi.goodcode.ru"
+        );
+
 
         $pageParams["pageSection"] = $section;
 
@@ -167,7 +175,7 @@ class CatalogController extends Controller
         ];
 
         $elements = ApiController::getCatalog($request);
-        
+
         return view("catalog/sections-filter-button", ["countElements" => $elements]);
     }
 

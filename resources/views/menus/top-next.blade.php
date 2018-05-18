@@ -2,7 +2,7 @@
 	<ul class="header-bottom-inner">
 		@foreach($items as $item)
 			@php
-				$isItemActive = (url($item->link()) == url()->current()) ? "active" : "";
+				$isItemActive = (stripos(url()->current(), substr(substr($item->link(), 1), 0, -1)) != false ) ? "active" : "";
 			@endphp
 			<li class="header-bottom-item-holder">
 				<a href="{{ $item->link() }}" title="" itemprop="url" class="header-bottom-item link link-black link--orange {{ $isItemActive }}">

@@ -15,7 +15,7 @@ use Illuminate\Http\Request;
 
 // blog API
 Route::get("/blog/", "ApiController@getBlog");
-Route::post("/blog/add-rating/", "ApiController@updateRating");
+Route::post("/blog/add-rating", "ApiController@updateRating");
 
 // catalog API
 //Route::get("/catalog/", "ApiController@getCatalog");

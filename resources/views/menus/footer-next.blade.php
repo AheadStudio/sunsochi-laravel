@@ -2,7 +2,7 @@
 	<ul class="footer-next-inner">
 		@foreach($items as $item)
 			@php
-				$isItemActive = (url($item->link()) == url()->current()) ? "active" : "";
+				$isItemActive = (stripos(url()->current(), substr(substr($item->link(), 1), 0, -1)) != false ) ? "active" : "";
 			@endphp
 			<li class="footer-next-item-holder">
 				<a href="{{ $item->link() }}" title="" itemprop="url" class="footer-next-item link link-white link-white--bottom-reverse {{ $isItemActive }}">

@@ -824,8 +824,8 @@
 										}
 
 										$.ajax({
-											url: "/api/blog/add-rating/",
-											type: 'POST',
+											url: "/api/blog/add-rating",
+											method: 'POST',
 											dataType: "json",
 											data: {
 												rating  : newRating.toFixed(2),
