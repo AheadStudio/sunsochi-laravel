@@ -191,7 +191,7 @@
                                 <div class="form-row-50">
                                     <div class="form-item-title">Цена</div>
                                     <div class="form-holder">
-                                        <input type="range" multiple="" name="price" data-name-input="price" value="5980160,180000000" min="5980160" max="180000000" step="1000" data-valfrom="" data-valto="" data-valtext="<span class='rub'>i</span>" class="form-item form-item--range">
+                                        <input type="range" multiple="" name="price" data-name-input="price" value="5980160,180000000" min="5980160" max="180000000" step="10" data-valfrom="" data-valto="" data-valtext="<span class='rub'>i</span>" class="form-item form-item--range">
                                     </div>
                                 </div>
                             </div>
