@@ -31,20 +31,27 @@ class BlogController extends Controller
         $blogsQuery = Blog::orderBy("views", "desc")
                           ->orderBy("date", "asc");
 
+        // main query
+        $blogsQueryPopular = Blog::orderBy("views", "desc")
+                                ->orderBy("date", "asc");
+
         // get popular blog item and add cache
-        $blogsPopular = Cache::remember("blogsPopular", 24*60, function() use(&$blogsQuery) {
-            return $blogsQuery->where("popular", 1)->get();
-        });
+        /*$blogsPopular = Cache::remember("blogsPopularNew", 24*60, function() use(&$blogsQueryPopular) {
+            return $blogsQueryPopular->where("popular", 1)->get();
+        });*/
 
         // get max views blog item and add cache
-        $blogMaxViews = Cache::remember("blogsMaxView", 24*60, function() use(&$blogsQuery) {
+        /*$blogMaxViews = Cache::remember("blogsMaxViewNew", 24*60, function() use(&$blogsQuery) {
             return $blogsQuery->first();
-        });
+        });*/
+        $blogsPopular = $blogsQueryPopular->where("popular", 1)->get();
+        $blogMaxViews = $blogsQueryPopular->first();
+        $blogsList = $blogsQuery->paginate(4);
 
         // get all glog item and add cashe
-        $blogsList = Cache::remember("blogsList", 24*60, function() use(&$blogsQuery) {
+        /*$blogsList = Cache::remember("blogsListNew", 24*60, function() use(&$blogsQuery) {
             return $blogsQuery->paginate(4);
-        });
+        });*/
 
         foreach ($blogsList as $key => $val) {
             $blogsList[$key]->date = Helper::convertDate($val->date);
