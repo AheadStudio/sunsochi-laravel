@@ -11,7 +11,7 @@
 					<div class="form-row">
 						<div class="form-row-100">
 							<div class="form-holder">
-								<input type="text" placeholder="Поиск по блогу" data-autocomplete="true" data-autocomplete-url="http://localhost:8000/api/blog" class="form-item form-item--text">
+								<input type="text" placeholder="Поиск по блогу" data-autocomplete-url="/api/blog/" data-autocomplete="true" data-autocomplete-type="link" class="form-item form-item--text">
 								<button type="button" class="form-filter-search">
 									<span class="form-filter-search-icon">
 										<?php include("svg/loupe.svg"); ?>

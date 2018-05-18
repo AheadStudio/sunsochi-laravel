@@ -473,13 +473,15 @@
 								$fakeInputMin.val(startFrom);
 								$fakeInputMax.val(finishTo);
 
+								self.positionTextTrueRange($inputEl);
+
 								$inputEl.on("change input", function(e) {
 									var $element = $(this);
-									fromVal = $element[0].valueLow;
-									toVal = $element[0].valueHigh;
+									var fromValInit = String($element[0].valueLow);
+									var toValInit = String($element[0].valueHigh);
 
-									fromVal = fromVal.replace(/(\d)(?=(\d\d\d)+([^\d]|$))/g, "$1 ");
-									toVal = toVal.replace(/(\d)(?=(\d\d\d)+([^\d]|$))/g, "$1 ");
+									var fromVal = fromValInit.replace(/(\d)(?=(\d\d\d)+([^\d]|$))/g, "$1 ");
+									var toVal = toValInit.replace(/(\d)(?=(\d\d\d)+([^\d]|$))/g, "$1 ");
 
 									$jcfFromField.html(fromVal).append(tplText);
 									$jcfToField.html(toVal).append(tplText);
@@ -502,9 +504,13 @@
 
 					},
 
-					positionTextTrueRange: function(trueElem) {
+					updatePrice: function($rangeInput) {
+
+					},
+
+					positionTextTrueRange: function($el) {
 						var self = this,
-							$jcfContainer = trueElem.closest(".jcf-range"),
+							$jcfContainer = $el.closest(".jcf-range"),
 							$minRange = $jcfContainer.find(".jcf-index-1"),
 							$maxRange = $jcfContainer.find(".jcf-index-2"),
 							$textLeft = $minRange.find(".jcf-range-count-number"),
@@ -622,7 +628,7 @@
 						var self = this,
 							$clearFilter = $(".filter-clear", self.filter);
 
-						$clearFilter.on("click", function() {
+						$clearFilter.on("click", function(e) {
 							var $regionsLi = $("li.select", ".regions-container");
 							var $regionsCheckbox = $(".filter-selected-regions-item");
 
@@ -642,6 +648,34 @@
 										(function(el) {
 
 											if (el.hasClass("form-item--range")) {
+												var $inputEl = $(el),
+													$jcfContainer = $inputEl.closest(".jcf-range"),
+													realInputName = $jcfContainer.find("input").data("nameInput"),
+													jcfFrom = $jcfContainer.find(".jcf-index-1"),
+													$jcfFromField = $(".jcf-range-count-number", jcfFrom),
+													$jcfTo = $jcfContainer.find(".jcf-index-2"),
+													$jcfToField = $(".jcf-range-count-number", $jcfTo),
+													tplText = $inputEl.data("valtext"),
+													fromVal,toVal,valueArray;
+
+												valueArray = $inputEl[0].defaultValue.split(",");
+
+												// text in container
+												var startFrom = valueArray[0].replace(/(\d)(?=(\d\d\d)+([^\d]|$))/g, "$1 ");
+												var finishTo = valueArray[1].replace(/(\d)(?=(\d\d\d)+([^\d]|$))/g, "$1 ");
+
+												$jcfFromField.html(startFrom).append(tplText);
+												$jcfToField.html(finishTo).append(tplText);
+
+												$inputEl.attr("data-valfrom", valueArray[0]);
+												$inputEl.attr("data-valto", valueArray[1]);
+
+												var $fakeInputMin = $jcfContainer.find("[data-fake-min]");
+												var $fakeInputMax = $jcfContainer.find("[data-fake-max]");
+
+												$fakeInputMin.val(startFrom);
+												$fakeInputMax.val(finishTo);
+
 												var currentStateRange = jcf.getInstance(el);
 												currentStateRange.values = [currentStateRange.minValue, currentStateRange.maxValue];
 												currentStateRange.refresh();
@@ -653,7 +687,7 @@
 								}, 100);
 
 							});
-
+							e.preventDefault();
 						});
 
 					}
@@ -2009,7 +2043,8 @@
 					var self = this;
 
 					self.$elements.each(function() {
-						var el = $(this);
+						var el = $(this),
+							typeList = el.data("autocompleteType");
 
 						el.autocomplete({
 							minChars: 2,
@@ -2017,24 +2052,49 @@
 							serviceUrl: el.data("autocompleteUrl"),
 							ajaxSettings: {
 			                    type: "GET",
-			                    dataType: "json"
+			                    dataType: "json",
+								crossDomain: true,
 							},
 							noSuggestionNotice: "Ничего не найдено",
 							showNoSuggestionNotice: true,
 							formatResult: function(suggestion, currentValue) {
 								var strItem = "",
+									img = "",
+									link = null,
 									reg = new RegExp(currentValue, "gi");
 
-								itemName = suggestion.value.replace(reg, function(str) {
+								var itemName = suggestion.value.replace(reg, function(str) {
 									return "<b>" + str + "</b>";
 								});
 
-								strItem += '<div class="autocomplate-item">'
-												+ '<div class="autocomplate-item-name">' + itemName +
-												 '</div>'
-											+ '</div>';
+								if (typeList == "link") {
+									link = suggestion.link;
+									if (suggestion.img) {
+										img = '<img src="' + suggestion.img + '" class="autocomplater-img">';
+									}
+									strItem += '<a href="' + link + '" class="link autocomplate-item autocomplate-item--link">' +
+												  	  '<div class="autocomplate-item-container">' +
+													  	img +
+													  '</div>' +
+													  '<div class="autocomplate-item-name">' +
+													  	itemName +
+													  '</div>' +
+											   '</a>';
+
+
+								} else {
+									strItem += '<div class="autocomplate-item">' +
+													 '<div class="autocomplate-item-name">' + itemName +
+													 '</div>' +
+											   '</div>';
+								}
 								return strItem;
 							},
+							onSelect: function (suggestion, item) {
+								if (item && item.attr("href")) {
+									location.href = item.find("a").attr("href");
+								}
+							}
 						});
 
 					})

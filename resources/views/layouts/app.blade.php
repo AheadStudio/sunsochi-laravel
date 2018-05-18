@@ -62,19 +62,27 @@
 								<a href="tel:+78007075523" class="link link--orange header-mobile-item">8-800-707-55-23</a>
 							</div>
 							<a href="form-call.html" data-mfp-type="ajax" data-mfp-ajaxcontent="#form-call" data-mfp-bcg="#009ecc" data-mfp-closeinside="false" class="link button button--orange header-call mfp-modal">Заказать звонок</a>
+							@php
+									$active = "";
+									$count = 0;
+									if (!empty(json_decode(Cookie::get('sunsochi-favorite')))) {
+										$count = count(json_decode(Cookie::get('sunsochi-favorite')));
+										$active = "active";
+									}
+							@endphp
 							<div class="header-mobile-elements">
 								<div class="header-favorites mobile-favorites">
-									<a href="#" class="link header-favorites-holder">
+
+									<a href="/catalog/favorites/" class="link header-favorites-holder {{ $active }}">
 										<?php include("svg/star.svg"); ?>
 									</a>
-									<span data-favorite="0" class="header-favorites-count">0</span>
+									<span data-favorite="0" class="header-favorites-count">{{ $count }}</span>
 								</div>
 								<div class="header-burger"><span class="header-burger-inner"></span></div>
 							</div>
 						</div>
 					</div>
 				</div>
-
 				<div class="header-row header-row--bottom">
 					<div class="page-inner page-inner--w1">
 						<div class="header-row-items">
@@ -87,10 +95,10 @@
 							<?php echo menu("main", "menus.top-next"); ?>
 
 							<div class="header-favorites">
-								<a href="#" class="link header-favorites-holder">
+								<a href="/catalog/favorites/" class="link header-favorites-holder {{ $active }}">
 									<?php include("svg/star.svg"); ?>
 								</a>
-								<span data-favorite="0" class="header-favorites-count">0</span>
+								<span data-favorite="0" class="header-favorites-count">{{ $count }}</span>
 							</div>
 
 						</div>
@@ -128,7 +136,7 @@
 
 				<div class="footer-row footer-row--bottom">
 					<div class="footer-info">
-						<a href="#" class="link link-bottom-orange footer-info-private">Политика обработки персональных данных</a>
+						<a href="/pdf/policy.pdf" target="_blank" class="link link-bottom-orange footer-info-private">Политика обработки персональных данных</a>
 						<div class="footer-info-name">SunSochi.com - Недвижимость в Сочи</div>
 						<a href="http://aheadstudio.ru" target="_blank," class="link footer-creators">
 							<span class="footer-creators-title">Поддержка сайта</span>

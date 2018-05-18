@@ -192,7 +192,7 @@
 
             // Listen for click event on suggestions list:
             container.on('click.autocomplete', suggestionSelector, function () {
-                that.select($(this).data('index'));
+                that.select($(this).data('index'), $(this));
                 return false;
             });
 
@@ -753,7 +753,7 @@
             if (!value) {
                 return;
             }
-            
+
             $.each(that.suggestions, function (i, suggestion) {
                 var foundMatch = suggestion.value.toLowerCase().indexOf(value) === 0;
                 if (foundMatch) {
@@ -850,10 +850,10 @@
             that.select(i);
         },
 
-        select: function (i) {
+        select: function (i, item) {
             var that = this;
             that.hide();
-            that.onSelect(i);
+            that.onSelect(i, item);
             that.disableKillerFn();
         },
 
@@ -914,8 +914,9 @@
             that.signalHint(null);
         },
 
-        onSelect: function (index) {
+        onSelect: function (index, item) {
             var that = this,
+                el,
                 onSelectCallback = that.options.onSelect,
                 suggestion = that.suggestions[index];
 
@@ -928,8 +929,14 @@
             that.suggestions = [];
             that.selection = suggestion;
 
+            if (item) {
+                el = item;
+            } else {
+                el = "";
+            }
+            
             if ($.isFunction(onSelectCallback)) {
-                onSelectCallback.call(that.element, suggestion);
+                onSelectCallback.call(that.element, suggestion, el);
             }
         },
 

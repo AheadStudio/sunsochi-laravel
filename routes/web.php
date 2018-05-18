@@ -40,15 +40,32 @@ Route::get("/company/team/", "TeamController@index")->name("TeamIndex");
 Route::get("/company/team/import/", "TeamController@import")->middleware("auth")->name("TeamImportIndex");
 Route::post("/company/team/import/send/", "TeamController@importHandler")->middleware("auth")->name("TeamImportSend");
 
-Route::get("/catalog/", "CatalogController@index")->name("CatalogIndex");
-Route::get("/catalog/{section}/", "CatalogController@section")->name("CatalogSection");
 
-Route::get("/catalog/{section}/filter/{params}/", "CatalogController@section")->name("CatalogSectionFilter")->where(["params" => "([/A-Za-z0-9_-]+)"]);
+/** catalog **/
+// route for get favorities
+Route::get("/catalog/favorites/", "CatalogController@getFavorite")->name("CatalogFavorite");
+Route::get("/catalog/favorites/add/", "CatalogController@addFavorite")->name("CatalogFavoriteAdd");
 
-Route::get("/catalog/{section}/{subsection}/", "CatalogController@subsection")->name("CatalogSubSection");
-Route::get("/catalog/{section}/{subsection}/{code}/", "CatalogController@show")->name("CatalogShow");
+// route for get items catalog
+Route::get("/catalog/{section}/get/", "CatalogController@getFilterItems")->name("CatalogSectionFilterItems");
+
+// route for get count items catalog
+Route::get("/catalog/{section}/get/count/", "CatalogController@getFilterCount")->name("CatalogSectionFilterCount");
+
+
+
+Route::get("/catalog/{section}/filter/{params}/", "CatalogController@section")->name("CatalogSectionFilter")->where(["params" => "([/А-Яа-яA-Za-z0-9_-]+)"]);
+
 Route::get("/catalog/import/", "CatalogController@import")->middleware("auth")->name("CatalogImportIndex");
 Route::post("/catalog/import/send/", "CatalogController@importHandler")->middleware("auth")->name("CatalogImportSend");
+
+Route::get("/catalog/", "CatalogController@index")->name("CatalogIndex");
+Route::get("/catalog/{section}/", "CatalogController@section")->name("CatalogSection");
+Route::get("/catalog/{section}/{subsection}/", "CatalogController@subsection")->name("CatalogSubSection");
+Route::get("/catalog/{section}/{subsection}/{code}/", "CatalogController@show")->name("CatalogShow");
+
+/** //catalog **/
+
 
 Route::get("/contacts/", "ContactsController@index")->name("ContactsIndex");
 
@@ -63,6 +80,7 @@ Route::get("/company/", function () {
 Route::get("/about/", function () {
     return redirect("/company/about/");
 })->name("CompanyIndex");
+
 
 //Route::get("/company/about/", ["uses" => "PageController@default", "arParams" => [
 //	"view" => "test"

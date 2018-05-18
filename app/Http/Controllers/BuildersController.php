@@ -61,12 +61,6 @@ class BuildersController extends Controller
             return redirect(404);
         }
 
-        $builderOffers = Catalog::select("id", "basic_section", "name", "code", "text_action", "price_from")
-                                ->where("developer_buildings", $builderItem->id)
-                                ->orderBy("active", "1")
-                                ->orderBy("name", "asc")
-                                ->paginate(6);
-
         // SEO information
         Helper::setSEO(
             "Застройщик ".$builderItem->name." и информация о нем",
@@ -74,114 +68,16 @@ class BuildersController extends Controller
             "http://sunsochi.goodcode.ru"
         );
 
-        if (!$builderOffers->isEmpty()) {
+        $request = [
+            "ar_filter"     => ["developer_buildings" => $builderItem->id],
+            "ar_select"     => ["id", "basic_section", "name", "code", "text_action", "price_ap_min"]
+        ];
 
-            foreach ($builderOffers as $keyOffers => $valOffers) {
-
-                if (!empty($valOffers) || isset($valOffers)) {
-
-                    // get section offers
-                    $subSection = CatalogsSection::select("parent_id", "code")
-                                                 ->where("id", $valOffers->basic_section)
-                                                 ->first();
-
-                    $catalogSection = CatalogsSection::select("code")
-                                                     ->where("id", $subSection->parent_id)
-                                                     ->first();
-
-                    // get photo offers
-                    $photo = Picture::select("path")
-                                    ->where("element_id", $valOffers->id)
-                                    ->first();
-
-                    // get district(region) offers
-                    $districtProp = ElementDirectory::where("element_id", $valOffers->id)
-                                                    ->where("name_field", "district")
-                                                    ->first();
-
-                    if (isset($districtProp)) {
-                        $district = District::select("name")
-                                            ->where("code", $districtProp->code)
-                                            ->first();
-                    } else {
-                        $district->{"name"} = "";
-                    }
-
-                    // get end of construction
-                    $deadlineProp = ElementDirectory::where("element_id", $valOffers->id)
-                                                    ->where("name_field", "deadline")
-                                                    ->first();
-                    if (isset($deadlineProp->code)) {
-                        $deadline = Deadline::select("name")
-                                            ->where("code", $deadlineProp->code)
-                                            ->first();
-                    } else {
-                        $deadline->{"name"} = "";
-                    }
-
-                    //using Cache
-                    $apartments = Cache::remember("catalogApartments", 24*60, function() use(&$valOffers){
-                        return Catalog::select("id", "price")
-                                             ->where([
-                                                ["cottage_village", $valOffers->id],
-                                                ["price", ">", "0"],
-                                             ])
-                                             ->orderBy("price", "asc")
-                                             ->distinct()
-                                             ->get();
-                    });
-
-                    $apartmnetItems = [];
-
-                    foreach ($apartments as $keyApartment => $valApartment) {
-                        $apartmentsProp = ElementDirectory::where([
-                                                             ["element_id", $valApartment->id],
-                                                             ["name_field", "number_rooms"],
-                                                          ])
-                                                          ->first();
-
-                        if (!empty($apartmentsProp->code) || isset($apartmentsProp->code)) {
-                            $apartmentRooms = NumberRoom::where("code", $apartmentsProp->code)->first();
-
-                            // verification of existence apartments
-                            if(!isset($apartmnetItems[$apartmentRooms->name])) {
-                                $apartmnetItems[$apartmentRooms->name] = Array(
-                                    "price" => $valApartment->price
-                                );
-                            } else {
-                                if($apartmnetItems[$apartmentRooms->name]->price > $valApartment->price) {
-                                    $apartmnetItems[$apartmentRooms->name]->price = $valApartment->price;
-                                }
-                            }
-
-                            // convert array to object (for unification component)
-                            $apartmnetItems = array_map(function($array){
-                                return (object)$array;
-                            }, $apartmnetItems);
-
-                        } else {
-                            $apartmnetItems = [];
-                        }
-                    }
-
-                    ksort($apartmnetItems);
-
-                    // create final object
-                    $builderOffers[$keyOffers]->{"photo"}       = $photo->path;
-                    $builderOffers[$keyOffers]->{"district"}    = $district->name;
-                    $builderOffers[$keyOffers]->{"deadline"}    = $deadline->name;
-                    $builderOffers[$keyOffers]->{"apartments"}  = (object)$apartmnetItems;
-                    $builderOffers[$keyOffers]->{"path"}        = route("CatalogShow", [$catalogSection->code, $subSection->code, $valOffers->code]);
-
-                }
-
-            }
-
-        }
+        $elements = ApiController::getCatalog($request);
 
         return view("builder-detail", [
             "builderItem"  => $builderItem,
-            "builderOffers" => $builderOffers,
+            "builderOffers" => $elements,
             "pageTitle" => $builderItem->name
         ]);
 

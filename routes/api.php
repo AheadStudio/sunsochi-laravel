@@ -18,5 +18,5 @@ Route::get("/blog/", "ApiController@getBlog");
 Route::post("/blog/add-rating/", "ApiController@updateRating");
 
 // catalog API
-Route::get("/catalog/", "ApiController@getCatalog");
-Route::get("/catalog/district/", "ApiController@getDistrict");
+//Route::get("/catalog/", "ApiController@getCatalog");
+Route::get("/catalog/list/", "ApiController@getCataloglist");

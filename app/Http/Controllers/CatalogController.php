@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 
+use App\Http\Controllers\ApiController;
+
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Http\Request;
@@ -41,8 +43,6 @@ class CatalogController extends Controller
 
     // section page
     public function section(Request $request, $section, $params = false) {
-        //dd(explode("/", $params));
-
         // main array, which contain all params
         $pageParams = [];
 
@@ -57,7 +57,39 @@ class CatalogController extends Controller
                 $pageParams["pageTabs"] = ["Вcе объекты проверены", "Квартиры<br>от 900 тысяч<br>рублей", "Гарантия цены<br>застройщика"];
                 $pageParams["pageImage"] = "/dummy/new-bildings.jpg";
                 break;
+            case "kvartiry":
+                $mainSectionId = 68;
+                $pageParams["pageTitle"] = "Квартиры Сочи и Адлера";
+                $pageParams["pageTabs"] = ["Вcе объекты проверены", "Квартиры<br>от 1,1 тысяч<br>рублей", "Гарантия цен<br>застройщика"];
+                $pageParams["pageImage"] = "/dummy/apartments.jpg";
+                break;
+            case "elitnye":
+                $mainSectionId = 34;
+                $pageParams["pageTitle"] = "Элитные дома Сочи и Адлера";
+                $pageParams["pageTabs"] = ["Площади <br>200 — 1200 м<sup>2</sup>", "Квартиры<br>от 5,9 тысяч<br>рублей", "Гарантия <br>актуальной цены"];
+                $pageParams["pageImage"] = "/dummy/houses.jpg";
+                break;
+            case "doma":
+                $mainSectionId = 34;
+                $pageParams["pageTitle"] = "Дома в Сочи и Адлера";
+                $pageParams["pageTabs"] = ["Площади <br>50 — 1200 м<sup>2</sup>", "Дома <br>от 3,9 тысяч рублей", "Гарантия <br>актуальной цены"];
+                $pageParams["pageImage"] = "/dummy/houses.jpg";
+                break;
+            case "uchastki":
+                $mainSectionId = 18;
+                $pageParams["pageTitle"] = "Участки в Сочи под любую <br>недвижимость";
+                $pageParams["pageTabs"] = ["Площади <br>4 — 200 соток", "Участки <br>от 600 тысяч рублей", "Гарантия актуальной <br>цены"];
+                $pageParams["pageImage"] = "/dummy/areas.jpg";
+                break;
+            case "kommercheskaya_nedvizhimost":
+                $mainSectionId = 2;
+                $pageParams["pageTitle"] = "Участки в Сочи под любую <br>недвижимость";
+                $pageParams["pageTabs"] = ["Площади <br>4 — 200 соток", "Участки <br>от 600 тысяч рублей", "Гарантия актуальной <br>цены"];
+                $pageParams["pageImage"] = "/dummy/areas.jpg";
+                break;
         }
+
+        $pageParams["pageSection"] = $section;
 
         // get district
         $pageParams["district"] = Cache::remember("catalogDistrict", 60, function() {
@@ -69,105 +101,23 @@ class CatalogController extends Controller
             return Deadline::select("id", "code", "name")->get();
         });
 
-        // all section
+        // get all section
         $allSection = Cache::remember("catalogAllSection", 60*3, function() {
             return CatalogsSection::all();
         });
 
-        // fields
-        $inputs = $request->all();
+        if (!empty($params) && $params != false) {
+            $request = [
+                "url"           => $request->url(),
+                "params"        => $params,
+                "main_section"  => $section,
+            ];
 
-        if (!empty($inputs)) {
-            // array fields
-            $arFields = [];
+            $elements = ApiController::getCatalog($request);
 
-            // select district
-            $selDistrict = [];
-
-            foreach ($inputs as $keyInput => $valInput) {
-                $nameSection = explode("|", $keyInput);
-
-                if ($nameSection[0] == "section") {
-                    $result = CatalogsSection::where("code", $nameSection[1])->first();
-                    $arSections[] = $result->id;
-                    continue;
-                }
-
-                if(strripos($keyInput, "min") != false) {
-                    $arFields[] = [$keyInput, ">", (int)str_replace(" ", "", $valInput)];
-                    continue;
-                }
-                if(strripos($keyInput, "max") != false) {
-                    $arFields[] = [$keyInput, "<", (int)str_replace(" ", "", $valInput)];
-                    continue;
-                }
-                if ($nameSection[0] == "district") {
-                    $selDistrict[] = $nameSection[1];
-                    continue;
-                }
-                if ($keyInput == "page") {
-                    continue;
-                }
-                $arFields[] = [$keyInput, $value = $valInput == "on" ? "1" : $valInput];
-
-            }
-
-            // create query
-            $QUERY = "(SELECT element_id FROM (
-                               SELECT element_id, count(element_id) as sections
-                               FROM catalogs_elements
-                               WHERE parent_id in ({section})
-                               GROUP BY element_id
-                           ) as s1
-                           WHERE (s1.sections {countSection})
-                           AND
-                           s1.element_id in (
-                               SELECT element_id FROM element_directories WHERE code in ('{district}')
-                           )
-                       )";
-
-            // get section
-            if (empty($arSections)) {
-                $arSections = CatalogsSection::where("parent_id", $mainSectionId)->get();
-
-                foreach ($arSections as $valSection) {
-                    $arrSectionsId[] =  $valSection->id;
-                }
-                // convert section array in string
-                $strSections = implode(", ", $arrSectionsId);
-                $arSectionsCount = "LIKE '%'";
-            } else {
-                $strSections = implode(", ", $arSections);
-                $arSectionsCount = " = ". count($arSections);
-            }
-
-            $QUERY = str_replace("{section}", $strSections, $QUERY);
-            $QUERY = str_replace("{countSection}", $arSectionsCount, $QUERY);
-
-            //get district
-            if (empty($selDistrict)) {
-                foreach ($pageParams["district"] as $valDistrict) {
-                    $selDistrict[] = $valDistrict->code;
-                }
-                $strDistrict = implode("', '", $selDistrict);
-            } else {
-                $strDistrict = implode("', '", $selDistrict);
-            }
-
-            $QUERY = str_replace("{district}", $strDistrict, $QUERY);
-
-            $elements = Catalog::select("id", "basic_section", "name", "code", "text_action", "price_min")
-                               ->whereRaw("id in ". $QUERY. "")
-                               ->where($arFields)
-                               ->orderBy("active", "1")
-                               ->orderBy("name", "asc")
-                               ->paginate(9)
-                               ->appends(request()->query());
-
-
-           $elements = Helper::getGsk($elements, $mainSectionId, $section);
-            $pageParams["offers"] = $elements;
-            $pageParams["countOffers"] = $elements->total();
+            $pageParams["offers"]       = $elements;
+            $pageParams["countOffers"]  = $elements->total();
+            $pageParams["showFind"]     = true;
 
         } else {
             $elements = CatalogsSection::where("parent_id", $mainSectionId)
@@ -178,11 +128,99 @@ class CatalogController extends Controller
                                         ->paginate(9);
 
             $elements = Helper::getGsk($elements, $mainSectionId, $section);
-            $pageParams["offers"] = $elements;
-            $pageParams["countOffers"] = $elements->total();
+
+            $pageParams["offers"]       = $elements;
+            $pageParams["countOffers"]  = $elements->total();
+            $pageParams["showFind"]     = true;
+
+        }
+	    return view("catalog/section", $pageParams);
+    }
+
+    // method for get catalog items
+    public function getFilterItems(Request $request) {
+        //set parameters for request
+        $request = [
+            "url"           => $request->url(),
+            "params"        => $request->params,
+            "main_section"  => $request->main_section,
+            "only_count"    => $request->only_count,
+        ];
+
+        $elements = ApiController::getCatalog($request);
+
+        $pageParams["offers"]       = $elements;
+        $pageParams["countOffers"]  = $elements->total();
+        $pageParams["showFind"]     = true;
+
+        return view("catalog/section-items", $pageParams);
+    }
+
+    // method for get catalog items count
+    public function getFilterCount(Request $request) {
+        //set parameters for request
+        $request = [
+            "url"           => $request->url(),
+            "params"        => $request->params,
+            "main_section"  => $request->main_section,
+            "only_count"    => $request->only_count,
+        ];
+
+        $elements = ApiController::getCatalog($request);
+        
+        return view("catalog/sections-filter-button", ["countElements" => $elements]);
+    }
+
+    // method for add elements in favorite
+    public function addFavorite(Request $request) {
+        $newCookie = [];
+
+        $checkCookie = json_decode($request->cookie("sunsochi-favorite"));
+        if (empty($checkCookie)) {
+            array_unshift($newCookie, $request["element_id"]);
+        } else {
+            if (!in_array($request["element_id"], $checkCookie)) {
+                array_unshift($checkCookie, $request["element_id"]);
+                $newCookie = $checkCookie;
+            } else {
+                $newCookie = $checkCookie;
+            }
         }
 
-	    return view("catalog/section", $pageParams);
+        return response()->json(["count" => count($newCookie)])->withCookie(cookie("sunsochi-favorite", json_encode($newCookie), 60*24*30));
+    }
+
+    // method for get elements from favorite
+    public function getFavorite(Request $request) {
+        $arFields = [];
+        $pageParams = [];
+
+        // get all elements
+        $checkCookie = json_decode($request->cookie("sunsochi-favorite"));
+
+        if (!empty($checkCookie)) {
+            foreach ($checkCookie as $valId) {
+                $arFields[] = $valId;
+            }
+            $request = [
+                "url"           => $request->url(),
+                "ar_filter"     => ["id" => $arFields],
+                "ar_filter_in"  => true,
+                "ar_select"     => ["id", "basic_section", "name", "code", "text_action", "price_ap_min", "price", "cottage_village", "price_m", "area"]
+            ];
+
+            $elements = ApiController::getCatalog($request);
+
+            $pageParams["offers"]       = $elements;
+            $pageParams["countOffers"]  = $elements->total();
+            $pageParams["showFind"]     = false;
+        } else {
+            $elements = new \stdClass;
+            $pageParams["offers"] = $elements;
+        }
+        $pageParams["notShowAdd"]   = 1;
+        $pageParams["showFind"]     = false;
+        return view("favorite", $pageParams);
     }
 
 
@@ -535,8 +573,8 @@ class CatalogController extends Controller
                  "text_action"          => $textAction = empty($valParseCatalog["PROMO_TEXT"]) ? null : $valParseCatalog["PROMO_TEXT"],
                  "street"               => $street = empty($addStreet->id) ? null : $addStreet->id,
                  "status_sale"          => $status = empty($addStatus->id) ? null : $addStatus->id,
-                 "price_min"           => $price_from = empty($valParseCatalog["PRICE_FULL"]) ? null : $valParseCatalog["PRICE_FULL"],
-                 "price_max"             => $price_to = empty($valParseCatalog["PRICE2"]) ? null : $valParseCatalog["PRICE2"],
+                 "price_ap_min"         => $price_from = empty($valParseCatalog["PRICE_FULL"]) ? null : $valParseCatalog["PRICE_FULL"],
+                 "price_ap_max"         => $price_to = empty($valParseCatalog["PRICE2"]) ? null : $valParseCatalog["PRICE2"],
                  "number_houses"        => $number_houses = empty($valParseCatalog["VSEGO_DOMOV"]) ? null : $valParseCatalog["VSEGO_DOMOV"],
                  "number_apartments"    => $number_houses = empty($valParseCatalog["VSEGO_KVARTIR"]) ? null : $valParseCatalog["VSEGO_KVARTIR"],
                  "cost_service"         => $cost_service = empty($valParseCatalog["STOIMOST_OBSLUZHIVANIYA"]) ? null : $valParseCatalog["STOIMOST_OBSLUZHIVANIYA"],
@@ -547,8 +585,8 @@ class CatalogController extends Controller
                  "federal_law_214"      => $low_214 = empty($valParseCatalog["FEDERALNYJ_ZAKON_214"]) ? null : $valParseCatalog["FEDERALNYJ_ZAKON_214"],
                  "federal_law_215"      => $low_215 = empty($valParseCatalog["FEDERALNYJ_ZAKON_215"]) ? null : $valParseCatalog["FEDERALNYJ_ZAKON_215"],
                  "m_capital"            => $m_capital = empty($valParseCatalog["MATKAP"]) ? null : $valParseCatalog["MATKAP"],
-                 "area_min"             => $area_ap_min = empty($valParseCatalog["PLOSHCHAD_KVARTIR_MIN"]) ? null : $valParseCatalog["PLOSHCHAD_KVARTIR_MIN"],
-                 "area_max"             => $area_ap_max = empty($valParseCatalog["PLOSHCHAD_KVARTIR_MAX"]) ? null : $valParseCatalog["PLOSHCHAD_KVARTIR_MAX"],
+                 "area_ap_min"          => $area_ap_min = empty($valParseCatalog["PLOSHCHAD_KVARTIR_MIN"]) ? null : $valParseCatalog["PLOSHCHAD_KVARTIR_MIN"],
+                 "area_ap_max"          => $area_ap_max = empty($valParseCatalog["PLOSHCHAD_KVARTIR_MAX"]) ? null : $valParseCatalog["PLOSHCHAD_KVARTIR_MAX"],
                  "infrastructure"       => $infrastructure = empty($valParseCatalog["INFRASTRUCTURA"]) ? null : $valParseCatalog["INFRASTRUCTURA"],
                  "for_dacha"            => $for_dacha = empty($valParseCatalog["FOR_DACH"]) ? null : $valParseCatalog["FOR_DACH"],
                  "for_build"            => $for_build = empty($valParseCatalog["FOR_STRO"]) ? null : $valParseCatalog["FOR_STRO"],

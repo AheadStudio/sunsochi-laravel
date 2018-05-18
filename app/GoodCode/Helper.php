@@ -64,9 +64,15 @@ class Helper
     */
     public static function getGsk($elements, $idMainSection, $codeMainSection) {
         if (!empty($elements) || isset($elements)) {
+            if ($idMainSection != "") {
+                $queryMainSection[] = ["parent_id", $idMainSection];
+            } else {
+                $queryMainSection[] = ["parent_id", "<>", ""];
+            }
+
             // all section
             $allSection = CatalogsSection::select("id", "code", "parent_id")
-                                            ->where("parent_id", $idMainSection)
+                                            ->where($queryMainSection)
                                             ->get()
                                             ->groupBy("id");
 
@@ -134,7 +140,7 @@ class Helper
 
                 // add region (district)
                 if (isset($districtElementsCode[$item->id])) {
-                    $item->{"distric"} = $districtElementsCode[$item->id][0]->name;
+                    $item->{"district"} = $districtElementsCode[$item->id][0]->name;
                 }
 
 
@@ -148,42 +154,46 @@ class Helper
                                         ->distinct()
                                         ->get();
 
-                $apartmnetItems = [];
+                if ($apartments->isNotEmpty()) {
+                    $apartmnetItems = [];
 
-                foreach ($apartments as $keyApartment => $valApartment) {
-                    $apartmentsProp = ElementDirectory::where([
-                                                            ["element_id", $valApartment->id],
-                                                            ["name_field", "number_rooms"],
-                                                        ])
-                                                        ->first();
+                    foreach ($apartments as $keyApartment => $valApartment) {
+                        $apartmentsProp = ElementDirectory::where([
+                                                                ["element_id", $valApartment->id],
+                                                                ["name_field", "number_rooms"],
+                                                            ])
+                                                            ->first();
 
-                    if (!empty($apartmentsProp->code) || isset($apartmentsProp->code)) {
-                        $apartmentRooms = NumberRoom::where("code", $apartmentsProp->code)->first();
+                        if (!empty($apartmentsProp->code) || isset($apartmentsProp->code)) {
+                            $apartmentRooms = NumberRoom::where("code", $apartmentsProp->code)->first();
 
-                        // verification of existence apartments
-                        if(!isset($apartmnetItems[$apartmentRooms->name])) {
-                            $apartmnetItems[$apartmentRooms->name] = Array(
-                                "price" => $valApartment->price
-                            );
-                        } else {
-                            if($apartmnetItems[$apartmentRooms->name]->price > $valApartment->price) {
-                                $apartmnetItems[$apartmentRooms->name]->price = $valApartment->price;
+                            // verification of existence apartments
+                            if(!isset($apartmnetItems[$apartmentRooms->name])) {
+                                $apartmnetItems[$apartmentRooms->name] = Array(
+                                    "price" => $valApartment->price
+                                );
+                            } else {
+                                if($apartmnetItems[$apartmentRooms->name]->price > $valApartment->price) {
+                                    $apartmnetItems[$apartmentRooms->name]->price = $valApartment->price;
+                                }
                             }
+
+                            // convert array to object (for unification component)
+                            $apartmnetItems = array_map(function($array){
+                                return (object)$array;
+                            }, $apartmnetItems);
+
+                        } else {
+                            $apartmnetItems = [];
                         }
 
-                        // convert array to object (for unification component)
-                        $apartmnetItems = array_map(function($array){
-                            return (object)$array;
-                        }, $apartmnetItems);
-
-                    } else {
-                        $apartmnetItems = [];
                     }
 
-                }
-                ksort($apartmnetItems);
+                    ksort($apartmnetItems);
 
-                $item->{"apartments"}  = (object)$apartmnetItems;
+                    $item->{"apartments"}  = (object)$apartmnetItems;
+
+                }
 
             });
 
