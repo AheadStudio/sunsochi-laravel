@@ -224,7 +224,7 @@ class Helper
                     return true;
                 }
                 if ($type == "post") {
-                    return false;
+                    return $cookie;
                 }
             } else {
                 if ($type == "get") {

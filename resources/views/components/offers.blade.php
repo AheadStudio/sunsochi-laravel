@@ -30,11 +30,10 @@
                 @php
                     $favorite = "";
                     $text = "Добавить в избранное";
-                    if (!empty(json_decode(Cookie::get('sunsochi-favorite')))) {
-                        if (array_search($valOffers->id, json_decode(Cookie::get('sunsochi-favorite'))) != false) {
-                            $favorite = "added";
-                            $text = "Добавленно";
-                        }
+                    $newCookie = App\GoodCode\Helper::handlerCookie($valOffers->id, "get");
+                    if ($newCookie == true) {
+                        $favorite = "added";
+                        $text = "Добавленно";
                     }
                 @endphp
                 <button type="button" class="offers-container-favorites {{ $favorite }}"  data-favorite='{{ $valOffers->id }}'>
