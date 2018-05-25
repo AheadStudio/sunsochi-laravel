@@ -14,7 +14,7 @@
                         </span>
                         <span class="blog-views-count">{{ $blogItem->views }}</span>
                         </div>
-                    <div data-rating data-rating-value="{{ $blogItem->rating }}" data-rating-read="true" class="blog-rating"></div>
+                    <div data-rating data-rating-value="{{ $blogItem->rating }}" data-rating-id="{{ $blogItem->id }}" data-rating-read="true" class="blog-rating"></div>
                 </div>
                 <div class="blog-holder">
                     @if (isset($blogItem->preview_picture))
@@ -43,7 +43,7 @@
                     </div>
                     <div class="blog-estimate">
                         <div class="blog-estimate-title">Поставить оценку:</div>
-                        <div data-rating data-rating-value="{{$blogItem->rating}}" data-rating-read="false" data-rating-params='{"voted" : "{{ $blogItem->voted }}", "summ" : "{{ $blogItem->summ_rating }}", "code": "{{ $blogItem->code }}"}' class="blog-rating"></div>
+                        <div data-rating data-rating-value="{{$blogItem->rating}}" data-rating-id="{{ $blogItem->id }}" data-rating-read="false" data-rating-params='{"voted" : "{{ $blogItem->voted }}", "summ" : "{{ $blogItem->summ_rating }}", "code": "{{ $blogItem->code }}"}' class="blog-rating"></div>
                     </div>
                 </div>
             </div>

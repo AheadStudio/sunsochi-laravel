@@ -1219,34 +1219,34 @@ body {
   color: #f99d22;
 }
 .header-favorites {
-  display: -webkit-box;
-  display: -moz-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: box;
-  display: flex;
-  -webkit-box-align: center;
-  -moz-box-align: center;
-  -o-box-align: center;
-  -ms-flex-align: center;
-  -webkit-align-items: center;
-  align-items: center;
-  min-width: 60px;
-  -webkit-box-pack: end;
-  -moz-box-pack: end;
-  -o-box-pack: end;
-  -ms-flex-pack: end;
-  -webkit-justify-content: flex-end;
-  justify-content: flex-end;
-
+ display: inline-block;
 }
 .header-favorites .header-favorites-holder {
-  display: block;
-  width: 25px;
-  height: 25px;
+    display: -webkit-box;
+    display: -moz-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: box;
+    display: flex;
+    -webkit-box-align: center;
+    -moz-box-align: center;
+    -o-box-align: center;
+    -ms-flex-align: center;
+    -webkit-align-items: center;
+    align-items: center;
+    min-width: 60px;
+    -webkit-box-pack: end;
+    -moz-box-pack: end;
+    -o-box-pack: end;
+    -ms-flex-pack: end;
+    -webkit-justify-content: flex-end;
+    justify-content: flex-end;
+    width: 25px;
+    height: 25px;
 }
 .header-favorites .header-favorites-holder svg {
   display: block;
+  max-width: 25px;
   width: 100%;
 }
 .header-favorites .header-favorites-holder svg path {
@@ -1258,6 +1258,16 @@ body {
 }
 .header-favorites .header-favorites-holder.active svg path {
   fill: #f99d22;
+}
+.header-favorites .header-favorites-holder.active svg{
+    -webkit-transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    -moz-transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    -o-transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    -ms-transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+.header-favorites .header-favorites-holder.active:hover svg{
+    transform: scale(1.2);
 }
 .header-favorites .header-favorites-count {
   padding-left: 10px;
@@ -3067,7 +3077,7 @@ body.open-menu .page-header .mobile-favorites {
   -ms-transition: background 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), color 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   transition: background 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), color 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   font-size: 14px;
-  white-space: nowrap;
+ /* white-space: nowrap;*/
 }
 .regions-container .regions-container-list ul li .regions-close {
   position: absolute;
@@ -3255,6 +3265,7 @@ body.open-menu .page-header .mobile-favorites {
 .offers-item {
   position: relative;
   height: 100%;
+  min-height: 350px;
   color: #2c2f2f;
   -webkit-transition: -webkit-transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   -moz-transition: -moz-transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
@@ -3381,6 +3392,25 @@ body.open-menu .page-header .mobile-favorites {
   z-index: 10;
   border-top-right-radius: 5px;
   border-top-left-radius: 5px;
+}
+.offers-item.hide-add .offers-container-favorites {
+    display: none;
+}
+.offers-item.hide-add .offers-container-more {
+    top: 50%;
+    bottom: inherit;
+    transform: translate(-50%, -50%);
+}
+.empty {
+    background: #ccc;
+}
+.empty svg{
+    position: absolute;
+    display: block;
+    width: 50px;
+    top: 50%;
+    left: 50%;
+    margin: -50px 0 0 -25px;
 }
 .offers-item .offers-container-favorites {
   position: absolute;
@@ -4171,17 +4201,10 @@ display: none;
 }
 .reviews-home-item .reviews-home-container .reviews-home-text {
   position: relative;
-  max-height: 215px;
   margin-bottom: 20px;
   line-height: 24px;
   color: #000;
   overflow: hidden;
-}
-.reviews-home-item .reviews-home-container .reviews-home-text:after {
-  content: "...";
-  position: absolute;
-  bottom: -1px;
-  right: 0;
 }
 .owl-item.active .reviews-home-item .reviews-home-video {
   -webkit-transform: translateX(0px);
@@ -4543,6 +4566,19 @@ display: none;
   display: inline-block;
   margin-right: 15px;
 }
+.apartment-preview-text-icon.added svg path{
+    fill: #f99d21;
+}
+.apartment-preview-text-icon.added svg{
+    -webkit-transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    -moz-transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    -o-transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    -ms-transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+.apartment-preview-text-icon.added svg:hover{
+    transform: scale(1.1);
+}
 .apartment .apartment-header .apartment-preview-text-info {
   display: inline-block;
   vertical-align: top;
@@ -4550,6 +4586,10 @@ display: none;
 }
 .apartment .apartment-header .apartment-preview-text-price {
   margin-bottom: 15px;
+}
+.apartment .apartment-header .apartment-preview-text-price sup{
+  vertical-align: top;
+  font-size: 16px;
 }
 .apartment .apartment-header .apartment-preview-text-credit {
   margin-bottom: 15px;
@@ -4628,7 +4668,7 @@ display: none;
 .apartment .apartment-slider .apartment-slider-item {
   display: block;
   width: 100%;
-  height: 475px;
+  height: 480px;
 }
 .apartment .apartment-slider .apartment-slider-item img {
   display: block;
@@ -4723,7 +4763,7 @@ display: none;
 }
 .apartment .apartment-preview-text-container .apartment-preview-text.fixed-element {
   position: fixed;
-  top: 70px;
+  top: 74px;
   right: 0;
   width: 100%;
   padding: 50px 0 50px 35px;
@@ -4841,6 +4881,48 @@ display: none;
 }
 .apartment .apartment-information .apartment-detail-info {
   margin-top: 30px;
+}
+.infrastructure {
+    display: -webkit-box;
+    display: -moz-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: box;
+    display: flex;
+    -webkit-box-pack: start;
+    -moz-box-pack: start;
+    -o-box-pack: start;
+    -ms-flex-pack: start;
+    -webkit-justify-content: flex-start;
+    justify-content: flex-start;
+    -webkit-box-align: baseline;
+    -moz-box-align: baseline;
+    -o-box-align: baseline;
+    -ms-flex-align: baseline;
+    -webkit-align-items: baseline;
+    align-items: baseline;
+    margin-bottom: 25px;
+    -webkit-box-lines: multiple;
+    -moz-box-lines: multiple;
+    -o-box-lines: multiple;
+    -webkit-flex-wrap: wrap;
+    -ms-flex-wrap: wrap;
+    flex-wrap: wrap;
+}
+.infrastructure .infrastructure-column {
+    max-width: 50%;
+    width: 100%;
+}
+.infrastructure .infrastructure-column .title{
+    font-family: "ProximaNovaSemibold";
+    margin-bottom: 30px;
+    font-size: 18px;
+    color: #2c2f2f;
+}
+.infrastructure .infrastructure-column .text {
+    margin-bottom: 20px;
+    font-size: 18px;
+    color: #2c2f2f;
 }
 .apartment.apartment-card .apartment-information {
   max-width: 1000px;
@@ -5428,6 +5510,9 @@ display: none;
   display: block;
   width: 100%;
 }
+.tooltip-container .tooltip-apartment-icon.added svg path{
+  fill:#f99d21;
+}
 .tooltip-container .tooltip-apartment-icon svg path {
   -webkit-transition: fill 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   -moz-transition: fill 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
@@ -5547,6 +5632,7 @@ display: none;
 }
 .tooltipster-slide-right.tooltipster-show {
   opacity: 1;
+  visibility: visible !important;
   -ms-filter: none;
   filter: none;
   -webkit-transform: translateX(0);
@@ -6756,12 +6842,15 @@ display: none;
   width: 66%;
 }
 .blog .blog-holder {
+  position: relative;
   display: block;
   width: 100%;
+  min-height: 360px;
   margin-bottom: 50px;
   overflow: hidden;
 }
 .blog .blog-holder .blog-img {
+  position: absolute;
   display: block;
   width: 100%;
   height: 100%;
@@ -6770,6 +6859,7 @@ display: none;
   -o-transition: -o-transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   -ms-transition: -ms-transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  object-fit: cover;
 }
 .blog .blog-title {
   display: block;

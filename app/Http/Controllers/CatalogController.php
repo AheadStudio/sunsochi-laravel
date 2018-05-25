@@ -8,6 +8,8 @@ use App\Http\Controllers\ApiController;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\URL;
+
 use Illuminate\Http\Request;
 
 use App\GoodCode\ParseCatalog;
@@ -28,6 +30,8 @@ use App\Builder;
 use App\Deadline;
 use App\District;
 use App\NumberRoom;
+use App\Predestination;
+use App\PopularQuery;
 
 use Session;
 use Excel;
@@ -49,7 +53,8 @@ class CatalogController extends Controller
         // array sections which belong to elements
         $arSections = [];
 
-        // check catalog page
+        // check catalog page and set settings for page
+        $pageParams["pageSection"] = $section;
 	    switch ($section) {
             case "novostrojki":
                 $mainSectionId = 51;
@@ -64,7 +69,6 @@ class CatalogController extends Controller
                 $pageParams["pageImage"] = "/dummy/apartments.jpg";
                 break;
             case "elitnye":
-                $mainSectionId = 34;
                 $pageParams["pageTitle"] = "Элитные дома Сочи и Адлера";
                 $pageParams["pageTabs"] = ["Площади <br>200 — 1200 м<sup>2</sup>", "Квартиры<br>от 5,9 тысяч<br>рублей", "Гарантия <br>актуальной цены"];
                 $pageParams["pageImage"] = "/dummy/houses.jpg";
@@ -89,32 +93,25 @@ class CatalogController extends Controller
                 break;
         }
 
-        
-        Helper::setSEO(
-            $pageParams["pageTitle"],
-            "Каталог компании “Солнечный Сочи”",
-            "http://sunsochi.goodcode.ru"
-        );
-
-
-        $pageParams["pageSection"] = $section;
-
         // get district
-        $pageParams["district"] = Cache::remember("catalogDistrict", 60, function() {
-            return District::select("id", "code", "name")->get();
+        $pageParams["district"] = District::select("id", "code", "name", "popular")
+                                          ->get();
+
+        $pageParams["popularDistrict"] = $pageParams["district"]->take(6)
+                                                                ->sortByDesc("popular");
+
+        // get predestination
+        $pageParams["predestination"] = Cache::remember("catalogPredestination", 60, function() {
+            return Predestination::select("id", "code", "name")->get();
         });
 
-        // get deadline
-        $pageParams["deadline"] = Cache::remember("catalogDeadline", 60, function() {
-            return Deadline::select("id", "code", "name")->get();
-        });
+        // get popular query
+        $pageParams["popularQuery"] = PopularQuery::get()
+                                                  ->sortByDesc("popular");
 
-        // get all section
-        $allSection = Cache::remember("catalogAllSection", 60*3, function() {
-            return CatalogsSection::all();
-        });
-
+        // check filter
         if (!empty($params) && $params != false) {
+            // construct request
             $request = [
                 "url"           => $request->url(),
                 "params"        => $params,
@@ -128,12 +125,18 @@ class CatalogController extends Controller
             $pageParams["showFind"]     = true;
 
         } else {
-            $elements = CatalogsSection::where("parent_id", $mainSectionId)
-                                        ->first()
-                                        ->getCatalogElements()
-                                        ->distinct()
-                                        ->take(45)
-                                        ->paginate(9);
+            if ($section == "elitnye") {
+                $mainSectionId  = [15, 31, 35, 66, 83];
+
+                $elements = Catalog::whereIn("basic_section", $mainSectionId)
+                                    ->paginate(9);
+            } else {
+                $elements = CatalogsSection::where("parent_id", $mainSectionId)
+                                            ->first()
+                                            ->getCatalogElements()
+                                            ->distinct()
+                                            ->paginate(9);
+            }
 
             $elements = Helper::getGsk($elements, $mainSectionId, $section);
 
@@ -142,7 +145,16 @@ class CatalogController extends Controller
             $pageParams["showFind"]     = true;
 
         }
+
+        // set SEO for page
+        Helper::setSEO(
+            $pageParams["pageTitle"],
+            "Каталог компании “Солнечный Сочи”",
+            URL::current()
+        );
+
 	    return view("catalog/section", $pageParams);
+
     }
 
     // method for get catalog items
@@ -162,6 +174,7 @@ class CatalogController extends Controller
         $pageParams["showFind"]     = true;
 
         return view("catalog/section-items", $pageParams);
+
     }
 
     // method for get catalog items count
@@ -177,24 +190,12 @@ class CatalogController extends Controller
         $elements = ApiController::getCatalog($request);
 
         return view("catalog/sections-filter-button", ["countElements" => $elements]);
+
     }
 
     // method for add elements in favorite
     public function addFavorite(Request $request) {
-        $newCookie = [];
-
-        $checkCookie = json_decode($request->cookie("sunsochi-favorite"));
-        if (empty($checkCookie)) {
-            array_unshift($newCookie, $request["element_id"]);
-        } else {
-            if (!in_array($request["element_id"], $checkCookie)) {
-                array_unshift($checkCookie, $request["element_id"]);
-                $newCookie = $checkCookie;
-            } else {
-                $newCookie = $checkCookie;
-            }
-        }
-
+        $newCookie = Helper::handlerCookie($request["element_id"], "post");
         return response()->json(["count" => count($newCookie)])->withCookie(cookie("sunsochi-favorite", json_encode($newCookie), 60*24*30));
     }
 
@@ -204,10 +205,10 @@ class CatalogController extends Controller
         $pageParams = [];
 
         // get all elements
-        $checkCookie = json_decode($request->cookie("sunsochi-favorite"));
+        $newCookie = Helper::handlerCookie($request["element_id"], "post");
 
-        if (!empty($checkCookie)) {
-            foreach ($checkCookie as $valId) {
+        if (!empty($newCookie)) {
+            foreach ($newCookie as $valId) {
                 $arFields[] = $valId;
             }
             $request = [
@@ -222,16 +223,288 @@ class CatalogController extends Controller
             $pageParams["offers"]       = $elements;
             $pageParams["countOffers"]  = $elements->total();
             $pageParams["showFind"]     = false;
+
         } else {
+
             $elements = new \stdClass;
             $pageParams["offers"] = $elements;
+
         }
+
         $pageParams["notShowAdd"]   = 1;
         $pageParams["showFind"]     = false;
+
+        // set SEO for page
+        Helper::setSEO(
+            "Избранное",
+            "Каталог компании “Солнечный Сочи”",
+            URL::current()
+        );
+
         return view("favorite", $pageParams);
+
     }
 
+    // detail page
+    public function show(Request $request, $section, $subsection, $code) {
+        //try {
+            $element = Catalog::where("code", $code)->get()->toArray()[0];
+            if (empty($element)) {
+                return redirect(404);
+            }
 
+            if ($section == "elitnye") {
+                $idSubsection = $element["basic_section"];
+                $mainSectionId = CatalogsSection::select("id", "code")
+                                                ->where("catalogs_sections.id", function ($query) use(&$idSubsection) {
+                                                    $query->select("catalogs_sections.parent_id")
+                                                          ->from(with(new CatalogsSection)->getTable())
+                                                          ->where("catalogs_sections.id", $idSubsection);
+                                                })
+                                                ->first();
+                if (is_null($mainSectionId)) {
+                    dd("Указы не верные параметры: секция = ".$section.",подсекция = ". $subsection."код элемента = ".$code);
+                } else {
+                    $mainSectionId = $mainSectionId->id;
+                }
+            } else {
+                $mainSectionId = CatalogsSection::where("code", $section)->first()->id;
+            }
+
+            $element["picture"] = Picture::where("element_id", $element["id"])
+                                            ->get()
+                                            ->toArray();
+
+            $element["code_fields"] = ElementDirectory::where("element_id", $element["id"])
+                                                        ->get()
+                                                        ->groupBy("name_table")
+                                                        ->toArray();
+
+            $element["chess"] = Chess::select("id", "section_list", "section_name", "section_lenght")
+                                        ->where("element_id", $element["id"])
+                                        ->first();
+
+            if (!is_null($element["chess"])) {
+                $element["chess"] = $element["chess"]->toArray();
+            }
+
+            // add property in array element
+            foreach ($element["code_fields"] as $keyElementCode => $valElementCode) {
+                foreach ($valElementCode as $keyCode => $valCode) {
+                    $className = "\App\\".$keyElementCode;
+                    $element["code_fields"][$keyElementCode][$keyCode]["property"] = $className::where("code", $valCode["code"])->get()->toArray()["0"];
+                }
+            }
+
+            // get similar object
+            $similarElements = CatalogsSection::where("code", $subsection)
+                                              ->first()
+                                              ->getCatalogElements();
+
+            // set similar region / district
+            /*$districtCode = $element["code_fields"]["District"][0]["code"];
+            if (!empty($districtCode)) {
+                $similarElements->join("element_directories", function ($join) use (&$districtCode) {
+                        $join->on("element_directories.element_id", "=", "catalogs.id")
+                             ->where("element_directories.code", $districtCode);
+                });
+            }*/
+
+            $similarElements = $similarElements->whereBetween("price", [$element["price"] / 1.5, $element["price"] * 1.5])
+                                               ->take(3)
+                                               ->get();
+
+            $similarElements = Helper::getGsk($similarElements, $mainSectionId, $section);
+
+            $newCookie = Helper::handlerCookie($element["id"], "get");
+            if ($newCookie == true) {
+                $element["check_cookie"] = 1;
+            }
+
+            if ($section == "novostrojki") {
+                // sekect apartments in new building
+                $arApartments = Catalog::where("cottage_village", $element["id"]);
+
+                // all apartments
+                $allApartments = clone $arApartments;
+
+                // all free apartments
+                $onlyFreeTable = clone $arApartments;
+
+                $element["all_apartments"] = $allApartments->select("id", "name", "area", "price", "price_m", "old_price", "text_action", "status_sale")
+                                                            ->where("status_sale", "!=", "1")
+                                                            ->get()
+                                                            ->groupBy("id")
+                                                            ->toArray();
+
+                foreach ($element["all_apartments"] as $keyAp => $valAp) {
+                    if ($valAp[0]["status_sale"] == 2) {
+                        $element["all_apartments"][$keyAp][0]["color"] = "#848783";
+                    }
+                    if ($valAp[0]["status_sale"] == 3) {
+                        $element["all_apartments"][$keyAp][0]["color"] = "#ffe200";
+                    }
+                    if ($valAp[0]["status_sale"] == 4) {
+                        $element["all_apartments"][$keyAp][0]["color"] = "#ffa62f";
+                    }
+                }
+
+                // get free apartments for table
+                $element["free_apartments"] = $onlyFreeTable->select("catalogs.id",
+                                                                    "catalogs.name",
+                                                                    "catalogs.code",
+                                                                    "catalogs.floor",
+                                                                    "catalogs.area",
+                                                                    "catalogs.price",
+                                                                    "catalogs.price_m",
+                                                                    "number_rooms.name as number_rooms_name",
+                                                                    "number_rooms.code as number_rooms_code",
+                                                                    "decorations.name as decorations_name",
+                                                                    "decorations.code as decorations_code",
+                                                                    "subsection.code as subsection_code",
+                                                                    "section.code as section_code"
+                                                                    )
+                                                                    ->where("catalogs.status_sale", "=", 1)
+                                                                    ->join("catalogs_sections as subsection", "subsection.id", "=", "catalogs.basic_section")
+                                                                    ->join("catalogs_sections as section", "section.id", "=", "subsection.parent_id")
+                                                                    ->join("element_directories as element_decoration", function ($join) {
+                                                                        $join->on("element_decoration.element_id", "=", "catalogs.id")
+                                                                                ->where("element_decoration.name_field", "decoration");
+                                                                    })
+                                                                    ->join("element_directories as element_number_rooms", function ($join) {
+                                                                        $join->on("element_number_rooms.element_id", "=", "catalogs.id")
+                                                                                ->where("element_number_rooms.name_field", "number_rooms");
+                                                                    })
+                                                                    ->join("decorations", "decorations.code", "=", "element_decoration.code")
+                                                                    ->join("number_rooms", "number_rooms.code", "=", "element_number_rooms.code")
+                                                                    ->get()
+                                                                    ->groupBy("id")
+                                                                    ->toArray();
+                // counter for different apartments
+                $element["decoration_count"]["8hJkbSPc"] = 0;
+                $element["decoration_count"]["T6ZqlhAt"] = 0;
+                $element["decoration_count"]["1lKIq2Yc"] = 0;
+
+                //get layout
+                if (!empty($element["free_apartments"])) {
+                    $layoutApartments = Layout::select("id", "path", "element_id")
+                                                ->whereIn("element_id", array_keys($element["free_apartments"]))
+                                                ->get()
+                                                ->groupBy("element_id")
+                                                ->toArray();
+
+                    // add propery in apartmens such as: color, layouts
+                    foreach ($element["free_apartments"] as $keyAp => $valAp) {
+
+                        if (isset($valAp[0]["decorations_code"])) {
+                            // без отделки
+                            if ($valAp[0]["decorations_code"] == "8hJkbSPc") {
+                                $element["free_apartments"][$keyAp][0]["color"] = "#498FE1";
+                                $element["decoration_count"]["8hJkbSPc"]++;
+                            }
+                            // с ремонтом
+                            if ($valAp[0]["decorations_code"] == "T6ZqlhAt") {
+                                $element["free_apartments"][$keyAp][0]["color"] = "#0036cb";
+                                $element["decoration_count"]["T6ZqlhAt"]++;
+                            }
+                            // предчистовая
+                            if ($valAp[0]["decorations_code"] == "1lKIq2Yc") {
+                                $element["free_apartments"][$keyAp][0]["color"] = "#b43894";
+                                $element["decoration_count"]["1lKIq2Yc"]++;
+                            }
+                        }
+
+                        if (array_key_exists($keyAp, $layoutApartments)) {
+                            $element["free_apartments"][$keyAp][0]["image_path"] = $layoutApartments[$keyAp][0]["path"];
+                        } else {
+                            $element["free_apartments"][$keyAp][0]["image_path"] = '';
+                        }
+
+                        //check cooie and add to element
+                        $element["free_apartments"][$keyAp][0]["check_cookie"] = 0;
+                        $newCookie = Helper::handlerCookie($element["free_apartments"][$keyAp][0]["id"], "get");
+                        if ($newCookie == true) {
+                            $element["free_apartments"][$keyAp][0]["check_cookie"] = 1;
+                        }
+
+                        // add route
+                        $element["free_apartments"][$keyAp][0]["link"] = route("CatalogShow", [$valAp[0]["section_code"], $valAp[0]["subsection_code"], $valAp[0]["code"]]);
+                    }
+
+                    // add in main array
+                    foreach ($element["free_apartments"] as $keyAp => $valAp) {
+                        $element["all_apartments"][$keyAp] = $valAp;
+                    }
+
+                }
+
+
+                if (!empty($element["developer_buildings"])) {
+                    $element["builder"] = Builder::where("id", $element["developer_buildings"])->first()->toArray();
+                    $element["builder"]["url"] = route("BuildersShow", [$element["builder"]["code"]]);
+                }
+
+                if (!empty($element["infrastructure"])) {
+                    $element["infrastructure"] = preg_replace("/&#?[a-z0-9]+;/i","",$element["infrastructure"]);
+                    $element["infrastructure"] = str_replace("br", "", explode("\r\n", $element["infrastructure"]));
+                }
+
+                if (!empty($element["include"])) {
+                    $element["include"] = preg_replace("/&#?[a-z0-9]+;/i","",$element["include"]);
+                    $element["include"] = str_replace("br", "", explode("\r\n", $element["include"]));
+                }
+
+                $pageParams = [
+                    "section" => $section,
+                    "element" => $element,
+                    "similarElements" => $similarElements,
+                ];
+
+                // set SEO for page
+                Helper::setSEO(
+                    $element["name"],
+                    $element["detail_text"],
+                    URL::current()
+                );
+
+                return view("catalog/detail-newbuildings", $pageParams);
+
+            } else {
+
+                // if gk for this element
+                $cottage = [];
+                if (!empty($element["cottage_village"])) {
+                    $cottage = Catalog::select("catalogs.id", "catalogs.name", "catalogs.code", "catalogs.basic_section", "catalogs_sections.code as subsection")
+                                        ->where("catalogs.id", $element["cottage_village"])
+                                        ->join("catalogs_sections", "catalogs_sections.id", "=", "catalogs.basic_section")
+                                        ->first()
+                                        ->toArray();
+                    // create url for gk
+                    $cottage["url"] = "/catalog/novostrojki/".$cottage["subsection"]."/".$cottage["code"];
+                }
+
+                $pageParams = [
+                    "section" => $section,
+                    "element" => $element,
+                    "cottage" => $cottage,
+                    "similarElements" => $similarElements,
+                ];
+
+                // set SEO for page
+                Helper::setSEO(
+                    $element["name"],
+                    $element["detail_text"],
+                    URL::current()
+                );
+
+                return view("catalog/detail", $pageParams);
+            }
+        // } catch (\Exception $e) {
+        //     return redirect(404);
+        // }
+
+
+    }
 
     /**
      * View import page

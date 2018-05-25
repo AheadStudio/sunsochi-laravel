@@ -12,7 +12,7 @@
 		<div id="news-list-load" class="news-list">
 			@foreach ($newsList as $keyNews => $valNews)
 				<div class="news-item">
-					@if (isset($valNews->preview_picture) && $valNews->preview_picture != "")
+					@if (isset($valNews->preview_picture))
 						<a href="{{ route("NewsShow", $valNews->code) }}" class="link news-holder">
 							<img src="{{ $valNews->preview_picture }}" class="news-img">
 						</a>

@@ -182,7 +182,7 @@
 										container = el.parent(),
 										elLeft = container.offset().left,
 										elParentHeight = container.outerHeight(),
-										dataBlockLimit = $("[data-fixed-limit='" + el.data("fixedBlock") + "']"),
+										dataBlockLimit = $("[data-fixed-limit='" + el.data("fixedBlock") + "']:first"),
 										dataBlockLimitTop = dataBlockLimit.position().top,
 										sTop = $sel.window.scrollTop();
 
@@ -429,7 +429,39 @@
 						self.changeRange();
 						self.regions.init();
 						self.watchChangeInput();
-						self.resetFilter();
+
+						$clearFilter = $(".filter-clear", self.filter);
+
+						$clearFilter.on("click", function(e) {
+							$(this).removeClass("reset");
+							self.resetFilter();
+							e.preventDefault();
+						});
+					},
+
+					replaceRangeText: function($el, $jcfContainer, minValue, maxValue) {
+						var jcfFrom = $jcfContainer.find(".jcf-index-1"),
+							$jcfFromField = $(".jcf-range-count-number", jcfFrom),
+							$jcfTo = $jcfContainer.find(".jcf-index-2"),
+							$jcfToField = $(".jcf-range-count-number", $jcfTo),
+							tplText = $el.data("valtext");
+
+						// text in container
+						var startFrom = minValue.replace(/(\d)(?=(\d\d\d)+([^\d]|$))/g, "$1 ");
+						var finishTo = maxValue.replace(/(\d)(?=(\d\d\d)+([^\d]|$))/g, "$1 ");
+
+						$jcfFromField.html(startFrom).append(tplText);
+						$jcfToField.html(finishTo).append(tplText);
+
+						$el.attr("data-valfrom", minValue);
+						$el.attr("data-valto", maxValue);
+
+						var $fakeInputMin = $jcfContainer.find("[data-fake-min]");
+						var $fakeInputMax = $jcfContainer.find("[data-fake-max]");
+
+						$fakeInputMin.val(startFrom);
+						$fakeInputMax.val(finishTo);
+
 					},
 
 					changeRange: function() {
@@ -449,29 +481,13 @@
 									tplText = $inputEl.data("valtext"),
 									fromVal,toVal,valueArray;
 
-
-								valueArray = $inputEl[0].defaultValue.split(",");
-
-
-								// text in container
-								var startFrom = valueArray[0].replace(/(\d)(?=(\d\d\d)+([^\d]|$))/g, "$1 ");
-								var finishTo = valueArray[1].replace(/(\d)(?=(\d\d\d)+([^\d]|$))/g, "$1 ");
-
-								$jcfFromField.html(startFrom).append(tplText);
-								$jcfToField.html(finishTo).append(tplText);
-
-								$inputEl.attr("data-valfrom", valueArray[0]);
-								$inputEl.attr("data-valto", valueArray[1]);
-
 								//add hidden field
 								$jcfContainer.prepend("<input type='hidden' name='"+realInputName+"_min' class='form-item' data-fake-min>");
 								$jcfContainer.prepend("<input type='hidden' name='"+realInputName+"_max' class='form-item' data-fake-max>");
 
-								var $fakeInputMin = $jcfContainer.find("[data-fake-min]");
-								var $fakeInputMax = $jcfContainer.find("[data-fake-max]");
+								valueArray = $inputEl[0].defaultValue.split(",");
 
-								$fakeInputMin.val(startFrom);
-								$fakeInputMax.val(finishTo);
+								self.replaceRangeText($inputEl, $jcfContainer, valueArray[0], valueArray[1]);
 
 								self.positionTextTrueRange($inputEl);
 
@@ -480,17 +496,7 @@
 									var fromValInit = String($element[0].valueLow);
 									var toValInit = String($element[0].valueHigh);
 
-									var fromVal = fromValInit.replace(/(\d)(?=(\d\d\d)+([^\d]|$))/g, "$1 ");
-									var toVal = toValInit.replace(/(\d)(?=(\d\d\d)+([^\d]|$))/g, "$1 ");
-
-									$jcfFromField.html(fromVal).append(tplText);
-									$jcfToField.html(toVal).append(tplText);
-
-									$element.attr("data-valfrom", fromVal);
-									$element.attr("data-valto", toVal);
-
-									$fakeInputMin.val(fromVal);
-									$fakeInputMax.val(toVal);
+									self.replaceRangeText($inputEl, $jcfContainer, fromValInit, toValInit);
 
 									var currentStateRange = jcf.getInstance($inputEl);
 									currentStateRange.refresh();
@@ -626,71 +632,67 @@
 
 					resetFilter: function() {
 						var self = this,
-							$clearFilter = $(".filter-clear", self.filter);
+							$regionsLi = $("li.select", ".regions-container"),
+					 		$regionsCheckbox = $(".filter-selected-regions-item");
 
-						$clearFilter.on("click", function(e) {
-							var $regionsLi = $("li.select", ".regions-container");
-							var $regionsCheckbox = $(".filter-selected-regions-item");
+						$regionsLi.removeClass("select");
+						$regionsCheckbox.remove();
 
-							$regionsLi.removeClass("select");
-							$regionsCheckbox.remove();
+						$(".filter-clear", self.filter).removeClass("reset");
 
-							$(this).removeClass("reset");
+						self.forms.each(function() {
+							var $form = $(this),
+								$itemForm = $form.find(".form-item");
 
-							self.forms.each(function() {
-								var $form = $(this),
-									$itemForm = $form.find(".form-item");
+							$form[0].reset();
 
-								$form[0].reset();
+							setTimeout(function() {
+								$itemForm.each(function() {
+									(function(el) {
 
-								setTimeout(function() {
-									$itemForm.each(function() {
-										(function(el) {
+										if (el.hasClass("form-item--range")) {
+											var $inputEl = $(el),
+												$jcfContainer = $inputEl.closest(".jcf-range"),
+												realInputName = $jcfContainer.find("input").data("nameInput"),
+												jcfFrom = $jcfContainer.find(".jcf-index-1"),
+												$jcfFromField = $(".jcf-range-count-number", jcfFrom),
+												$jcfTo = $jcfContainer.find(".jcf-index-2"),
+												$jcfToField = $(".jcf-range-count-number", $jcfTo),
+												tplText = $inputEl.data("valtext"),
+												fromVal,toVal,valueArray;
 
-											if (el.hasClass("form-item--range")) {
-												var $inputEl = $(el),
-													$jcfContainer = $inputEl.closest(".jcf-range"),
-													realInputName = $jcfContainer.find("input").data("nameInput"),
-													jcfFrom = $jcfContainer.find(".jcf-index-1"),
-													$jcfFromField = $(".jcf-range-count-number", jcfFrom),
-													$jcfTo = $jcfContainer.find(".jcf-index-2"),
-													$jcfToField = $(".jcf-range-count-number", $jcfTo),
-													tplText = $inputEl.data("valtext"),
-													fromVal,toVal,valueArray;
+											valueArray = $inputEl[0].defaultValue.split(",");
 
-												valueArray = $inputEl[0].defaultValue.split(",");
+											// text in container
+											var startFrom = valueArray[0].replace(/(\d)(?=(\d\d\d)+([^\d]|$))/g, "$1 ");
+											var finishTo = valueArray[1].replace(/(\d)(?=(\d\d\d)+([^\d]|$))/g, "$1 ");
 
-												// text in container
-												var startFrom = valueArray[0].replace(/(\d)(?=(\d\d\d)+([^\d]|$))/g, "$1 ");
-												var finishTo = valueArray[1].replace(/(\d)(?=(\d\d\d)+([^\d]|$))/g, "$1 ");
+											$jcfFromField.html(startFrom).append(tplText);
+											$jcfToField.html(finishTo).append(tplText);
 
-												$jcfFromField.html(startFrom).append(tplText);
-												$jcfToField.html(finishTo).append(tplText);
+											$inputEl.attr("data-valfrom", valueArray[0]);
+											$inputEl.attr("data-valto", valueArray[1]);
 
-												$inputEl.attr("data-valfrom", valueArray[0]);
-												$inputEl.attr("data-valto", valueArray[1]);
+											var $fakeInputMin = $jcfContainer.find("[data-fake-min]");
+											var $fakeInputMax = $jcfContainer.find("[data-fake-max]");
 
-												var $fakeInputMin = $jcfContainer.find("[data-fake-min]");
-												var $fakeInputMax = $jcfContainer.find("[data-fake-max]");
+											$fakeInputMin.val(startFrom);
+											$fakeInputMax.val(finishTo);
 
-												$fakeInputMin.val(startFrom);
-												$fakeInputMax.val(finishTo);
+											var currentStateRange = jcf.getInstance(el);
+											currentStateRange.values = [currentStateRange.minValue, currentStateRange.maxValue];
+											currentStateRange.refresh();
+											self.positionTextTrueRange(el);
+										}
+										jcf.refresh(el);
+									})($(this));
+								})
+							}, 100);
 
-												var currentStateRange = jcf.getInstance(el);
-												currentStateRange.values = [currentStateRange.minValue, currentStateRange.maxValue];
-												currentStateRange.refresh();
-												self.positionTextTrueRange(el);
-											}
-											jcf.refresh(el);
-										})($(this));
-									})
-								}, 100);
-
-							});
-							e.preventDefault();
 						});
 
-					}
+					},
+
 				},
 
 			},
@@ -840,14 +842,19 @@
 													code  : data.code,
 												};
 
-												$container.attr("data-rating-params", JSON.stringify(params));
-												$container.attr("data-rating-value", data.rating);
+												var $ratingSim = $sel.body.find("[data-rating-id='" + $container.attr('data-rating-id') + "']");
+
+												$ratingSim.each(function() {
+													var $el = $(this);
+													$el.attr("data-rating-params", JSON.stringify(params));
+													$el.attr("data-rating-value", data.rating);
+												});
 
 												setTimeout(function() {
 													SUNSOCHI.forms.rating.destroy();
-													setTimeout(function() {
-														SUNSOCHI.forms.rating.init();
-													}, 100);
+
+													SUNSOCHI.forms.rating.init();
+
 												}, 300);
 
 												if (typeof self.$checkCookie === 'undefined') {
@@ -940,7 +947,6 @@
 													$(".btn-container-close").on("click", function() {
 														$.magnificPopup.close();
 													});
-													console.log(el);
 												},
 												ajaxContentAdded: function() {
 													SUNSOCHI.reload();
@@ -948,16 +954,16 @@
 												parseAjax: function(response) {
 													var $content = $(response.data);
 													response.data = $content;
-													console.log(response);
+
 												},
 												updateStatus: function(data) {
 													if(data.status === 'ready') {
 														this.contentContainer // do something
 													}
-													console.log(data);
+
 												},
 												elementParse: function(item) {
-													console.log(item);
+
 												}
 											}
 
@@ -1191,13 +1197,25 @@
 
 				lightSlider: function() {
 					var self = this,
-						$lightSlider = $(".light-slider");
+						$lightSlider = $(".light-slider"),
+						sliderLoop = $lightSlider.data("lightsliderLoop"),
+						sliderThumbItem = $lightSlider.data("lightsliderThumbitem"),
+						loop = true,
+						thumbItem = 8;
+
+						if (typeof sliderLoop != 'undefined') {
+							loop = sliderLoop;
+						}
+
+						if (typeof sliderThumbItem != 'undefined') {
+							thumbItem = sliderThumbItem;
+						}
 
 						$lightSlider.lightSlider({
 					        item: 1,
 							auto: true,
 							controls: true,
-					        loop: true,
+					        loop: loop,
 					        slideMove: 1,
 							pause: 5000,
 					        easing: "cubic-bezier(0.250, 0.460, 0.450, 0.940)",
@@ -1205,14 +1223,14 @@
 							gallery: true,
 							slideMargin: 10,
 							slideEndAnimation: true,
-							thumbItem: 8,
+							thumbItem: thumbItem,
 							prevHtml: '<svg data-name="Слой 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 119.21 218"><path d="M8 116.47l95.64 95.64 8-8-95.7-95.61 95.64-95.64-8-8L0 108.5z" fill="#fff"/></svg>',
 						  	nextHtml: '<svg data-name="Слой 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 127 214"><path d="M118.14 98.53L22.5 2.89l-8 8 95.64 95.64-95.61 95.61 8 8L126.11 106.5z" fill="#fff"/></svg>',
 							onBeforeStart: function(el) {
 								var parentSlider = el.closest(".for-preloader");
 								if (parentSlider.length !== 0) {
 									parentSlider.addClass("preloader-active");
-									parentSlider.append('<span class="preloader-bcg"><span class="preloader-container"><img src="../svg/logo-mini_preload.svg", class="preloader-img"></span></span>');
+									parentSlider.append('<span class="preloader-bcg"><span class="preloader-container"><img src="/svg/logo-mini_preload.svg", class="preloader-img"></span></span>');
 								}
 							},
 							onSliderLoad: function(el) {
@@ -1410,6 +1428,7 @@
 										$contentTitle = $content.find("[data-tooltip-apartment-title]"),
 										$contentLinkTitle = $content.find("[data-tooltip-apartment-link-title]"),
 										$contentId = $content.find("[data-tooltip-apartment-id]"),
+										$contentFavorite = $content.find("[data-favorite]"),
 										$contentImg = $content.find("[data-tooltip-apartment-img]"),
 										$contentImgSheme = $content.find("[data-tooltip-apartment-imgsheme]"),
 										$contentPrice = $content.find("[data-tooltip-apartment-price]"),
@@ -1429,11 +1448,22 @@
 										$contentId.text("Нет информации");
 									}
 
-									if (apartmentData.linkobject) {
+									$contentFavorite.attr("data-favorite", "");
+
+									if (apartmentData.checkCookie == 0) {
+										if (apartmentData.id) {
+											$contentFavorite.attr("data-favorite", apartmentData.id);
+										}
+									} else {
+										apartmentData.checkCookie == 1;
+										$contentFavorite.addClass("added");
+									}
+
+									if (apartmentData.linkObject) {
 										$contentLinkTitle.text("");
 
 										if (apartmentData.apartment) {
-											$contentLinkTitle.attr("href", apartmentData.linkobject);
+											$contentLinkTitle.attr("href", apartmentData.linkObject);
 											$contentLinkTitle.text(apartmentData.apartment);
 										}
 
@@ -1482,6 +1512,7 @@
 										instance._$origin.tooltipster("hide");
 									});
 									SUNSOCHI.reload();
+									SUNSOCHI_FILTER.favorites.init();
 								},
 
 							});
@@ -1721,6 +1752,24 @@
 
 						$progressText.text($progressTextData.replace("$count", self.progressCount));
 						$areaFill.width(self.progressCount+"%");
+
+						self.fillName();
+					},
+
+					fillName: function() {
+						var self = this,
+							count = 1;
+							$itemText = self.$progressContainer.find(".apartment-progress-item");
+
+						$itemText.each(function() {
+							var el = $(this);
+							if (count <  Math.floor(self.progressCount / 10)) {
+								el.addClass("active");
+							}
+
+							count = count + 1;
+
+						});
 					}
 				},
 
@@ -1981,7 +2030,6 @@
 								if (!self.startAnimation && (sTop < elHeight + 500)) {
 									self.startAnimation = true;
 									self.start();
-									console.log(123);
 								}
 
 							});
@@ -2069,10 +2117,12 @@
 
 								if (typeList == "link") {
 									link = suggestion.link;
+
 									if (suggestion.img) {
 										img = '<img src="' + suggestion.img + '" class="autocomplater-img">';
 									}
-									strItem += '<a href="' + link + '" class="link autocomplate-item autocomplate-item--link">' +
+
+									strItem += '<a href="' + link + '" target="_blank" class="link autocomplate-item autocomplate-item--link">' +
 												  	  '<div class="autocomplate-item-container">' +
 													  	img +
 													  '</div>' +
@@ -2091,7 +2141,8 @@
 								return strItem;
 							},
 							onSelect: function (suggestion, item) {
-								if (item && item.attr("href")) {
+
+								if (item && item.find("a").attr("href")) {
 									location.href = item.find("a").attr("href");
 								}
 							}

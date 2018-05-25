@@ -29,7 +29,7 @@
 							<img src="{{ $blogMaxViews->preview_picture }}" class="blog-img">
 						@endif
 					</div>
-					<div class="blog-title">{{ $blogMaxViews->name }}</div>
+					<a href="{{ $blogMaxViews->code }}"  class="link link-black link--orange blog-title">{{ $blogMaxViews->name }}</a>
 					<div class="blog-group">
 						<div class="blog-data">{{ $blogMaxViews->date }}</div>
 						<div class="blog-views {{ $blogMaxViews->views > 0 ? 'active' :'' }}">

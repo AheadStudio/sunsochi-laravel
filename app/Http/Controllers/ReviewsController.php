@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Http\Request;
 
 use App\GoodCode\ParseCsv;
@@ -19,13 +20,15 @@ use File;
 
 class ReviewsController extends Controller
 {
+
     // index page
     public function index() {
+
         // SEO information
         Helper::setSEO(
             "Отзывы клиентов",
             "Компания “Солнечный Сочи” занимается экспертным подбором недвижимости любых типов в городе-курорте Сочи, организовывая не только полное сопровождение сделки, но и предлагая инвестиционные проекты “под ключ”.",
-            "http://sunsochi.goodcode.ru"
+            URL::current()
         );
 
         $reviewList = Review::orderBy("date", "asc")->paginate(3);
@@ -42,7 +45,6 @@ class ReviewsController extends Controller
         ]);
 
     }
-
 
     // import page
     public function importHandler(Request $request) {

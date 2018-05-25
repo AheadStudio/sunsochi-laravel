@@ -16,6 +16,5 @@
             $strElementsCount = $countElements." объектов недвижимости";
             break;
     }
-
 @endphp
 <button type="submit"  class="button button--orange-flood filter-submit">Показать {{ $strElementsCount }}</button>

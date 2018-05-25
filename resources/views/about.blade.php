@@ -12,6 +12,7 @@
             </div>
         </div>
     </div>
+
     <div style="background:#f7f8fb" class="page-inner page-inner--max">
         <div class="about-info">
             <div class="page-inner page-inner--w1">

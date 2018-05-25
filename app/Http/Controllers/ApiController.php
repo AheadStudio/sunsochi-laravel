@@ -22,6 +22,7 @@ use App\Picture;
 use App\NumberRoom;
 use App\Builder;
 use App\Deadline;
+use App\PopularQuery;
 
 class ApiController extends Controller
 {
@@ -58,7 +59,9 @@ class ApiController extends Controller
                     )
                 ];
             }
+
             return response()->json($resultRestonse);
+
         }
 
         // method for update rating
@@ -69,7 +72,9 @@ class ApiController extends Controller
                                  "summ_rating"  => $request->summ,
                                  "voted"        => $request->voted,
                              ]);
+
             return $request;
+
         }
 
     //-- //API BLOG --//
@@ -83,13 +88,13 @@ class ApiController extends Controller
             $requestFormat = trim(strip_tags($request["query"]));
 
             $catalogItems = Catalog::select("id", "name", "code", "basic_section")
-                                    ->where("code", "<>", "")
-                                    ->where("name", "like", "%".$requestFormat."%")
-                                    ->get();
+                                   ->where("code", "<>", "")
+                                   ->where("name", "like", "%".$requestFormat."%")
+                                   ->get();
 
             $arSections = CatalogsSection::select("id", "code", "parent_id")
-                                            ->get()
-                                            ->groupBy("id");
+                                         ->get()
+                                         ->groupBy("id");
 
             if (!$catalogItems->isEmpty()) {
                 foreach ($catalogItems as $item) {
@@ -107,7 +112,7 @@ class ApiController extends Controller
                         "value" => $item->name,
                         "code"  => $item->code,
                         "link"  => "/catalog/". $mainSection."/".$arSections[$item->basic_section][0]->code."/".$item->code."/",
-                        "img" => $img = (!empty($image)) ? $image->path : "",
+                        "img"   => $img = (!empty($image)) ? $image->path : "",
                     );
                     $resultRestonse = [
                         "suggestions" => $arSuggestions
@@ -123,96 +128,84 @@ class ApiController extends Controller
                     )
                 ];
             }
+
             return response()->json($resultRestonse);
+
         }
 
         // method for getting catalog elements
         public static function getCatalog($request) {
-            if (!isset($request) || empty($request)) {
+            if (!isset($request) && empty($request)) {
                 return;
             }
 
             // check exist main_section
-            if (isset($request["main_section"]) || !empty($request["main_section"])) {
+            if (isset($request["main_section"]) && !empty($request["main_section"])) {
                 // general section
                 if ($request["main_section"] == "elitnye") {
-                    $mainSectionId = CatalogsSection::select("id")->where("code", "doma")->first()->id;
+                    $section = ["kottedzhnye_poselki_elitnye", "elitnye_uchastki_v_sochi", "elitnye_doma_v_sochi", "elitnye_novostroyki_v_sochi", "elitnye_kvartiry_v_sochi"];
+                    $mainSectionId = CatalogsSection::select("id")
+                                                    ->whereIn("code", $section)
+                                                    ->get()
+                                                    ->pluck("id")
+                                                    ->toArray();
                 } else {
-                    $mainSectionId = CatalogsSection::select("id")->where("code", $request["main_section"])->first()->id;
+                    $mainSectionId = CatalogsSection::select("id")
+                                                    ->where("code", $request["main_section"])
+                                                    ->first()
+                                                    ->id;
                 }
-
             }
 
             // check for the existence of the installed $ar_filter and isset $params from url
-            if (isset($request["params"]) || !empty($request["params"])) {
-                // create template query for getting elements from Model:Catalog
-                $QUERY = "(SELECT element_id FROM (
-                                   SELECT element_id, count(element_id) as sections
-                                   FROM catalogs_elements
-                                   WHERE parent_id in ({section})
-                                   GROUP BY element_id
-                               ) as s1
-                               WHERE (s1.sections {countSection})
-                               AND
-                               s1.element_id in (
-                                   SELECT element_id FROM element_directories WHERE code in ('{district}')
-                               )
-                           )";
+            if (isset($request["params"]) && !empty($request["params"])) {
 
+                // parse url filter params
                 $parseUrl = self::getParamsFormUrl($request["params"]);
 
-                // get select sections
-                $arSections = CatalogsSection::select("id")
-                                                ->whereIn("code", $parseUrl["sections"])
-                                                ->get()
-                                                ->pluck("id")
-                                                ->toArray();
+                $elements = Catalog::select(
+                    "catalogs.id",
+                    "catalogs.active",
+                    "catalogs.basic_section",
+                    "catalogs.name",
+                    "catalogs.code",
+                    "catalogs.text_action",
+                    "catalogs.price_ap_min",
+                    "catalogs.cottage_village",
+                    "catalogs.price_m",
+                    "catalogs.price",
+                    "catalogs.area",
+                    "catalogs.gaz",
+                    "catalogs.old_price",
+                    "catalogs.floors",
+                    "catalogs.floor"
+                )
+                ->join("catalogs_sections", function ($join) use (&$mainSectionId) {
+                    $join->on("catalogs.basic_section", "=", "catalogs_sections.id");
+                        if (is_array($mainSectionId)) {
+                            $join->whereIn("catalogs_sections.id", $mainSectionId);
+                        } else {
+                            $join->where("catalogs_sections.parent_id", "=", $mainSectionId);
+                        }
+                });
 
-                // get section
-                if (empty($arSections)) {
-                   $arSections = CatalogsSection::where("parent_id", $mainSectionId)
-                                                   ->get()
-                                                   ->pluck("id")
-                                                   ->toArray();
-                   $strSections = implode(", ", $arSections);
-                   $arSectionsCount = "LIKE '%'";
-                } else {
-                   $strSections = implode(", ", $arSections);
-                   $arSectionsCount = " = ". count($arSections);
+                // use list fields
+                if (!empty($parseUrl["listFields"])) {
+                    foreach ($parseUrl["listFields"] as $keyList => $valList) {
+                        $elements = $elements->join("element_directories as el_code_".$keyList, function ($join) use (&$keyList, &$valList) {
+
+                            if ($keyList == 0) {
+                                $join->on("catalogs.id", "=", "el_code_".$keyList.".element_id")
+                                     ->where("el_code_".$keyList.".code", "=", $valList);
+                            } else {
+                                $newCode = $keyList-1;
+                                $join->on("el_code_".$newCode.".element_id", "=", "el_code_".$keyList.".element_id")
+                                     ->where("el_code_".$keyList.".code", "=", $valList);
+                            }
+
+                        });
+                    }
                 }
-
-                //get district
-                if (empty($parseUrl["districts"])) {
-                    $arDistricts = District::select("id", "code", "name")
-                                            ->get()
-                                            ->pluck("code")
-                                            ->toArray();
-
-                    $strDistrict = implode("', '", $arDistricts);
-                } else {
-                    $strDistrict = implode("', '", $parseUrl["districts"]);
-                }
-
-                $arReplace = [
-                    "{section}"     => $strSections,
-                    "{district}"    => $strDistrict,
-                    "{countSection}"=> $arSectionsCount,
-                ];
-
-                $QUERY = strtr($QUERY, $arReplace);
-
-                $elements = Catalog::select("id", "basic_section", "name", "code", "text_action", "price_ap_min", "cottage_village", "price", "price_m", "area");
-
-                /*if (!empty($parseUrl["joins"])) {
-                    $joins = $parseUrl["joins"];
-                    $elements = $elements->leftJoin("element_directories", function ($join) use (&$joins) {
-                                                        $join->on("catalog.id", "=", 'element_directories.element_id')
-                                                             ->whereBetween("code", $joins);
-                                                    });
-                }*/
-
-                $elements = $elements->whereRaw("id in ". $QUERY. "");
-
 
                 if (!empty($parseUrl["between"])) {
                     foreach ($parseUrl["between"] as $keyBetween => $valBetween) {
@@ -224,23 +217,43 @@ class ApiController extends Controller
                     $elements = $elements->where($parseUrl["fields"]);
                 }
 
+                // check count or list elements
                 if (isset($request["only_count"]) && $request["only_count"] == 1) {
                     $elements = $elements->get()
                                          ->count();
+
+                    $countElements = $elements;
                 } else {
                     $elements = $elements->orderBy("active", "1")
                                          ->orderBy("name", "asc")
                                          ->paginate(9)
                                          ->appends(request()->query());
 
+                    $countElements = $elements->total();
                     $elements = Helper::getGsk($elements, $mainSectionId, $request["main_section"]);
+                }
+
+                if (!empty($parseUrl["listFields"])) {
+                    // +1 to popularity
+                    foreach ($parseUrl["listFields"] as $value) {
+                        PopularQuery::where("url", "like", "%".$value)->update(["count_elements" => $countElements]);
+                        PopularQuery::where("url", "like", "%".$value)->increment("popular", 1);
+                    }
+                }
+
+                if (!empty($parseUrl["fields"])) {
+                    foreach ($parseUrl["fields"] as $value) {
+                        PopularQuery::where("url", "like", "%".$value[0])->update(["count_elements" => $countElements]);
+                        PopularQuery::where("url", "like", "%".$value[0])->increment("popular", 1);
+                    }
                 }
 
                 return $elements;
 
             }
 
-            if (isset($request["ar_filter"]) || !empty($request["ar_filter"])) {
+            // check exist ar_filter
+            if (isset($request["ar_filter"]) && !empty($request["ar_filter"])) {
                 // select fields
                 $arSelect = "";
 
@@ -250,11 +263,11 @@ class ApiController extends Controller
                 // fields
                 $arFields = $request["ar_filter"];
 
-                if (isset($request["ar_select"]) || !empty($request["ar_select"])) {
+                if (isset($request["ar_select"]) && !empty($request["ar_select"])) {
                     $arSelect = $request["ar_select"];
                 }
 
-                if (isset($request["ar_order"]) || !empty($request["ar_order"])) {
+                if (isset($request["ar_order"]) && !empty($request["ar_order"])) {
                     $arOrder = $request["ar_order"];
                 }
 
@@ -263,7 +276,6 @@ class ApiController extends Controller
                 if (isset($request["ar_filter_in"]) && $request["ar_filter_in"] == true ) {
                     foreach ($request["ar_filter"] as $keyArFilterIn => $valArFilterIn) {
                         $elements->whereIn($keyArFilterIn, $valArFilterIn);
-
                     }
                 } else {
                     $elements->where($arFields);
@@ -280,7 +292,7 @@ class ApiController extends Controller
                     $elements = $elements->paginate(9)
                                          ->appends(request()->query());
 
-                    $elements = Helper::getGsk($elements, "", "");
+                    $elements = Helper::getGsk($elements);
                 }
 
                 return $elements;
@@ -296,29 +308,20 @@ class ApiController extends Controller
             // result array
             $arResult = [];
 
-            // fields
+            // fields elements
             $arFields = [];
 
-            // select section filter
-            $arSections = [];
+            // list property elements from connected DB
+            $arLists = [];
 
-            // range field
+            // range field elements
             $rangeFields = ["area_ap", "price_ap"];
 
-            // range for where in
+            // range one column elements
             $whereBetween = [];
 
             // all fields
             $inputs = explode("/", $url);
-
-            // select districs
-            $arDistricts = [];
-
-            // joins
-            $arJoin = [];
-
-            // range joins
-            $arJoinRange = ["number_rooms", "decorations"];
 
             foreach ($inputs as $keyInput => $valInput) {
 
@@ -327,33 +330,44 @@ class ApiController extends Controller
                     if (strripos($valInput, "__")) {
                         $fields = explode("__", $valInput);
 
-                        // for section
-                        if ($fields[0] == "section") {
-                            $arSections[] = $fields[1];
+                        // for fields
+                        if ($fields[0] == "section" ||
+                            $fields[0] == "district" ||
+                            $fields[0] == "number_rooms" ||
+                            $fields[0] == "decoration" ||
+                            $fields[0] == "relief" ||
+                            $fields[0] == "predestination"
+                        ) {
+                            if ($fields[0] == "district") {
+                                // +1 to popularity
+                                District::where("code", $fields[1])
+                                        ->increment("popular", 1);
+                            }
+                            $arLists[] = $fields[1];
                             continue;
                         }
+
+                        // for range apartments
                         if (in_array($fields[0], $rangeFields) != false) {
                             $arFields[] = [$fields[0] . "_min" , ">", explode("_", $fields[1])[0]];
                             $arFields[] = [$fields[0] . "_max" , "<", explode("_", $fields[1])[1]];
                             continue;
                         }
-                        if ($fields[0] == "district") {
-                            $arDistricts[] = $fields[1];
-                            continue;
-                        }
+
+                        // search by name
                         if ($fields[0] == "search") {
-                            $arFields[] = ["name", "like", "%".$fields[1]."%"];
+                            $arFields[] = ["catalogs.name", "like", "%".$fields[1]."%"];
                             continue;
                         }
+
+                        // between one columns
                         if ($fields[0] == "area" || $fields[0] == "price") {
                             $whereBetween[$fields[0]] = [(int)explode("_", $fields[1])[0], (int)explode("_", $fields[1])[1]];
                             continue;
                         }
-                        if (in_array($fields[0], $arJoinRange) != false) {
-                            $arJoin[] = (string)$fields[1];
-                            continue;
-                        }
+
                     }
+
                     $arFields[] = [$valInput, "1"];
 
                 }
@@ -361,14 +375,13 @@ class ApiController extends Controller
             }
 
             $arResult = [
-                "sections"  => $arSections,
-                "districts" => $arDistricts,
-                "fields"    => $arFields,
-                "between"   => $whereBetween,
-                "joins"     => $arJoin,
+                "listFields"    => $arLists,
+                "fields"        => $arFields,
+                "between"       => $whereBetween,
             ];
 
             return $arResult;
+            
         }
 
     //-- //API CATALOG--//

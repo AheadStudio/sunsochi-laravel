@@ -11,7 +11,7 @@
 |
 */
 
-Route::get("/", "PageController@home");
+Route::get("/", "HomeController@show");
 
 Route::get("/reviews/", "ReviewsController@index")->name("ReviewsIndex");
 Route::get("/reviews/import/", "ReviewsController@import")->middleware("auth")->name("ReviewsImportIndex");
@@ -60,6 +60,9 @@ Route::get("/catalog/import/", "CatalogController@import")->middleware("auth")->
 Route::post("/catalog/import/send/", "CatalogController@importHandler")->middleware("auth")->name("CatalogImportSend");
 
 Route::get("/catalog/", "CatalogController@index")->name("CatalogIndex");
+Route::get("/catalog/", function () {
+    return redirect("/catalog/novostrojki/");
+});
 Route::get("/catalog/{section}/", "CatalogController@section")->name("CatalogSection");
 Route::get("/catalog/{section}/{subsection}/", "CatalogController@subsection")->name("CatalogSubSection");
 Route::get("/catalog/{section}/{subsection}/{code}/", "CatalogController@show")->name("CatalogShow");

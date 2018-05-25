@@ -75,8 +75,9 @@
 
 									<a href="/catalog/favorites/" class="link header-favorites-holder {{ $active }}">
 										<?php include("svg/star.svg"); ?>
+										<span data-favorite="0" class="header-favorites-count">{{ $count }}</span>
 									</a>
-									<span data-favorite="0" class="header-favorites-count">{{ $count }}</span>
+
 								</div>
 								<div class="header-burger"><span class="header-burger-inner"></span></div>
 							</div>
@@ -97,8 +98,9 @@
 							<div class="header-favorites">
 								<a href="/catalog/favorites/" class="link header-favorites-holder {{ $active }}">
 									<?php include("svg/star.svg"); ?>
+									<span data-favorite="0" class="header-favorites-count">{{ $count }}</span>
 								</a>
-								<span data-favorite="0" class="header-favorites-count">{{ $count }}</span>
+
 							</div>
 
 						</div>
@@ -123,6 +125,37 @@
 			</div>
 		</div>
 		<!--//preloader-->
+
+		<!-- tooltip -->
+		<div data-tooltip-apartment="" class="tooltip-container">
+			<form class="form" novalidate="novalidate">
+				<a data-tooltip-apartment-link-title="" class="link link-black link-black--bottom tooltip-apartment-title"></a>
+				<div data-tooltip-apartment-title="" class="tooltip-apartment-title"></div>
+				<div data-tooltip-apartment-price="" class="tooltip-apartment-price"></div>
+				<div data-tooltip-apartment-id="" class="tooltip-apartment-id"></div>
+				<div class="tooltip-apartment-holder">
+					<img src="" data-tooltip-apartment-img="" class="tooltip-apartment-img">
+				</div>
+				<div class="tooltip-apartment-holder-sheme">
+					<img src="" data-tooltip-apartment-imgsheme="" class="tooltip-apartment-img">
+				</div>
+				<a href="#" class="link tooltip-apartment-icon">
+					<?php include("svg/download.svg"); ?>
+				</a>
+				<a href="#" data-print="" class="link tooltip-apartment-icon">
+					<?php include("svg/print.svg"); ?>
+				</a>
+				<button type="button" data-favorite="" class="link tooltip-apartment-icon">
+					<?php include("svg/star_orage.svg"); ?>
+				</button>
+				<a href="form-bid.html" data-mfp-type="ajax" data-mfp-ajaxcontent="#form-call" data-mfp-bcg="#009ecc" data-mfp-closeinside="false" class="link button button--orange-reverse tooltip-apartment-button mfp-modal">Оставить заявку</a>
+			</form>
+			<button type="button" class="tooltip-close">
+				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44.8 44.8"><g data-name="Слой 2"><path d="M19.6 22.4L0 42l2.8 2.8 19.6-19.6L42 44.8l2.8-2.8-19.6-19.6L44.8 2.8 42 0 22.4 19.6 2.8 0 0 2.8z" fill="#d0d0d0" data-name="Слой 1"></path></g></svg>
+			</button>
+		</div>
+		<!-- //tooltip -->
+
 
 		<!--footer-->
 		<footer itemscope itemtype="http://schema.org/WPFooter" class="page-footer">

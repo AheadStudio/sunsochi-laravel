@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Http\Request;
 
 use App\GoodCode\ParseCsv;
@@ -16,15 +17,18 @@ use Session;
 use Excel;
 use File;
 
+
 class NewsController extends Controller
 {
+
     // index page
     public function index() {
+
         // SEO information
         Helper::setSEO(
             "Новости",
             "Компания “Солнечный Сочи” занимается экспертным подбором недвижимости любых типов в городе-курорте Сочи, организовывая не только полное сопровождение сделки, но и предлагая инвестиционные проекты “под ключ”.",
-            "http://sunsochi.goodcode.ru"
+            URL::current()
         );
 
         $newsList = News::orderBy("date", "asc")->paginate(3);
@@ -42,6 +46,7 @@ class NewsController extends Controller
     // detail page
     public function show($code) {
         $newsItem = News::where("code", $code)->first();
+
         if (!isset($newsItem)) {
             return redirect(404);
         }
@@ -49,10 +54,9 @@ class NewsController extends Controller
         // SEO information
         Helper::setSEO(
             $newsItem->name,
-            "Новости компании “Солнечный Сочи”",
-            "http://sunsochi.goodcode.ru"
+            $newsItem->preview_text,
+            URL::current()
         );
-
 
         $newsItem->date = Helper::convertDate($newsItem->date);
 

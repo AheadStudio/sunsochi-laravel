@@ -3,10 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\ApiController;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\URL;
+
 use Illuminate\Http\Request;
 
 use App\GoodCode\ParseCsv;
@@ -30,20 +33,21 @@ class BuildersController extends Controller
 {
     // index page
     public function index() {
+        $finalArray = [];
+        $builderList = Builder::orderBy("name", "asc")
+                              ->get()
+                              ->toArray();
+
+        foreach ($builderList as $keyBuilderList => $valBuilderList) {
+            $finalArray[mb_substr($valBuilderList["name"], 0, 1)][] = $builderList[$keyBuilderList];
+        }
 
         // SEO information
         Helper::setSEO(
             "Застройщики Сочи, официальная информация о застройщиках в Сочи",
             "Белый список застройщиков Сочи. Объекты и актуальная информация о скидках и акциях.",
-            "http://sunsochi.goodcode.ru"
+            URL::current()
         );
-
-        $finalArray = [];
-        $builderList = Builder::orderBy("name", "asc")->get()->toArray();
-
-        foreach ($builderList as $keyBuilderList => $valBuilderList) {
-            $finalArray[mb_substr($valBuilderList["name"], 0, 1)][] = $builderList[$keyBuilderList];
-        }
 
         return view("builders-list", [
             "builderList"  => $finalArray,
@@ -61,19 +65,19 @@ class BuildersController extends Controller
             return redirect(404);
         }
 
-        // SEO information
-        Helper::setSEO(
-            "Застройщик ".$builderItem->name." и информация о нем",
-            "Все новостройки от застройщика ".$builderItem->name." в Сочи - информация о ценах, планировках и документах на строительство.",
-            "http://sunsochi.goodcode.ru"
-        );
-
         $request = [
             "ar_filter"     => ["developer_buildings" => $builderItem->id],
             "ar_select"     => ["id", "basic_section", "name", "code", "text_action", "price_ap_min"]
         ];
 
         $elements = ApiController::getCatalog($request);
+
+        // SEO information
+        Helper::setSEO(
+            "Застройщик ".$builderItem->name." и информация о нем",
+            "Все новостройки от застройщика ".$builderItem->name." в Сочи - информация о ценах, планировках и документах на строительство.",
+            "http://sunsochi.goodcode.ru"
+        );
 
         return view("builder-detail", [
             "builderItem"  => $builderItem,

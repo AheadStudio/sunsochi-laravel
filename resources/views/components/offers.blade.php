@@ -26,32 +26,36 @@
 @if (isset($offersList) && !empty((array)$offersList))
     <div id="offers-list-load" class="offers-list">
         @foreach ($offersList as $keyOffers => $valOffers)
-            <div class="offers-item">
-                @if (!isset($notShowAdd))
-                    @php
-                        $favorite = "";
-                        $text = "Добавить в избранное";
-                        if (!empty(json_decode(Cookie::get('sunsochi-favorite')))) {
-                            if (array_search($valOffers->id, json_decode(Cookie::get('sunsochi-favorite'))) != false) {
-                                $favorite = "added";
-                                $text = "Добавленно";
-                            }
+            <div class="offers-item <?=$hide = isset($notShowAdd) ? "hide-add": ""?>">
+                @php
+                    $favorite = "";
+                    $text = "Добавить в избранное";
+                    if (!empty(json_decode(Cookie::get('sunsochi-favorite')))) {
+                        if (array_search($valOffers->id, json_decode(Cookie::get('sunsochi-favorite'))) != false) {
+                            $favorite = "added";
+                            $text = "Добавленно";
                         }
-                    @endphp
-                    <button type="button" class="offers-container-favorites {{ $favorite }}"  data-favorite='{{ $valOffers->id }}'>
-                        <div type="button" class="link offers-container-favorites-icon">
-                            @php include("svg/star_orage.svg"); @endphp
-                        </div>
-                        <div class="link link-orange link-orange--bottom offers-container-favorites-text">{{ $text }}</div>
-                    </button>
-                @endif
+                    }
+                @endphp
+                <button type="button" class="offers-container-favorites {{ $favorite }}"  data-favorite='{{ $valOffers->id }}'>
+                    <div class="link offers-container-favorites-icon">
+                        @php include("svg/star_orage.svg"); @endphp
+                    </div>
+                    <div class="link link-orange link-orange--bottom offers-container-favorites-text">{{ $text }}</div>
+                </button>
                 <div class="offers-container">
                     @if ($valOffers->text_action)
                         <div class="offers-container-mark">
                             {{ $valOffers->text_action }}
                         </div>
                     @endif
-                    <img src="{{ $valOffers->photo }}" alt class="offers-container-img">
+                    @if (!empty($valOffers->photo))
+                        <img src="{{ $valOffers->photo }}" alt class="offers-container-img">
+                    @else
+                        <div class="offers-container-img empty">
+                            @php include("svg/logo-mini_preload.svg"); @endphp
+                        </div>
+                    @endif
                     @if (!empty($valOffers->price_ap_min))
                         <div class="offers-container-price">{{ number_format($valOffers->price_ap_min, 0, " ", " ") }} <span class="rub">i</span></div>
                     @endif
@@ -66,14 +70,57 @@
                         <span class="offers-time">{{ $valOffers->deadline }}</span>
                         @if (isset($valOffers->apartments))
                             <dl>
+                                @if (isset($valOffers->id))
+                                    <dt>
+                                        <span>ID</span>
+                                    </dt>
+                                    <dd>
+                                        <span>{{ $valOffers->id }}</span>
+                                    </dd>
+                                @endif
                                 @foreach ($valOffers->apartments as $keyApartment => $valApartment)
                                     <dt>
                                         <span>{{ $keyApartment }}</span>
                                     </dt>
                                     <dd>
-                                        <span>от {{ number_format($valApartment->price, 0, " ", " ") }}<span class="rub">i</span></span>
+                                        <span>от {{ number_format($valApartment, 0, " ", " ") }}<span class="rub">i</span></span>
                                     </dd>
                                 @endforeach
+                            </dl>
+                        @else
+                            <dl>
+                                @if (isset($valOffers->id))
+                                    <dt>
+                                        <span>ID</span>
+                                    </dt>
+                                    <dd>
+                                        <span>{{ $valOffers->id }}</span>
+                                    </dd>
+                                @endif
+                                @if (isset($valOffers->price_m))
+                                    <dt>
+                                        <span>Цена м<span class="page-text"><sup>2</sup></span></span>
+                                    </dt>
+                                    <dd>
+                                        <span>{{ $valOffers->price_m }}<span class="rub">i</span></span>
+                                    </dd>
+                                @endif
+                                @if (isset($valOffers->floors) && !isset($valOffers->floor))
+                                    <dt>
+                                        <span>Этажей</span>
+                                    </dt>
+                                    <dd>
+                                        <span>{{ $valOffers->floors }}</span>
+                                    </dd>
+                                @endif
+                                @if (isset($valOffers->floor))
+                                    <dt>
+                                        <span>Этаж</span>
+                                    </dt>
+                                    <dd>
+                                        <span><b>{{ $valOffers->floor }}</b> — <b>{{ $valOffers->floors }}</b></span>
+                                    </dd>
+                                @endif
                             </dl>
                         @endif
                     </div>
@@ -82,11 +129,12 @@
             </div>
         @endforeach
     </div>
-
-    @include("pagination.default", [
-        "paginator" => $offersList,
-        "class" 	=> "offers-more",
-        "container" => "#offers-list-load",
-        "item" 		=> ".offers-item",
-    ])
+    @if ($offersList instanceof \Illuminate\Pagination\LengthAwarePaginator)
+        @include("pagination.default", [
+            "paginator" => $offersList,
+            "class" 	=> "offers-more",
+            "container" => "#offers-list-load",
+            "item" 		=> ".offers-item",
+        ])
+    @endif
 @endif
