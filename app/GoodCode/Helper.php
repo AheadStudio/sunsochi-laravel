@@ -209,9 +209,15 @@ class Helper
     public static function handlerCookie($element, $type) {
         $element = (int)$element;
         $cookie = json_decode(Cookie::get("sunsochi-favorite"));
-        
+
         if (empty($cookie)) {
-            array_unshift($cookie, $element);
+            $cookie = [];
+            if ($type == "post") {
+                array_unshift($cookie, $element);
+            } else {
+                return false;
+            }
+
         } else {
             if (in_array($element, $cookie)) {
                 if ($type == "get") {
