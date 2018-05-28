@@ -31,7 +31,7 @@ class SendEmail extends Mailable
      */
     public function build()
     {
-        $to = 'Gorponffffff@yandex.ru';
+        /*$to = 'Gorponffffff@yandex.ru';
         $subject = 'Тестовое письмо с HTML';
 
         $message = '
@@ -64,11 +64,11 @@ class SendEmail extends Mailable
         $headers[] = 'Cc: copy@test.com';
 
         $result = mail($to, $subject, $message, implode("\r\n", $headers));
-        echo $result ? 'OK' : 'Error';
+        echo $result ? 'OK' : 'Error';*/
 
-        /*return $this->from("PorstLogin@yandex.ru")
+        return $this->from("PorstLogin@yandex.ru")
                     ->view("emails/send-email")
                     ->with($this->fields)
-                    ->subject("Новое письмо");*/
+                    ->subject("Новое письмо");
     }
 }
