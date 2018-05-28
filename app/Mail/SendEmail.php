@@ -66,8 +66,7 @@ class SendEmail extends Mailable
         $result = mail($to, $subject, $message, implode("\r\n", $headers));
         echo $result ? 'OK' : 'Error';*/
 
-        return $this->from("PorstLogin@yandex.ru")
-                    ->view("emails/send-email")
+        return $this->view("emails/send-email")
                     ->with($this->fields)
                     ->subject("Новое письмо");
     }
