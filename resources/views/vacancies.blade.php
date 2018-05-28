@@ -53,7 +53,7 @@
                                     <li>От 60 000 до 150 000 руб</li>
                                 </ul>
                             </div>
-                            <a href="form-bid.html" data-mfp-type="ajax" data-mfp-ajaxcontent="#form-call" data-mfp-bcg="#009ecc" data-mfp-closeinside="false" class="link button button--orange-flood vacancies-link mfp-modal">Откликнуться на вакансию</a>
+                            <a href="/form/order-object" data-mfp-type="ajax" data-mfp-ajaxcontent="#form-call" data-mfp-bcg="#009ecc" data-mfp-closeinside="false" class="link button button--orange-flood vacancies-link mfp-modal">Откликнуться на вакансию</a>
                         </div>
                     </div>
                 <div class="vacancies-contacts">

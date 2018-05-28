@@ -191,6 +191,7 @@ class Helper
                         foreach ($groupBy as $key => $value) {
                             $apartmentsArray[$key] = $value[0]->price;
                         }
+                        ksort($apartmentsArray);
                         $item->{"apartments"} = (object)$apartmentsArray;
                     }
                 }
@@ -206,9 +207,13 @@ class Helper
      *
      * @return: array = [idElement, idElement,...]
     */
-    public static function handlerCookie($element, $type) {
+    public static function handlerCookie($element = false, $type) {
         $element = (int)$element;
         $cookie = json_decode(Cookie::get("sunsochi-favorite"));
+
+        if (empty($element) || $element == false) {
+            return $cookie;
+        }
 
         if (empty($cookie)) {
             $cookie = [];

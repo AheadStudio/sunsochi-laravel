@@ -36,7 +36,7 @@
                             @if (!empty($element["area"]))
                                 <div class="apartment-preview-text-credit">{{ number_format($element["area"], 0, '', ' ') }} м<sup>2</sup></div>
                             @endif
-                            <a href="form-bid.html" data-mfp-type="ajax" data-mfp-ajaxcontent="#form-call" data-mfp-bcg="#009ecc" data-mfp-closeinside="false" class="link button button--orange-reverse apartment-preview-order mfp-modal">Оставить заявку</a>
+                            <a href="/form/order-object" data-mfp-type="ajax" data-mfp-ajaxcontent="#form-call" data-mfp-bcg="#009ecc" data-mfp-closeinside="false" data-mfp-info='{"id": {{ $element["id"] }} }' class="link button button--orange-reverse apartment-preview-order mfp-modal">Оставить заявку</a>
                         </div>
                     </div>
                     </div>
@@ -304,6 +304,13 @@
                                         </table>
                                     </div>
                                 </div>
+                            @else
+                                <div class="page-text">
+                                    <br>
+                                    <h1>Нет объектов в продаже</h1>
+                                    <br>
+                                    <br>
+                                </div>
                             @endif
                         </div>
                         <div data-filter-item="view_2" class="apartment-list filter-item">
@@ -390,36 +397,6 @@
             </div>
         </div>
         @endif
-        <div style="background:#009ecc" data-fixed-limit="apartment-preview-text" class="page-inner page-inner--max">
-            <div class="page-inner page-inner--w1">
-                <div class="order-call">
-                    <div class="page-text">
-                        <h2>Закажите профессиональный подбор сейчас</h2>
-                    </div>
-                    <form class="form form-order-call">
-                        <div class="form-row form-row--100">
-                            <input type="text" id="name" name="name" required data-error="Ваше имя" aria-required="true" placeholder="Ваше имя" class="form-item form-item--text">
-                        </div>
-                        <div class="form-row form-row--100">
-                            <input type="text" id="mobile" name="mobile" required data-error="Укажите телефон" aria-required="true" data-pattern="mobileRU" data-number="+7 (000) 000-00-00" placeholder="Контактный телефон" class="form-item form-item--text">
-                        </div>
-                        <div class="form-row form-row--100">
-                            <div class="order-call-privacy">Нажимая на кнопку "Отправить заявку", вы даете<a href="#" class="link link-white link--opacity">&ensp;согласие на обработку своих персональных данных</a></div>
-                        </div>
-                        <div class="form-row form-row--100">
-                            <button type="submit" class="button button--orange-flood send-order">Отправить заявку</button>
-                        </div>
-                    </form>
-                    <div class="order-call-hotline">
-                        <span class="order-call-hotline-text">Бесплатная горячая линия</span>
-                        <a href="tel:+78007075523" class="link link-white link--opacity order-call-hotline-mobile">8-800-707-55-23</a>
-                        <span class="order-call-hotline-text">операторы доступны</span><span class="order-call-hotline-text">с 8:00 до 22:00 МСК</span>
-                    </div>
-                    <div class="order-call-icon">
-                        @php include("svg/call.svg"); @endphp
-                    </div>
-                </div>
-            </div>
-        </div>
+        @component("components.form-specialorder")@endcomponent
     </div>
 @endsection

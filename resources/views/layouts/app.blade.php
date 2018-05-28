@@ -61,14 +61,15 @@
 								<span class="header-mobile-title">Звоните нам бесплатно по РФ</span>
 								<a href="tel:+78007075523" class="link link--orange header-mobile-item">8-800-707-55-23</a>
 							</div>
-							<a href="form-call.html" data-mfp-type="ajax" data-mfp-ajaxcontent="#form-call" data-mfp-bcg="#009ecc" data-mfp-closeinside="false" class="link button button--orange header-call mfp-modal">Заказать звонок</a>
+							<a href="/form/order-call" data-mfp-type="ajax" data-mfp-ajaxcontent="#form-call" data-mfp-bcg="#009ecc" data-mfp-closeinside="false" class="link button button--orange header-call mfp-modal">Заказать звонок</a>
 							@php
-									$active = "";
-									$count = 0;
-									if (!empty(json_decode(Cookie::get('sunsochi-favorite')))) {
-										$count = count(json_decode(Cookie::get('sunsochi-favorite')));
-										$active = "active";
-									}
+								$active = "";
+								$count = "0";
+								$newCookie = App\GoodCode\Helper::handlerCookie(false, "get");
+								if ($newCookie == true) {
+									$active = "active";
+									$count = count($newCookie);
+								}
 							@endphp
 							<div class="header-mobile-elements">
 								<div class="header-favorites mobile-favorites">
@@ -148,7 +149,7 @@
 				<button type="button" data-favorite="" class="link tooltip-apartment-icon">
 					<?php include("svg/star_orage.svg"); ?>
 				</button>
-				<a href="form-bid.html" data-mfp-type="ajax" data-mfp-ajaxcontent="#form-call" data-mfp-bcg="#009ecc" data-mfp-closeinside="false" class="link button button--orange-reverse tooltip-apartment-button mfp-modal">Оставить заявку</a>
+				<a href="/form/order-object" data-mfp-type="ajax" data-mfp-ajaxcontent="#form-call" data-mfp-bcg="#009ecc" data-mfp-info data-mfp-closeinside="false" class="link button button--orange-reverse tooltip-apartment-button mfp-modal">Оставить заявку</a>
 			</form>
 			<button type="button" class="tooltip-close">
 				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44.8 44.8"><g data-name="Слой 2"><path d="M19.6 22.4L0 42l2.8 2.8 19.6-19.6L42 44.8l2.8-2.8-19.6-19.6L44.8 2.8 42 0 22.4 19.6 2.8 0 0 2.8z" fill="#d0d0d0" data-name="Слой 1"></path></g></svg>
@@ -204,7 +205,7 @@
 		<script type="text/javascript" src="{{ asset("js/plugins/jcf.select.js") }}"></script>
 		<script type="text/javascript" src="{{ asset("js/plugins/jquery.magnific-popup.min.js") }}"></script>
 		<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDOtcx9Sm_hunFMGzh4eqe_XRkFUYMWIao&amp;sensor=true"></script>
-		<script type="text/javascript" src="http://api-maps.yandex.ru/2.0/?load=package.full&amp;lang=ru-RU"></script>
+		<script type="text/javascript" src="http://api-maps.yandex.ru/2.1/?load=package.full&amp;lang=ru-RU"></script>
 		<script type="text/javascript" src="{{ asset("js/plugins/owl.carousel.min.js") }}"></script>
 		<script type="text/javascript" src="{{ asset("js/plugins/jquery.mask.min.js") }}"></script>
 		<script type="text/javascript" src="{{ asset("js/plugins/lightslider.min.js") }}"></script>

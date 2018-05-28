@@ -134,6 +134,7 @@ class CatalogController extends Controller
                 $elements = CatalogsSection::where("parent_id", $mainSectionId)
                                             ->first()
                                             ->getCatalogElements()
+                                            ->where("code", "<>", "")
                                             ->distinct()
                                             ->paginate(9);
             }
@@ -311,6 +312,7 @@ class CatalogController extends Controller
             }*/
 
             $similarElements = $similarElements->whereBetween("price", [$element["price"] / 1.5, $element["price"] * 1.5])
+                                               ->where("code", "<>", "")
                                                ->take(3)
                                                ->get();
 

@@ -217,6 +217,8 @@ class ApiController extends Controller
                     $elements = $elements->where($parseUrl["fields"]);
                 }
 
+                $elements = $elements->where("catalogs.code", "<>", "");
+
                 // check count or list elements
                 if (isset($request["only_count"]) && $request["only_count"] == 1) {
                     $elements = $elements->get()
@@ -236,14 +238,14 @@ class ApiController extends Controller
                 if (!empty($parseUrl["listFields"])) {
                     // +1 to popularity
                     foreach ($parseUrl["listFields"] as $value) {
-                        PopularQuery::where("url", "like", "%".$value)->update(["count_elements" => $countElements]);
+                        //PopularQuery::where("url", "like", "%".$value)->update(["count_elements" => $countElements]);
                         PopularQuery::where("url", "like", "%".$value)->increment("popular", 1);
                     }
                 }
 
                 if (!empty($parseUrl["fields"])) {
                     foreach ($parseUrl["fields"] as $value) {
-                        PopularQuery::where("url", "like", "%".$value[0])->update(["count_elements" => $countElements]);
+                        //PopularQuery::where("url", "like", "%".$value[0])->update(["count_elements" => $countElements]);
                         PopularQuery::where("url", "like", "%".$value[0])->increment("popular", 1);
                     }
                 }
@@ -270,6 +272,7 @@ class ApiController extends Controller
                 if (isset($request["ar_order"]) && !empty($request["ar_order"])) {
                     $arOrder = $request["ar_order"];
                 }
+                array_push($arSelect, "code");
 
                 $elements = Catalog::select($arSelect);
 
@@ -284,6 +287,8 @@ class ApiController extends Controller
                 foreach ($arOrder as $key => $value) {
                     $elements->orderBy($key, $value);
                 }
+
+                $elements->where("code", "<>", "");
 
                 if (isset($request["only_count"]) && $request["only_count"] == 1) {
                     $elements = $elements->get()
@@ -381,7 +386,7 @@ class ApiController extends Controller
             ];
 
             return $arResult;
-            
+
         }
 
     //-- //API CATALOG--//

@@ -89,38 +89,7 @@
 			</div>
 		</div>
 	</div>
-	<div style="background:#009ecc" class="page-inner page-inner--max">
-		<div class="page-inner page-inner--w1">
-			<div class="order-call">
-				<div class="page-text">
-					<h2>Закажите профессиональный подбор сейчас</h2>
-				</div>
-				<form class="form form-order-call">
-					<div class="form-row form-row--100">
-						<input type="text" id="name" name="name" required data-error="Ваше имя" aria-required="true" placeholder="Ваше имя" class="form-item form-item--text">
-					</div>
-					<div class="form-row form-row--100">
-						<input type="text" id="mobile" name="mobile" required data-error="Укажите телефон" aria-required="true" data-pattern="mobileRU" data-number="+7 (000) 000-00-00" placeholder="Контактный телефон" class="form-item form-item--text">
-					</div>
-					<div class="form-row form-row--100">
-						<div class="order-call-privacy">Нажимая на кнопку "Отправить заявку", вы даете<a href="#" class="link link-white link--opacity">&ensp;согласие на обработку своих персональных данных</a></div>
-					</div>
-					<div class="form-row form-row--100">
-						<button type="submit" class="button button--orange-flood send-order">Отправить заявку</button>
-					</div>
-				</form>
-				<div class="order-call-hotline">
-					<span class="order-call-hotline-text">Бесплатная горячая линия</span>
-					<a href="tel:+78007075523" class="link link-white link--opacity order-call-hotline-mobile">8-800-707-55-23</a>
-					<span class="order-call-hotline-text">операторы доступны</span>
-					<span class="order-call-hotline-text">с 8:00 до 22:00 МСК</span>
-				</div>
-				<div class="order-call-icon">
-					<?php include("svg/call.svg")?>
-				</div>
-			</div>
-		</div>
-	</div>
+	@component("components.form-specialorder")@endcomponent
 	<div class="page-inner page-inner--max">
 		<div class="feature">
 			<div class="page-inner page-inner--w1">
@@ -238,36 +207,5 @@
 			</div>
 		</div>
 	</div>
-	<div style="background:#009ecc" class="page-inner page-inner--max">
-		<div class="page-inner page-inner--w1">
-			<div class="order-call">
-				<div class="page-text">
-					<h2>Закажите профессиональный подбор сейчас</h2>
-				</div>
-				<form class="form form-order-call">
-					<div class="form-row form-row--100">
-						<input type="text" id="name" name="name" required data-error="Ваше имя" aria-required="true" placeholder="Ваше имя" class="form-item form-item--text">
-					</div>
-					<div class="form-row form-row--100">
-						<input type="text" id="mobile" name="mobile" required data-error="Укажите телефон" aria-required="true" data-pattern="mobileRU" data-number="+7 (000) 000-00-00" placeholder="Контактный телефон" class="form-item form-item--text">
-					</div>
-					<div class="form-row form-row--100">
-						<div class="order-call-privacy">Нажимая на кнопку "Отправить заявку", вы даете<a href="#" class="link link-white link--opacity">&ensp;согласие на обработку своих персональных данных</a></div>
-					</div>
-					<div class="form-row form-row--100">
-						<button type="submit" class="button button--orange-flood send-order">Отправить заявку</button>
-					</div>
-				</form>
-				<div class="order-call-hotline">
-					<span class="order-call-hotline-text">Бесплатная горячая линия</span>
-					<a href="tel:+78007075523" class="link link-white link--opacity order-call-hotline-mobile">8-800-707-55-23</a>
-					<span class="order-call-hotline-text">операторы доступны</span>
-					<span class="order-call-hotline-text">с 8:00 до 22:00 МСК</span>
-				</div>
-				<div class="order-call-icon">
-					<?php include("svg/call.svg")?>
-				</div>
-			</div>
-		</div>
-	</div>
+	@component("components.form-specialorder")@endcomponent
 @endsection

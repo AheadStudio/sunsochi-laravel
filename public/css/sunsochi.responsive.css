@@ -778,4 +778,10 @@
   .blog .blog-actions .blog-estimate .blog-rating {
     margin: 0;
   }
+  .form .form-row .form-filter-search {
+      right: 5px;
+  }
+  .form .jcf-select-form-item--select .jcf-select-opener {
+      right: 10px;
+  }
 }

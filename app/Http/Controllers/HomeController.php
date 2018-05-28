@@ -44,6 +44,7 @@ class HomeController extends Controller {
 
         // get profit offers
         $profitOffers = Catalog::where("profit_offers", 1)
+                               ->where("code", "<>", "")
                                ->get()
                                ->take(12);
 
@@ -52,6 +53,7 @@ class HomeController extends Controller {
         // get big card
         $bigCard = Catalog::select("*", "catalogs.id", "catalogs.name", "catalogs.code", "builders.name as builders_name")
                           ->where("big_card", 1)
+                          ->where("catalogs.code", "<>", "")
                           ->join("builders", "catalogs.developer_buildings", "=", "builders.id")
                           ->get();
 

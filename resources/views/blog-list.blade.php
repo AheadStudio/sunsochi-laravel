@@ -116,24 +116,7 @@
 
 	<div style="background:#009ecc" class="page-inner page-inner--max">
 		<div class="page-inner page-inner--w1">
-			<div class="order-sub">
-				<div class="page-text">
-					<h2>Быть в курсе – просто. <br>Подпишитесь!</h2>
-				</div>
-				<form class="form form-order-sub">
-					<div class="form-row form-row--100">
-						<input type="email" id="name" name="name" required data-error="Укажите Ваш e-mail" aria-required="true" placeholder="Укажите e-mail" class="form-item form-item--text">
-					</div>
-					<div class="form-row form-row--100">
-						<div class="order-call-privacy">Нажимая на кнопку "Отправить заявку", вы даете&nbsp;
-							<a href="#" class="link link-white link--opacity">&ensp;согласие на обработку своих персональных данных</a>
-						</div>
-					</div>
-					<div class="form-row form-row--100">
-						<button type="submit" class="button button--orange-flood send-order">Подписаться на блог</button>
-					</div>
-				</form>
-			</div>
+			@component("components.form-sub")@endcomponent
 		</div>
 	</div>
 @endsection

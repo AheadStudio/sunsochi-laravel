@@ -84,6 +84,11 @@ Route::get("/about/", function () {
     return redirect("/company/about/");
 })->name("CompanyIndex");
 
+Route::get("/form/order-call", "FormController@formOrderCall")->name("FormOrderCall");
+Route::get("/form/order-object", "FormController@formOrderObject")->name("FormOrderObject");
+Route::get("/form/success", "FormController@formSuccess")->name("FormSuccess");
+Route::post("/form/handler", "FormController@handlerForm")->name("FormHandler");
+
 
 //Route::get("/company/about/", ["uses" => "PageController@default", "arParams" => [
 //	"view" => "test"

@@ -929,14 +929,33 @@
 								});
 
 								if($form.data("success")) {
-
 									formParams.submitHandler = function(form) {
 										event.preventDefault();
-										$.magnificPopup.open({
-											items: {
-												src: $form.data("success")
+
+										var data = $form.serialize(),
+											$typeHidden = $form.find("input[name=form_type]");
+
+										if ($typeHidden.length > 0 && $typeHidden.attr("id") != "") {
+											data = data + "&element_id=" + $typeHidden.attr("id");
+										}
+
+										$.ajax({
+											headers: {
+												'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
 											},
+											url: $form.attr("action"),
+											method: "POST",
+											data: data,
+											success: function(data) {
+												console.log(data);
+											}
+										})
+
+										/*$.magnificPopup.open({
 											type: "ajax",
+											items: {
+												src: $form.data('success'),
+											},
 											midClick: true,
 											closeMarkup: '<button title="%title%" type="button" class="mfp-close btn-container-close"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44.8 44.8"><g data-name="Слой 2"><path d="M19.6 22.4L0 42l2.8 2.8 19.6-19.6L42 44.8l2.8-2.8-19.6-19.6L44.8 2.8 42 0 22.4 19.6 2.8 0 0 2.8z" fill="#d0d0d0" data-name="Слой 1"/></g></svg></button>',
 											mainClass: "mfp-fade mfp-blue",
@@ -948,26 +967,16 @@
 														$.magnificPopup.close();
 													});
 												},
+												parseAjax: function(mfpResponse) {
+													console.log(mfpResponse);
+													mfpResponse.data = $(mfpResponse.data).find("#form-result");
+												},
 												ajaxContentAdded: function() {
 													SUNSOCHI.reload();
 												},
-												parseAjax: function(response) {
-													var $content = $(response.data);
-													response.data = $content;
-
-												},
-												updateStatus: function(data) {
-													if(data.status === 'ready') {
-														this.contentContainer // do something
-													}
-
-												},
-												elementParse: function(item) {
-
-												}
 											}
 
-										});
+										});*/
 									};
 								}
 								$form.validate(formParams);
@@ -999,6 +1008,7 @@
 								elAjaxContent = el.data("mfpAjaxcontent"),
 								elClose = el.data("mfpCloseinside"),
 								elCloseBcg = el.data("mfpCloseonbcg"),
+								elData = el.data("mfpInfo"),
 								elbcg = el.data("mfpBcg");
 
 							if (!elbcg) {
@@ -1023,16 +1033,19 @@
 								closeOnBgClick: elCloseBcg ? elCloseBcg : false,
 								closeBtnInside: elClose ? elClose : false,
 								callbacks: {
-									open: function(el) {
+									open: function() {
 										$(".mfp-bg.mfp-blue").css("background", elbcg);
 
 										$(".btn-container-close").on("click", function() {
 											$.magnificPopup.close();
 										});
-
 									},
 									ajaxContentAdded: function() {
+										if (elData) {
+											$(this.contentContainer).find("input[name=form_type]").attr("id", elData.id);
+										}
 										SUNSOCHI.reload();
+
 									},
 									parseAjax: parseAjax,
 								}
@@ -1312,6 +1325,7 @@
 								}, 100);
 
 								SUNSOCHI.reload();
+								SUNSOCHI_FILTER.favorites.init();
 							}
 						})
 					})(href, $container, $linkAddress, selector);
@@ -1432,8 +1446,8 @@
 										$contentImg = $content.find("[data-tooltip-apartment-img]"),
 										$contentImgSheme = $content.find("[data-tooltip-apartment-imgsheme]"),
 										$contentPrice = $content.find("[data-tooltip-apartment-price]"),
+										$button = $content.find("[data-mfp-info]"),
 										apartmentData = instance._$origin.data("apartmentInfo");
-
 
 									if (!apartmentData) {
 										$content = "<span class='tooltip-apartment-empty'>Нет информации</span>";
@@ -1441,9 +1455,11 @@
 									}
 
 									$contentId.text("");
+									$button.attr("data-mfp-info", "");
 
 									if (apartmentData.id) {
 										$contentId.text("ID " + apartmentData.id);
+										$button.attr("data-mfp-info", JSON.stringify({ "id": apartmentData.id }) );
 									} else {
 										$contentId.text("Нет информации");
 									}

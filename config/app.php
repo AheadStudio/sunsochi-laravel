@@ -167,6 +167,11 @@ return [
         /*
          * Package Service Providers...
          */
+         // Forms
+         Collective\Html\HtmlServiceProvider::class,
+
+         // Excel composer
+         Maatwebsite\Excel\ExcelServiceProvider::class,
 
         /*
          * Application Service Providers...
@@ -176,9 +181,6 @@ return [
         // App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
-
-        // Excel composer
-        Maatwebsite\Excel\ExcelServiceProvider::class,
     ],
 
     /*
@@ -230,6 +232,10 @@ return [
 
         // Excel composer
         'Excel' => Maatwebsite\Excel\Facades\Excel::class,
+
+        // Forms
+        'Form' => Collective\Html\FormFacade::class,
+        'Html' => Collective\Html\HtmlFacade::class,
     ],
 
 ];
