@@ -3806,12 +3806,15 @@ display: none;
 }
 .section-item .section-information dl {
   max-width: 240px;
+  grid-template-columns: 78px 1fr;
+  align-items: baseline;
   margin-bottom: 60px;
 }
 .section-item .section-information dl dt {
   color: #2c2f2f;
 }
 .section-item .section-information dl dd {
+  justify-self: flex-start;
   font-family: "ProximaNovaRegular";
   color: #2c2f2f;
 }

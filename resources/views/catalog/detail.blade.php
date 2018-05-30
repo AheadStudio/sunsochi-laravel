@@ -126,7 +126,7 @@
                                 <dt>Расстояние до моря</dt>
                                     <dd>{{ $element["to_sea"] }} м</dd>
                             @endif
-                            @if (!empty($element["see_sea"]) && $element["to_sea"] == 1 )
+                            @if (!empty($element["see_sea"]) && $element["see_sea"] == 1 )
                                 <dt>Вид на море</dt>
                                     <dd>Да</dd>
                             @endif
@@ -148,7 +148,7 @@
                 @if (!empty($element["yandex_coord"]))
                     <div class="apartment-description-item">
                         <div class="apartment-map">
-                            <div id="mapYandex" data-center="[{{ $element["yandex_coord"] }}]" data-zoom="19" data-points="[{name:&quot;1&quot;, position: &quot;{{ $element["yandex_coord"] }}&quot;, description:&quot;Сочи, район Светлана, 3-комп. квартира, 170 м&quot;}]" class="map"></div>
+                            <div id="mapYandex" data-center="[{{ $element["yandex_coord"] }}]" data-zoom="12" data-points="[{name:&quot;1&quot;, position: &quot;{{ $element["yandex_coord"] }}&quot;, description:&quot;Сочи, район Светлана, 3-комп. квартира, 170 м&quot;}]" class="map"></div>
                             <!--div(class="map", id="mapGoogle", data-lat="43.60405218", data-lng="39.73541935", data-zoom="16", data-icon="../svg/point_map.svg")-->
                         </div>
                     </div>

@@ -176,9 +176,9 @@
                                             <dt>Федеральный закон 214</dt>
                                             <dd>да</dd>
                                         @endif
-                                        @if (!empty($element["code_fields"]["PurposePurchases"]))
+                                        @if (!empty($element["code_fields"]["Sewerage"]))
                                             <dt>Канализация</dt>
-                                            <dd>{{ $element["code_fields"]["PurposePurchases"][0]["property"]["name"] }}</dd>
+                                            <dd>{{ $element["code_fields"]["Sewerage"][0]["property"]["name"] }}</dd>
                                         @endif
 
                                     </dl>
@@ -213,7 +213,7 @@
                     @if ($element["yandex_coord"])
                         <div class="apartment-description-item">
                             <div class="apartment-map">
-                                <div id="mapYandex" data-center="[{{ $element["yandex_coord"] }}]" data-zoom="19" data-points="[{name:&quot;1&quot;, position: &quot;{{ $element["yandex_coord"] }}&quot;, description:&quot;Сочи, район Светлана, 3-комп. квартира, 170 м&quot;}]" class="map"></div>
+                                <div id="mapYandex" data-center="[{{ $element["yandex_coord"] }}]" data-zoom="12" data-points="[{name:&quot;1&quot;, position: &quot;{{ $element["yandex_coord"] }}&quot;, description:&quot;Сочи, район Светлана, 3-комп. квартира, 170 м&quot;}]" class="map"></div>
                             </div>
                         </div>
                     @endif

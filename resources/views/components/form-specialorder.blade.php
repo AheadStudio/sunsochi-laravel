@@ -4,7 +4,8 @@
             <div class="page-text">
                 <h2>Закажите профессиональный подбор сейчас</h2>
             </div>
-            {!! Form::open(["method" =>"POST", "data-success" => "/form/success", "class" => "form form-order-call"]) !!}
+            {!! Form::open(["method" =>"POST", "action" => "FormController@handlerForm", "data-success" => "/form/success", "class" => "form form-order-call"]) !!}
+                {!! Form::hidden("form_type", "special")!!}
                 <div class="form-row form-row--100">
                     {!! Form::text("name", null, ["id"=>"name", "placeholder" => "Ваше имя", "data-error"=>"Ваше имя", "aria-required"=>"true", "required", "class"=>"form-item form-item--text"]) !!}
                 </div>

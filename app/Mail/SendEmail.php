@@ -66,8 +66,28 @@ class SendEmail extends Mailable
         $result = mail($to, $subject, $message, implode("\r\n", $headers));
         echo $result ? 'OK' : 'Error';*/
 
-        return $this->view("emails/send-email")
-                    ->with($this->fields)
-                    ->subject("Новое письмо");
+        if ($this->fields["type"] == "call") {
+            return $this->view("emails/call-email")
+                        ->with($this->fields)
+                        ->subject("Звонок");
+        }
+
+        if ($this->fields["type"] == "special") {
+            return $this->view("emails/special-email")
+                        ->with($this->fields)
+                        ->subject("Проффесиональный подбор");
+        }
+
+        if ($this->fields["type"] == "object") {
+            return $this->view("emails/object-email")
+                        ->with($this->fields)
+                        ->subject("Заявка на объект");
+        }
+
+        if ($this->fields["type"] == "sub") {
+            return $this->view("emails/sub-email")
+                        ->with($this->fields)
+                        ->subject("Заявка на объект");
+        }
     }
 }

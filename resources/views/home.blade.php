@@ -68,11 +68,11 @@
 									<div class="section-developer">{{ $bigCard["builders_name"] }}</div>
 									<div class="section-district">{{ $bigCard["district"] }}</div>
 									<div class="section-area">Площадь от {{ $bigCard["area_ap_min"] }} м<sup>2</sup></div>
-									<div class="section-price">Цена от {{ $bigCard["price_ap_min"] }} 2 319 200<span class="rub">i</span></div>
+									<div class="section-price">Цена от {{  number_format(round($bigCard["price_ap_min"]), 0, '', ' ') }}<span class="rub">i</span></div>
 									<dl>
 										@foreach ($bigCard["apartments"] as $key => $value)
 											<dt>{{ $key }} комн.</dt>
-											<dd>от {{ $value }} <span class="rub">i</span></dd>
+											<dd>от {{ number_format(round($value), 0, '', ' ') }} <span class="rub">i</span></dd>
 										@endforeach
 									</dl>
 									<a href="{{ $bigCard["path"] }}" target="_blank" class="link button button--white section-more">Подробнее</a>

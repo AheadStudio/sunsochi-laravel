@@ -127,6 +127,18 @@
 		</div>
 		<!--//preloader-->
 
+		<!-- result magnific popup -->
+		<div id="form-result" class="form-popup white-popup mfp-hide">
+			<div class="order-call-icon">
+				<?php include("svg/call.svg")?>
+			</div>
+			<div class="page-text">
+				<h2>Ваша заявка принята</h2>
+				<h3>В ближайшее время с вами свяжется нам менеджер!</h3>
+			</div>
+		</div>
+		<!-- //result magnific popup -->
+
 		<!-- tooltip -->
 		<div data-tooltip-apartment="" class="tooltip-container">
 			<form class="form" novalidate="novalidate">
@@ -205,7 +217,7 @@
 		<script type="text/javascript" src="{{ asset("js/plugins/jcf.select.js") }}"></script>
 		<script type="text/javascript" src="{{ asset("js/plugins/jquery.magnific-popup.min.js") }}"></script>
 		<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDOtcx9Sm_hunFMGzh4eqe_XRkFUYMWIao&amp;sensor=true"></script>
-		<script type="text/javascript" src="http://api-maps.yandex.ru/2.1/?load=package.full&amp;lang=ru-RU"></script>
+		<script type="text/javascript" src="http://api-maps.yandex.ru/2.1/?load=package.full&amp;lang=ru-RU&amp;scroll=false"></script>
 		<script type="text/javascript" src="{{ asset("js/plugins/owl.carousel.min.js") }}"></script>
 		<script type="text/javascript" src="{{ asset("js/plugins/jquery.mask.min.js") }}"></script>
 		<script type="text/javascript" src="{{ asset("js/plugins/lightslider.min.js") }}"></script>
