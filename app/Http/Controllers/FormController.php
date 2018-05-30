@@ -38,7 +38,7 @@ class FormController extends Controller
                         "type" => "call",
                     ];
                     Mail::to("PorstLogin@yandex.ru")->send(new SendEmail($request));
-
+                    $request["message"] = "<h2>Ваша заявка принята</h2><h3>В ближайшее время с вами свяжется нам менеджер!</h3>";
                     return response()->json($request);
                     break;
 
@@ -53,7 +53,7 @@ class FormController extends Controller
                     ];
 
                     Mail::to("PorstLogin@yandex.ru")->send(new SendEmail($request));
-
+                    $request["message"] = "<h2>Ваша заявка принята</h2><h3>В ближайшее время с вами свяжется нам менеджер!</h3>";
                     return response()->json($request);
                     break;
 
@@ -66,6 +66,8 @@ class FormController extends Controller
                     ];
 
                     Mail::to("PorstLogin@yandex.ru")->send(new SendEmail($request));
+
+                    $request["message"] = "<h2>Ваша заявка принята</h2><h3>В ближайшее время с вами свяжется нам менеджер!</h3>";
 
                     return response()->json($request);
                     break;
@@ -81,9 +83,13 @@ class FormController extends Controller
                         ["user_email" => $request["email"]]
                     );
 
-                    Mail::to($request["email"])->send(new SendEmail($request));
+                    if ($sub->wasRecentlyCreated) {
+                        Mail::to($request["email"])->send(new SendEmail($request));
+                        return response()->json($request);
+                    } else {
+                        return response()->json(["message" => "<h2>Вы уже подписались на блог!</h2>"]);
+                    }
 
-                    return response()->json($sub);
                     break;
 
             }
