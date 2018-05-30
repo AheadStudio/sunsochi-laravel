@@ -9,4 +9,9 @@ class FormSubscription extends Model
 
     protected $table = "form_subscription";
 
+    public $timestamps = false;
+
+    public $fillable = [
+    	"user_email"
+    ];
 }
