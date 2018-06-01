@@ -350,18 +350,20 @@
                             </div>
                             <div class="page-text">
                                 <div class="apartment-structure">
-                                    @for ($section = 1; $section <= $element["chess"]["section_list"]; $section++)
-                                        <div class="apartment-structure-item">
-                                            <div class="apartment-structure-name">{{ $element["chess"]["section_names"][$section-1] }}</div>
-                                                <div data-structure = '{"size": {"row": <?=$element["floors"]?>, "col": <?=$element["chess"]["section_lenght"]?> }, "floorslink": [123, 111, 222], "objects": [ <? foreach ($element["chess_apartments"]["section"][$section] as $key => $value) : ?>{"position": <?=$value["chess"]; ?>, "text": "<? echo($text = isset($value["decorations_name"]) ? $value["decorations_name"] : ""); ?>", "color": "<?=$value["color"]; ?>", "info": {"id": "<?=$value["id"]; ?>", "apartment": "<?=$value["name"]; ?>", "price": "<?=number_format($value["price"], 0, '', ' ') ?>", "oldprice": "<? echo(!is_null($value["old_price"]) ? number_format($value["old_price"], 0, '', ' ') : ""); ?>", "image": "<? echo(isset($value["image_path"]) ? $value["image_path"] : ""); ?>", "imagesheme": "/dummy/apartment-icon/2.png"}} <? echo(key(array_slice( $element["chess_apartments"]["section"][$section], -1, 1, TRUE )) == $key ? "" : ",");?> <? endforeach; ?> ]}' class="apartment-structure-grid">
-                                                <div class="apartment-structure-floor">Этажи</div>
-                                                <div class="apartment-structure-grid-container">
-                                                    <div class="apartment-structure-grid-container-floors"></div>
-                                                    <div class="apartment-structure-grid-container-list"></div>
+                                    @if (isset($element["chess_apartments"]))
+                                        @for ($section = 1; $section <= $element["chess"]["section_list"]; $section++)
+                                            <div class="apartment-structure-item">
+                                                <div class="apartment-structure-name">{{ $element["chess"]["section_names"][$section-1] }}</div>
+                                                    <div data-structure = '{"size": {"row": <?=$element["floors"]?>, "col": <?=$element["chess"]["section_lenght"]?> }, "floorslink": [123, 111, 222], "objects": [ <? foreach ($element["chess_apartments"]["section"][$section] as $key => $value) : ?>{"position": <?=$value["chess"]; ?>, "text": "<? echo($text = isset($value["decorations_name"]) ? $value["decorations_name"] : ""); ?>", "color": "<?=$value["color"]; ?>", "info": {"id": "<?=$value["id"]; ?>", "apartment": "<?=$value["name"]; ?>", "price": "<?=number_format($value["price"], 0, '', ' ') ?>", "oldprice": "<? echo(!is_null($value["old_price"]) ? number_format($value["old_price"], 0, '', ' ') : ""); ?>", "image": "<? echo(isset($value["image_path"]) ? $value["image_path"] : ""); ?>", "imagesheme": "/dummy/apartment-icon/2.png"}} <? echo(key(array_slice( $element["chess_apartments"]["section"][$section], -1, 1, TRUE )) == $key ? "" : ",");?> <? endforeach; ?> ]}' class="apartment-structure-grid">
+                                                    <div class="apartment-structure-floor">Этажи</div>
+                                                    <div class="apartment-structure-grid-container">
+                                                        <div class="apartment-structure-grid-container-floors"></div>
+                                                        <div class="apartment-structure-grid-container-list"></div>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    @endfor
+                                        @endfor
+                                    @endif
                                 </div>
                             </div>
                         </div>
