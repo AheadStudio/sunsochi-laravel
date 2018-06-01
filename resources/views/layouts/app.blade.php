@@ -232,7 +232,6 @@
 		<script type="text/javascript" src="{{ asset("js/plugins/ssm.min.js") }}"></script>
 		<script type="text/javascript" src="{{ asset("js/sunsochi.js") }}"></script>
 		<script type="text/javascript" src="{{ asset("js/sunsochi-filter.js") }}"></script>
-		<script type="text/javascript" src="{{ asset("js/app.js") }}"></script>
 		<!--//Sripts-->
 
 	</body>

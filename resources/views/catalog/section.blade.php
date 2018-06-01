@@ -17,6 +17,7 @@
             </div>
         </div>
     </div>
+
     <div class="page-inner page-inner--w1">
         <div class="page-text">
             <h2>Поиск по объектам</h2>
@@ -47,6 +48,7 @@
             </div>
         </div>
     </div>
+
     <div class="page-inner page-inner--max">
         <div class="section-shadow">
             <div class="page-inner page-inner--w1">
@@ -83,6 +85,7 @@
             </div>
         </div>
     </div>
+
     <div style="background:#fff" class="page-inner page-inner--max">
         <div class="causes">
             <div class="page-inner page-inner--w1">
@@ -96,5 +99,6 @@
             </div>
         </div>
     </div>
+    
     @component("components.form-specialorder")@endcomponent
 @endsection

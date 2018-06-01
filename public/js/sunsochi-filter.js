@@ -77,6 +77,7 @@
                         $filterItems = $form.find(".form-item"),
                         filterParams = "",
 						$homePage = $("input[name='home-page']", $form),
+						$investmentsPage = $("input[name='investments-page']", $form),
                         url = $form.attr("action");
 
 					if (self.stopChange == false) {
@@ -99,8 +100,9 @@
 	                    });
 
 						self.filterUrl = self.baseUrl + filterParams;
-						if ($homePage.length == 0) {
-	                    	history.pushState(null, null, self.filterUrl);
+						if ($homePage.length != 0 || $investmentsPage.length != 0) {
+						} else {
+							history.pushState(null, null, self.filterUrl);
 						}
 
 						self.sendFilter($form, filterParams, only_count);
@@ -121,7 +123,6 @@
 							}
 						}
 					}
-
                 },
 
                 sendFilter: function($form, params, only_count) {
@@ -129,6 +130,7 @@
 						$submit = $form.find(".filter-submit"),
 						$sectionCatalog = $("input[name='section-name']", $form).val(),
 						$homePage = $("input[name='home-page']", $form),
+						$investmentsPage = $("input[name='investments-page']", $form),
 						buttonLinkRedirect = 0,
                         url = $form.attr("action");
 
@@ -279,7 +281,7 @@
 												 '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44.8 44.8"><g id="Слой_2" data-name="Слой 2"><g id="Слой_1-2" data-name="Слой 1"><path d="M19.6,22.4,0,42l2.8,2.8L22.4,25.2,42,44.8,44.8,42,25.2,22.4,44.8,2.8,42,0,22.4,19.6,2.8,0,0,2.8Z" fill="#d0d0d0"></path></g></g></svg>'+
 											 '</div>'+
 										 '</div>');
-										 
+
 									SUNSOCHI.filter.formFilter.regions.removeCheckbox();
 
 									$form.find(".filter-selected-regions-list .selected-regions-item-close").on("click", function() {

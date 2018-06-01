@@ -1615,22 +1615,22 @@
 
 							for (var itemPos = 0; itemPos < params.objects[itemObj].position.length; itemPos++) {
 								// смещаем на одну ячейку все ячейки
-								var changePostion = Math.round((Number(params.objects[itemObj].position[itemPos].replace(",",".")) + 0.1) * 100) / 100;
+								var splitNumber = params.objects[itemObj].position[itemPos].replace(",",".").split(".");
+								var changePostion = String(splitNumber[0] + "," + String(Number(splitNumber[1]) + 1));
 
 								// записываем измененные данные
-								params.objects[itemObj].position[itemPos] = String(changePostion).replace(".", ",");
+								params.objects[itemObj].position[itemPos] = changePostion;
 							}
 
 							// позиция элемента в виде строки
 							params.objects[itemObj].posMatrix = params.objects[itemObj].position.join("|");
-
 							// шв элемента
 							params.objects[itemObj].id = itemObj + params.objects[itemObj].posMatrix.replace(/\,/g, "").replace(/\|/g, "");
 
 							params.objects[itemObj].gridArea = "area" + String(params.objects[itemObj].id);
 							params.allpostion += params.objects[itemObj].position.join("|");
 						}
-
+						
 						self.createStructure(self.replaceMarix(sortMatrix, params), function() {
 							//$alltooltip.removeClass(".tooltip-item");
 							//var $alltooltip = $sel.body.find(".tooltip-item").destroy();
@@ -1641,16 +1641,14 @@
 					replaceMarix: function(matrix, obj) {
 						var self = this,
 							cloneMatrix = matrix;
-
 						self.cells = obj.objects;
-
 						(function(cloneMatrix, matrix) {
 							for (var d = 0; d < obj.objects.length; d++) {
 								for(var i = 0; i < matrix.length; i++) {
 									for(var j = 0; j < matrix[i].length; j++) {
 										matrix[i][0] = "flor" + Number(matrix.length - i);
 
-										if (obj.objects[d].posMatrix.indexOf(matrix[i][j]) !== -1) {
+										if (matrix[i][j].lastIndexOf(obj.objects[d].posMatrix) !== -1 && obj.objects[d].posMatrix.length === matrix[i][j].length) {
 											matrix[i][j] = obj.objects[d].gridArea;
 										}
 										/*if (obj.allpostion.indexOf(matrix[i][j]) === -1) {
@@ -1704,7 +1702,8 @@
 							if (self.cells[d].info) {
 								information = JSON.stringify(self.cells[d].info);
 							}
-							self.$gridContainer.prepend("<div class='apartment-structure-grid-cell tooltip-item' data-apartment-info='" + information + "' style='background-color:" + self.cells[d].color + "; grid-area:" + self.cells[d].gridArea + "'><div class='apartment-structure-grid-cell-text'>" + self.cells[d].text + "</div></div>");
+
+							self.$gridContainer.prepend("<div class='apartment-structure-grid-cell tooltip-item' data-apartment-info='" + information + "' style='background-color:" + self.cells[d].color + "; grid-area:" + self.cells[d].gridArea + "'><div class='apartment-structure-grid-cell-text'>" + self.cells[d].text.substring(0, 1) + "</div></div>");
 						}
 
 						self.showElements();
@@ -2179,7 +2178,51 @@
 					window.print();
 					e.preventDefault();
 				});
+			},
+
+			triggerItemsBlock: {
+
+				items: null,
+
+				init: function() {
+					var self = this;
+
+					self.items = $sel.body.find("[data-trigger]");
+					self.items.each(function() {
+						(function(el) {
+							self.createTrigger(el);
+						})($(this))
+					})
+				},
+
+				createTrigger: function(element) {
+					var self = this;
+
+					element.on("click", function(e) {
+						e.preventDefault();
+						var el = $(this),
+							$container = $(el.data("trigger"));
+
+						if (el.hasClass("active")) {
+							$container.removeClass("show-block");
+							setTimeout(function() {
+								$container.removeClass("show");
+								el.removeClass("active");
+							}, 300);
+						} else {
+							el.addClass("active");
+							$container.addClass("show");
+							setTimeout(function() {
+								$container.addClass("show-block");
+							}, 300);
+						}
+
+					});
+
+				}
+
 			}
+
 		};
 
 	})();
@@ -2203,6 +2246,7 @@
 	SUNSOCHI.printpage();
 
 	SUNSOCHI.animations.init();
+	SUNSOCHI.triggerItemsBlock.init();
 
 	ymaps.ready(function() {
 		SUNSOCHI.maps.yandexMap.init();

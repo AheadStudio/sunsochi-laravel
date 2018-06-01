@@ -52,14 +52,10 @@ Route::get("/catalog/{section}/get/", "CatalogController@getFilterItems")->name(
 // route for get count items catalog
 Route::get("/catalog/{section}/get/count/", "CatalogController@getFilterCount")->name("CatalogSectionFilterCount");
 
-
-
 Route::get("/catalog/{section}/filter/{params}/", "CatalogController@section")->name("CatalogSectionFilter")->where(["params" => "([/А-Яа-яA-Za-z0-9_-]+)"]);
 
 Route::get("/catalog/import/", "CatalogController@import")->middleware("auth")->name("CatalogImportIndex");
 Route::post("/catalog/import/send/", "CatalogController@importHandler")->middleware("auth")->name("CatalogImportSend");
-
-Route::get("/catalog/", "CatalogController@index")->name("CatalogIndex");
 Route::get("/catalog/", function () {
     return redirect("/catalog/novostrojki/");
 });
@@ -73,6 +69,13 @@ Route::get("/catalog/{section}/{subsection}/{code}/", "CatalogController@show")-
 Route::get("/contacts/", "ContactsController@index")->name("ContactsIndex");
 
 Route::get("/vacancies/", "VacanciesController@index")->name("VacanciesIndex");
+
+Route::get("/investments/", "InvestmentsController@index")->name("InvestmentsIndex");
+Route::get("/investments/{section}/get/", "InvestmentsController@getFilterItems")->name("InvestmentsSectionFilterItems");
+Route::get("/investments/{section}/get/count/", "InvestmentsController@getFilterCount")->name("InvestmentsControllerFilterCount");
+Route::get("/investments/{section}/", "InvestmentsController@section")->name("InvestmentsSection");
+
+Route::get("/company/about/", "AboutController@index")->name("AboutIndex");
 
 Route::get("/company/about/", "AboutController@index")->name("AboutIndex");
 

@@ -31,7 +31,7 @@
                         </button>
                         <div class="apartment-preview-text-info">
                             @if (!empty($element["price"]))
-                                <div class="apartment-preview-text-price">{{ number_format($element["price"], 0, '', ' ') }}<span class="rub">i</span>/ м<sup>2</sup></div>
+                                <div class="apartment-preview-text-price">{{ number_format($element["price"], 0, '', ' ') }}<span class="rub">i</span> / м<sup>2</sup></div>
                             @endif
                             @if (!empty($element["area"]))
                                 <div class="apartment-preview-text-credit">{{ number_format($element["area"], 0, '', ' ') }} м<sup>2</sup></div>
@@ -316,12 +316,12 @@
                         <div data-filter-item="view_2" class="apartment-list filter-item">
                             <div class="apartment-types-list">
                                 <div class="apartment-type">
-                                    <div data-badge="1" style="background:#41aa33" class="apartment-type-badge"></div>
+                                    <div data-badge="1" style="background:#ffe200" class="apartment-type-badge"></div>
                                     <div class="apartment-type-text">Продано:</div>
                                     <div class="apartment-type-count">136</div>
                                 </div>
                                 <div class="apartment-type">
-                                    <div data-badge="2" style="background:#ffe200" class="apartment-type-badge"></div>
+                                    <div data-badge="2" style="background:#848783" class="apartment-type-badge"></div>
                                     <div class="apartment-type-text">Забронировано:</div>
                                     <div class="apartment-type-count">30</div>
                                 </div>
@@ -350,36 +350,18 @@
                             </div>
                             <div class="page-text">
                                 <div class="apartment-structure">
-                                    <div class="apartment-structure-item">
-                                        <div class="apartment-structure-name">Блок Г2</div>
-                                        <div data-structure="{&quot;size&quot;:{&quot;row&quot;:4, &quot;col&quot;: 3}, &quot;floorslink&quot;: [123, 111, 222], &quot;objects&quot;: [ {&quot;position&quot;: [&quot;4,0&quot;, &quot;4,1&quot;, &quot;4,2&quot;], &quot;text&quot;: &quot;4+&quot;, &quot;color&quot;: &quot;#ffe200&quot;, &quot;info&quot;: {&quot;apartment&quot;: &quot;3-х ком. квартира&quot;, &quot;price&quot;: &quot;17 300 000&quot;, &quot;oldprice&quot;: &quot;22 300 000&quot;,     &quot;id&quot;: 231231, &quot;image&quot;: &quot;../dummy/apartment-icon/1.png&quot;, &quot;imagesheme&quot;: &quot;../dummy/apartment-icon/2.png&quot;} }, {&quot;position&quot;: [&quot;1,0&quot;, &quot;2,0&quot;], &quot;text&quot;: &quot;2&quot;, &quot;color&quot;: &quot;#498FE1&quot;},{&quot;position&quot;: [&quot;1,1&quot;], &quot;text&quot;: &quot;1&quot;, &quot;color&quot;: &quot;#41aa33&quot;},{&quot;position&quot;: [&quot;1,2&quot;],    &quot;text&quot;: &quot;3&quot;,&quot;color&quot;: &quot;#41aa33&quot;},{&quot;position&quot;: [&quot;2,1&quot;], &quot;text&quot;: &quot;1&quot;, &quot;color&quot;: &quot;#41aa33&quot;},{&quot;position&quot;: [&quot;2,2&quot;], &quot;text&quot;: &quot;C&quot;, &quot;color&quot;: &quot;#41aa33&quot;},{&quot;position&quot;: [&quot;3,0&quot;,&quot;3,1&quot;,&quot;3,2&quot;], &quot;text&quot;: &quot;10&quot;, &quot;color&quot;: &quot;#41aa33&quot;}]}"    class="apartment-structure-grid">
-                                            <div class="apartment-structure-floor">Этажи</div>
-                                            <div class="apartment-structure-grid-container">
-                                                <div class="apartment-structure-grid-container-floors">                                 </div>
-                                                <div class="apartment-structure-grid-container-list">                                   </div>
+                                    @for ($section = 1; $section <= $element["chess"]["section_list"]; $section++)
+                                        <div class="apartment-structure-item">
+                                            <div class="apartment-structure-name">{{ $element["chess"]["section_names"][$section-1] }}</div>
+                                                <div data-structure = '{"size": {"row": <?=$element["floors"]?>, "col": <?=$element["chess"]["section_lenght"]?> }, "floorslink": [123, 111, 222], "objects": [ <? foreach ($element["chess_apartments"]["section"][$section] as $key => $value) : ?>{"position": <?=$value["chess"]; ?>, "text": "<? echo($text = isset($value["decorations_name"]) ? $value["decorations_name"] : ""); ?>", "color": "<?=$value["color"]; ?>", "info": {"id": "<?=$value["id"]; ?>", "apartment": "<?=$value["name"]; ?>", "price": "<?=number_format($value["price"], 0, '', ' ') ?>", "oldprice": "<? echo(!is_null($value["old_price"]) ? number_format($value["old_price"], 0, '', ' ') : ""); ?>", "image": "<? echo(isset($value["image_path"]) ? $value["image_path"] : ""); ?>", "imagesheme": "/dummy/apartment-icon/2.png"}} <? echo(key(array_slice( $element["chess_apartments"]["section"][$section], -1, 1, TRUE )) == $key ? "" : ",");?> <? endforeach; ?> ]}' class="apartment-structure-grid">
+                                                <div class="apartment-structure-floor">Этажи</div>
+                                                <div class="apartment-structure-grid-container">
+                                                    <div class="apartment-structure-grid-container-floors"></div>
+                                                    <div class="apartment-structure-grid-container-list"></div>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                    <div class="apartment-structure-item">
-                                        <div class="apartment-structure-name">Блок C2</div>
-                                        <div data-structure="{&quot;size&quot;:{&quot;row&quot;:3, &quot;col&quot;: 3}, &quot;floorslink&quot;: [123, 1311, 2252], &quot;objects&quot;: [{&quot;position&quot;: [&quot;3,0&quot;, &quot;2,0&quot;, &quot;1,0&quot;], &quot;text&quot;: &quot;1+&quot;, &quot;color&quot;: &quot;#498FE1&quot;, &quot;info&quot;: {&quot;apartment&quot;: &quot;3-х ком. квартира&quot;, &quot;price&quot;: &quot;17 300 000&quot;, &quot;oldprice&quot;: &quot;22 300 000&quot;,    &quot;id&quot;: 231231, &quot;image&quot;: &quot;../dummy/apartment-icon/1.png&quot;, &quot;imagesheme&quot;: &quot;../dummy/apartment-icon/2.png&quot;} }, {&quot;position&quot;: [&quot;3,1&quot;, &quot;2,1&quot;, &quot;1,1&quot;], &quot;text&quot;: &quot;C&quot;, &quot;color&quot;: &quot;#41aa33&quot;, &quot;info&quot;: {&quot;apartment&quot;: &quot;3-х ком. квартира&quot;, &quot;price&quot;: &quot;7 300 000&quot;, &quot;oldprice&quot;: &quot;2 300   000&quot;, &quot;id&quot;: 5205, &quot;image&quot;: &quot;../dummy/apartment-icon/1.png&quot;, &quot;imagesheme&quot;: &quot;../dummy/apartment-icon/2.png&quot;}}, {&quot;position&quot;: [&quot;3,2&quot;, &quot;2,2&quot;, &quot;1,2&quot;], &quot;text&quot;: &quot;2&quot;, &quot;color&quot;: &quot;#41aa33&quot;}]}" class="apartment-structure-grid">
-                                            <div class="apartment-structure-floor">Этажи</div>
-                                            <div class="apartment-structure-grid-container">
-                                                <div class="apartment-structure-grid-container-floors">                             </div>
-                                                <div class="apartment-structure-grid-container-list">                                   </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="apartment-structure-item">
-                                        <div class="apartment-structure-name">Блок D2</div>
-                                        <div data-structure="{&quot;size&quot;:{&quot;row&quot;:4, &quot;col&quot;: 3}, &quot;floorslink&quot;: [123, 111, 222], &quot;objects&quot;: [ {&quot;position&quot;: [&quot;4,0&quot;, &quot;4,1&quot;, &quot;4,2&quot;], &quot;text&quot;: &quot;4+&quot;, &quot;color&quot;: &quot;#ffe200&quot;, &quot;info&quot;: {&quot;apartment&quot;: &quot;3-х ком. квартира&quot;, &quot;price&quot;: &quot;17 300 000&quot;, &quot;oldprice&quot;: &quot;22 300 000&quot;, &quot;id&quot;: 231231, &quot;image&quot;: &quot;../dummy/apartment-icon/1.png&quot;, &quot;imagesheme&quot;: &quot;../dummy/apartment-icon/2.png&quot;} }, {&quot;position&quot;: [&quot;1,0&quot;, &quot;2,0&quot;], &quot;text&quot;: &quot;2&quot;, &quot;color&quot;: &quot;#498FE1&quot;},{&quot;position&quot;: [&quot;1,1&quot;], &quot;text&quot;: &quot;1&quot;, &quot;color&quot;: &quot;#41aa33&quot;},{&quot;position&quot;: [&quot;1,2&quot;], &quot;text&quot;: &quot;3&quot;,&quot;color&quot;: &quot;#41aa33&quot;},{&quot;position&quot;: [&quot;2,1&quot;], &quot;text&quot;: &quot;1&quot;, &quot;color&quot;: &quot;#41aa33&quot;},{&quot;position&quot;: [&quot;2,2&quot;], &quot;text&quot;: &quot;C&quot;, &quot;color&quot;: &quot;#41aa33&quot;},{&quot;position&quot;: [&quot;3,0&quot;,&quot;3,1&quot;,&quot;3,2&quot;], &quot;text&quot;: &quot;10&quot;, &quot;color&quot;: &quot;#41aa33&quot;}]}" class="apartment-structure-grid">
-                                            <div class="apartment-structure-floor">Этажи</div>
-                                            <div class="apartment-structure-grid-container">
-                                                <div class="apartment-structure-grid-container-floors">                                       </div>
-                                                <div class="apartment-structure-grid-container-list">                                       </div>
-                                            </div>
-                                        </div>
-                                    </div>
+                                    @endfor
                                 </div>
                             </div>
                         </div>

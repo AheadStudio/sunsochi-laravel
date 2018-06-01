@@ -149,12 +149,19 @@ class ApiController extends Controller
                                                     ->get()
                                                     ->pluck("id")
                                                     ->toArray();
+                } elseif ($request["main_section"] == "lease" || $request["main_section"] == "resale" || $request["main_section"] == "building") {
+                    $mainSectionId = CatalogsSection::select("id")
+                                                    ->whereNotNull("parent_id")
+                                                    ->get()
+                                                    ->pluck("id")
+                                                    ->toArray();
                 } else {
                     $mainSectionId = CatalogsSection::select("id")
                                                     ->where("code", $request["main_section"])
                                                     ->first()
                                                     ->id;
                 }
+
             }
 
             // check for the existence of the installed $ar_filter and isset $params from url
@@ -189,6 +196,15 @@ class ApiController extends Controller
                         }
                 });
 
+                // use district
+                if (!empty($parseUrl["listDistrict"])) {
+                    $arListDistrict = $parseUrl["listDistrict"];
+                    $elements = $elements->join("element_directories as el_code_district", function ($join) use (&$arListDistrict) {
+                        $join->on("catalogs.id", "=", "el_code_district.element_id")
+                             ->whereIn("el_code_district.code", $arListDistrict);
+                    });
+                }
+
                 // use list fields
                 if (!empty($parseUrl["listFields"])) {
                     foreach ($parseUrl["listFields"] as $keyList => $valList) {
@@ -205,6 +221,22 @@ class ApiController extends Controller
 
                         });
                     }
+                }
+
+                if ($request["main_section"] == "lease" || $request["main_section"] == "resale" || $request["main_section"] == "building") {
+                    $investments = $request["main_section"];
+                    $elements = $elements->join("element_directories as el_code_investments", function ($join) use (&$investments) {
+                        $join->on("catalogs.id", "=", "el_code_investments.element_id");
+                            if ($investments == "resale") {
+                                $join->where("el_code_investments.code", "=", "Tx2477Dx");
+                            }
+                            if ($investments == "lease") {
+                                $join->where("el_code_investments.code", "=", "c5ILKt8a");
+                            }
+                            if ($investments == "building") {
+                                $join->where("el_code_investments.code", "=", "Hdhotk6j");
+                            }
+                    });
                 }
 
                 if (!empty($parseUrl["between"])) {
@@ -232,7 +264,12 @@ class ApiController extends Controller
                                          ->appends(request()->query());
 
                     $countElements = $elements->total();
-                    $elements = Helper::getGsk($elements, $mainSectionId, $request["main_section"]);
+                    if ($request["main_section"] == "lease" || $request["main_section"] == "resale" || $request["main_section"] == "building") {
+                        $elements = Helper::getGsk($elements);
+                    } else {
+                        $elements = Helper::getGsk($elements, $mainSectionId, $request["main_section"]);
+                    }
+
                 }
 
                 if (!empty($parseUrl["listFields"])) {
@@ -319,6 +356,9 @@ class ApiController extends Controller
             // list property elements from connected DB
             $arLists = [];
 
+            // list property for whereIn
+            $arListDistrict = [];
+
             // range field elements
             $rangeFields = ["area_ap", "price_ap"];
 
@@ -347,6 +387,8 @@ class ApiController extends Controller
                                 // +1 to popularity
                                 District::where("code", $fields[1])
                                         ->increment("popular", 1);
+                                $arListDistrict[] = $fields[1];
+                                continue;
                             }
                             $arLists[] = $fields[1];
                             continue;
@@ -381,6 +423,7 @@ class ApiController extends Controller
 
             $arResult = [
                 "listFields"    => $arLists,
+                "listDistrict"  => $arListDistrict,
                 "fields"        => $arFields,
                 "between"       => $whereBetween,
             ];

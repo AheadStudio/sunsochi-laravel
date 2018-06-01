@@ -85,6 +85,9 @@ class FormController extends Controller
 
                     if ($sub->wasRecentlyCreated) {
                         Mail::to($request["email"])->send(new SendEmail($request));
+
+                        $request["message"] = "<h2>Вы подписались на рассылку информации с блога</h2>";
+
                         return response()->json($request);
                     } else {
                         return response()->json(["message" => "<h2>Вы уже подписались на блог!</h2>"]);

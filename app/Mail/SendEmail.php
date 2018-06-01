@@ -87,7 +87,7 @@ class SendEmail extends Mailable
         if ($this->fields["type"] == "sub") {
             return $this->view("emails/sub-email")
                         ->with($this->fields)
-                        ->subject("Заявка на объект");
+                        ->subject("Подписка на блог");
         }
     }
 }

@@ -15,6 +15,7 @@ use App\Picture;
 use App\Deadline;
 use App\District;
 use App\NumberRoom;
+use App\Chess;
 
 // for SEO
 use SEO;
@@ -90,7 +91,7 @@ class Helper
 
             // create array with elements id
             $idElements = $elements->sortBy("id")->pluck("id");
-
+            //echo "<pre>"; print_r($idElements); echo "</pre>";
             // get one photo for every elements
             $photoElements = Picture::select("path", "element_id")
                                     ->whereIn("element_id", $idElements)
@@ -99,7 +100,7 @@ class Helper
                                     ->unique("element_id")
                                     ->sortBy("element_id")
                                     ->groupBy("element_id");
-
+            //dd($photoElements)                        ;
             // get property for every elements
             $propertyElementsCode = ElementDirectory::whereIn("name_field", ["deadline", "district"])
                                                     ->whereIn("element_id", $idElements)
@@ -242,6 +243,31 @@ class Helper
         }
         return $cookie;
     }
+
+    /**
+     * function for change format chess
+     *
+     * @return: element
+    */
+    public static function chessFormat($item, $width, $height) {
+        if (is_null($width)) {
+            $width = 1;
+        }
+        if (is_null($height)) {
+            $height = 1;
+        }
+        $explodeItem = explode("_", $item);
+        $final = "[";
+        for ($i = 0; $i < $width; $i++) {
+            for ($j = $explodeItem[1]; $j > $explodeItem[1]-$height; $j--) {
+                $final .= '"' .  $j . "," . (int)($explodeItem[2] + ($i-1)) .'"' . ",";
+            }
+        }
+        $final .= "]";
+        $final = str_replace(",]", "]", $final);
+        return ["section" => $explodeItem[0], "chess_obj" => $final];
+    }
+
 }
 
 

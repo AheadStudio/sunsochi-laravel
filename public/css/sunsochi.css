@@ -6077,8 +6077,41 @@ display: none;
 .investments-offers {
   padding: 40px 0;
 }
+.investments-offers .button--blue {
+  max-width: 240px;
+  margin: 0 auto;
+}
 .investments-offers h2 {
   margin-bottom: 20px;
+}
+.investments-offers-block {
+    display: none;
+    padding: 50px 0;
+    opacity: 0;
+    -webkit-transform: translateY(50px);
+    -moz-transform: translateY(50px);
+    -o-transform: translateY(50px);
+    -ms-transform: translateY(50px);
+    transform: translateY(50px);
+    -webkit-box-shadow: inset 0px 0px 48px 15px #f7f8fb;
+    -moz-box-shadow: inset 0px 0px 48px 15px #f7f8fb;
+    box-shadow: inset 0px 0px 48px 15px #f7f8fb;
+}
+.investments-offers-block.show {
+    display: block;
+    -webkit-transition: -webkit-transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    -moz-transition: -moz-transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    -o-transition: -o-transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    -ms-transition: -ms-transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+.investments-offers-block.show-block {
+    opacity: 1;
+    -webkit-transform: translateY(0px);
+    -moz-transform: translateY(0px);
+    -o-transform: translateY(0px);
+    -ms-transform: translateY(0px);
+    transform: translateY(0px);
 }
 /*** //investments-info ***/
 /*** employees ***/

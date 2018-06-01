@@ -104,7 +104,7 @@
                                         <span>{{ $valOffers->price_m }}<span class="rub">i</span></span>
                                     </dd>
                                 @endif
-                                @if (isset($valOffers->floors) && !isset($valOffers->floor))
+                                @if (isset($valOffers->floors))
                                     <dt>
                                         <span>Этажей</span>
                                     </dt>
@@ -112,7 +112,7 @@
                                         <span>{{ $valOffers->floors }}</span>
                                     </dd>
                                 @endif
-                                @if (isset($valOffers->floor))
+                                @if (isset($valOffers->floor) && isset($valOffers->floors))
                                     <dt>
                                         <span>Этаж</span>
                                     </dt>

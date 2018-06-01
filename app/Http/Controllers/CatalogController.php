@@ -129,7 +129,7 @@ class CatalogController extends Controller
                 $mainSectionId  = [15, 31, 35, 66, 83];
 
                 $elements = Catalog::whereIn("basic_section", $mainSectionId)
-                                    ->paginate(9);
+                                   ->paginate(9);
             } else {
                 $elements = CatalogsSection::where("parent_id", $mainSectionId)
                                             ->first()
@@ -249,7 +249,10 @@ class CatalogController extends Controller
     // detail page
     public function show(Request $request, $section, $subsection, $code) {
         //try {
-            $element = Catalog::where("code", $code)->get()->toArray()[0];
+            $element = Catalog::where("code", $code)
+                              ->get()
+                              ->toArray()[0];
+
             if (empty($element)) {
                 return redirect(404);
             }
@@ -273,20 +276,22 @@ class CatalogController extends Controller
             }
 
             $element["picture"] = Picture::where("element_id", $element["id"])
-                                            ->get()
-                                            ->toArray();
+                                         ->get()
+                                         ->toArray();
 
             $element["code_fields"] = ElementDirectory::where("element_id", $element["id"])
-                                                        ->get()
-                                                        ->groupBy("name_table")
-                                                        ->toArray();
+                                                      ->get()
+                                                      ->groupBy("name_table")
+                                                      ->toArray();
 
-            $element["chess"] = Chess::select("id", "section_list", "section_name", "section_lenght")
-                                        ->where("element_id", $element["id"])
-                                        ->first();
+            $chess = Chess::select("id", "section_list", "section_name", "section_lenght")
+                          ->where("element_id", $element["id"])
+                          ->first()
+                          ->toArray();
 
-            if (!is_null($element["chess"])) {
-                $element["chess"] = $element["chess"]->toArray();
+            if (!empty($chess)) {
+                $element["chess"] = $chess;
+                $element["chess"]["section_names"] = explode(",", $chess["section_name"]);
             }
 
             // add property in array element
@@ -333,11 +338,11 @@ class CatalogController extends Controller
                 // all free apartments
                 $onlyFreeTable = clone $arApartments;
 
-                $element["all_apartments"] = $allApartments->select("id", "name", "area", "price", "price_m", "old_price", "text_action", "status_sale")
-                                                            ->where("status_sale", "!=", "1")
-                                                            ->get()
-                                                            ->groupBy("id")
-                                                            ->toArray();
+                $element["all_apartments"] = $allApartments->select("id", "name", "catalogs.code as ap_code", "area", "price", "price_m", "old_price", "text_action", "status_sale")
+                                                           ->where("status_sale", "!=", "1")
+                                                           ->get()
+                                                           ->groupBy("id")
+                                                           ->toArray();
 
                 foreach ($element["all_apartments"] as $keyAp => $valAp) {
                     if ($valAp[0]["status_sale"] == 2) {
@@ -353,35 +358,36 @@ class CatalogController extends Controller
 
                 // get free apartments for table
                 $element["free_apartments"] = $onlyFreeTable->select("catalogs.id",
-                                                                    "catalogs.name",
-                                                                    "catalogs.code",
-                                                                    "catalogs.floor",
-                                                                    "catalogs.area",
-                                                                    "catalogs.price",
-                                                                    "catalogs.price_m",
-                                                                    "number_rooms.name as number_rooms_name",
-                                                                    "number_rooms.code as number_rooms_code",
-                                                                    "decorations.name as decorations_name",
-                                                                    "decorations.code as decorations_code",
-                                                                    "subsection.code as subsection_code",
-                                                                    "section.code as section_code"
-                                                                    )
-                                                                    ->where("catalogs.status_sale", "=", 1)
-                                                                    ->join("catalogs_sections as subsection", "subsection.id", "=", "catalogs.basic_section")
-                                                                    ->join("catalogs_sections as section", "section.id", "=", "subsection.parent_id")
-                                                                    ->join("element_directories as element_decoration", function ($join) {
-                                                                        $join->on("element_decoration.element_id", "=", "catalogs.id")
-                                                                                ->where("element_decoration.name_field", "decoration");
-                                                                    })
-                                                                    ->join("element_directories as element_number_rooms", function ($join) {
-                                                                        $join->on("element_number_rooms.element_id", "=", "catalogs.id")
-                                                                                ->where("element_number_rooms.name_field", "number_rooms");
-                                                                    })
-                                                                    ->join("decorations", "decorations.code", "=", "element_decoration.code")
-                                                                    ->join("number_rooms", "number_rooms.code", "=", "element_number_rooms.code")
-                                                                    ->get()
-                                                                    ->groupBy("id")
-                                                                    ->toArray();
+                                                                     "catalogs.name",
+                                                                     "catalogs.code as ap_code",
+                                                                     "catalogs.floor",
+                                                                     "catalogs.area",
+                                                                     "catalogs.price",
+                                                                     "catalogs.price_m",
+                                                                     "catalogs.old_price",
+                                                                     "number_rooms.name as number_rooms_name",
+                                                                     "number_rooms.code as number_rooms_code",
+                                                                     "decorations.name as decorations_name",
+                                                                     "decorations.code as decorations_code",
+                                                                     "subsection.code as subsection_code",
+                                                                     "section.code as section_code"
+                                                                     )
+                                                                     ->where("catalogs.status_sale", "=", 1)
+                                                                     ->join("catalogs_sections as subsection", "subsection.id", "=", "catalogs.basic_section")
+                                                                     ->join("catalogs_sections as section", "section.id", "=", "subsection.parent_id")
+                                                                     ->join("element_directories as element_decoration", function ($join) {
+                                                                         $join->on("element_decoration.element_id", "=", "catalogs.id")
+                                                                                 ->where("element_decoration.name_field", "decoration");
+                                                                     })
+                                                                     ->join("element_directories as element_number_rooms", function ($join) {
+                                                                         $join->on("element_number_rooms.element_id", "=", "catalogs.id")
+                                                                                 ->where("element_number_rooms.name_field", "number_rooms");
+                                                                     })
+                                                                     ->join("decorations", "decorations.code", "=", "element_decoration.code")
+                                                                     ->join("number_rooms", "number_rooms.code", "=", "element_number_rooms.code")
+                                                                     ->get()
+                                                                     ->groupBy("id")
+                                                                     ->toArray();
                 // counter for different apartments
                 $element["decoration_count"]["8hJkbSPc"] = 0;
                 $element["decoration_count"]["T6ZqlhAt"] = 0;
@@ -390,10 +396,10 @@ class CatalogController extends Controller
                 //get layout
                 if (!empty($element["free_apartments"])) {
                     $layoutApartments = Layout::select("id", "path", "element_id")
-                                                ->whereIn("element_id", array_keys($element["free_apartments"]))
-                                                ->get()
-                                                ->groupBy("element_id")
-                                                ->toArray();
+                                              ->whereIn("element_id", array_keys($element["free_apartments"]))
+                                              ->get()
+                                              ->groupBy("element_id")
+                                              ->toArray();
 
                     // add propery in apartmens such as: color, layouts
                     foreach ($element["free_apartments"] as $keyAp => $valAp) {
@@ -430,7 +436,7 @@ class CatalogController extends Controller
                         }
 
                         // add route
-                        $element["free_apartments"][$keyAp][0]["link"] = route("CatalogShow", [$valAp[0]["section_code"], $valAp[0]["subsection_code"], $valAp[0]["code"]]);
+                        $element["free_apartments"][$keyAp][0]["link"] = route("CatalogShow", [$valAp[0]["section_code"], $valAp[0]["subsection_code"], $valAp[0]["ap_code"]]);
                     }
 
                     // add in main array
@@ -439,8 +445,28 @@ class CatalogController extends Controller
                     }
 
                 }
+                $picture = Layout::select("path", "element_id")
+                                 ->whereIn("element_id", array_keys($element["all_apartments"]))
+                                 ->get()
+                                 ->groupBy("element_id")
+                                 ->toArray();
 
-
+                foreach ($element["all_apartments"] as $keyAp => $valAp) {
+                    $chessApartment = Chess::where("element_id", $keyAp)
+                                           ->first();
+                    if (!is_null($chessApartment)) {
+                        $chessApartment = $chessApartment->toArray();
+                        if (!empty($chessApartment)) {
+                            $chessApartment = Helper::chessFormat($chessApartment["old_obj"], $chessApartment["old_width"], $chessApartment["old_height"]);
+                            $element["chess_apartments"]["section"][$chessApartment["section"]][$keyAp] = $valAp[0];
+                            $element["chess_apartments"]["section"][$chessApartment["section"]][$keyAp]["chess"] = $chessApartment["chess_obj"];
+                            //$element["all_apartments"][$keyAp][0]["chess"]["section"][$chessApartment["section"]][] = $chessApartment["chess_obj"];
+                        }
+                    } else {
+                        $element["all_apartments"][$keyAp][0]["chess"] = "";
+                    }
+                }
+                
                 if (!empty($element["developer_buildings"])) {
                     $element["builder"] = Builder::where("id", $element["developer_buildings"])->first()->toArray();
                     $element["builder"]["url"] = route("BuildersShow", [$element["builder"]["code"]]);
@@ -468,7 +494,7 @@ class CatalogController extends Controller
                     $element["detail_text"],
                     URL::current()
                 );
-
+                //dd($element);
                 return view("catalog/detail-newbuildings", $pageParams);
 
             } else {
