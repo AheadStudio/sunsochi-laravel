@@ -25,24 +25,24 @@
             <div class="options-list options-list--3">
                 <div class="options-item options-item--hover">
                     <div class="options-container">
-                        <img src="../dummy/options/options_1.png" alt="" class="options-img"></div>
+                        <img src="/dummy/options/options_1.png" alt="" class="options-img"></div>
                     <div class="options-title">Перепродажа</div>
                     <div class="options-text">Вкладывайте деньги в недвижимость на этапе строительства и продавайте по выгодной цене на более поздних этапах готовности объекта или когда объект уже сдан.</div>
-                    <a href="resale/" class="link button button--orange options-more">Подробнее</a>
+                    <a href="<?=url()->current()?>/resale/" class="link button button--orange options-more">Подробнее</a>
                 </div>
                 <div class="options-item options-item--hover">
                     <div class="options-container">
-                        <img src="../dummy/options/options_2.png" alt="" class="options-img"></div>
+                        <img src="/dummy/options/options_2.png" alt="" class="options-img"></div>
                     <div class="options-title">Аренда</div>
                     <div class="options-text">Получайте стабильный доход на сдаче недвижимости в аренду. Возможны варианты с краткосрочной и долгосрочной арендой. Отличный вариант пассивного дохода.</div>
-                    <a href="lease/" class="link button button--orange options-more">Подробнее</a>
+                    <a href="<?=url()->current()?>/lease/" class="link button button--orange options-more">Подробнее</a>
                 </div>
                 <div class="options-item options-item--hover">
                     <div class="options-container">
-                        <img src="../dummy/options/options_3.png" alt="" class="options-img"></div>
+                        <img src="/dummy/options/options_3.png" alt="" class="options-img"></div>
                     <div class="options-title">Строительство</div>
                     <div class="options-text">Для тех, кто готов подождать ради максимальной отдачи инвестиций. Ваши деньги обернутся при строительстве коттеджного поселка и принесут от 200% чистой прибыли.</div>
-                    <a href="building/" class="link button button--orange options-more">Подробнее</a>
+                    <a href="<?=url()->current()?>/building/" class="link button button--orange options-more">Подробнее</a>
                 </div>
             </div>
         </div>
